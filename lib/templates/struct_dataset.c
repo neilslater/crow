@@ -1,10 +1,10 @@
-// ext/ru_ne_ne/struct_<%= short_name %>.c
+// ext/<%= lib_short_name %>/struct_<%= short_name %>.c
 
 #include "struct_<%= short_name %>.h"
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //
-//  Definitions of OO-style functions for manipulating <%= struct_name %> structs
+//  Definitions for <%= struct_name %> memory management
 //
 
 <%= struct_name %> *<%= short_name %>__create() {
@@ -16,16 +16,20 @@
   return <%= short_name %>;
 }
 
-void <%= short_name %>__init( <%= struct_name %> *<%= short_name %>, int input_rank, int *input_shape, int num_items ) {
-  int i, size, *pos;
+<% if needs_init? -%>
+void <%= short_name %>__init( <%= struct_name %> *<%= short_name %><% if init_params %>, <%= init_params %><% end %> ) {
+  int i;
+<% if any_narray? -%>
   struct NARRAY *narr;
+<% end -%>
 
-  <%= short_name %>->input_item_shape = ALLOC_N( int, input_rank + 1);
-  size = 1;
-  for( i = 0; i < input_rank; i++ ) {
-    <%= short_name %>->input_item_shape[i] = input_shape[i];
-    size *= input_shape[i];
+<% attributes.select(&:needs_alloc?).each do |attribute| -%>
+  <%= short_name %>-><%= attribute.name %> = ALLOC_N( <%= attribute.cbase %>, <%= attribute.size_expr %> );
+  for( i = 0; i < <%= attribute.size_expr %>; i++ ) {
+    <%= short_name %>-><%= attribute.name %> = <%= attribute.init_expr %>;
   }
+
+<% end -%>
   <%= short_name %>->input_item_shape[input_rank] = num_items;
   <%= short_name %>->narr_inputs = na_make_object( NA_SFLOAT, input_rank + 1, <%= short_name %>->input_item_shape, cNArray );
   GetNArray( <%= short_name %>->narr_inputs, narr );
@@ -36,6 +40,7 @@ void <%= short_name %>__init( <%= struct_name %> *<%= short_name %>, int input_r
   return;
 }
 
+<% end -%>
 void <%= short_name %>__destroy( <%= struct_name %> *<%= short_name %> ) {
 <% attributes.select(&:needs_alloc?).each do |attribute| -%>
   xfree( <%= short_name %>-><%= attribute.name %> );

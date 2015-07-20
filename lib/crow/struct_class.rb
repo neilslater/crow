@@ -1,8 +1,38 @@
 require 'erb'
 
+# m = Crow::LibDef.new( 'the_module', { :structs => [ { :name => 'hello', :attributes => [{:name=>'hi',:ctype=>:NARRAY}] } ] } )
+# m.structs.first.write( '/tmp' )
+
 module Crow
+  class LibDef
+    attr_accessor :short_name, :module_name, :structs
+
+    def initialize( short_name, opts = {} )
+      raise "Short name '#{short_name}' cannot be used" if short_name !~ /\A[a-zA-Z0-9_]+\z/
+      @short_name = short_name
+      @module_name = opts[:module_name] || module_name_from_short_name( @short_name )
+      if opts[:structs]
+        @structs = opts[:structs].map do | struct_opts |
+          use_opts = struct_opts.clone
+          struct_name = use_opts[:name]
+          use_opts[:parent_lib] = self
+          StructClass.new( struct_name, use_opts )
+        end
+      else
+        @structs = []
+      end
+    end
+
+    private
+
+    def module_name_from_short_name sname
+      parts = sname.split('_')
+      parts.map { |part| part[0].upcase + part[1,30] }.join
+    end
+  end
+
   class StructClass
-    attr_accessor :short_name, :struct_name, :attributes
+    attr_accessor :short_name, :struct_name, :attributes, :parent_lib, :init_params
 
     TEMPLATE_DIR = File.realdirpath( File.join( __dir__, '../../lib/templates' ) )
     TEMPLATES = [ 'struct_dataset.h', 'struct_dataset.c', 'ruby_class_dataset.h', 'ruby_class_dataset.c' ]
@@ -19,6 +49,8 @@ module Crow
       else
         @attributes = []
       end
+      @parent_lib = opts[:parent_lib] || LibDef.new( 'module' )
+      @init_params = opts[:init_params]
     end
 
     def write path
@@ -34,11 +66,23 @@ module Crow
     end
 
     def any_narray?
-      @attributes.any? { |a| [:NARRAY].include?( a.ctype ) }
+      @attributes.any? { |a| a.is_narray? }
     end
 
     def any_alloc?
       @attributes.any? { |a| a.needs_alloc? }
+    end
+
+    def needs_init?
+      any_narray? || any_alloc?
+    end
+
+    def lib_short_name
+      parent_lib.short_name
+    end
+
+    def lib_module_name
+      parent_lib.module_name
     end
 
     private

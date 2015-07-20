@@ -1,4 +1,4 @@
-// ext/ru_ne_ne/ruby_class_<%= short_name %>.c
+// ext/<%= lib_short_name %>/ruby_class_<%= short_name %>.c
 
 #include "ruby_class_<%= short_name %>.h"
 
@@ -29,7 +29,7 @@ void assert_value_wraps_<%= short_name %>( VALUE obj ) {
   }
 }
 
-/* Document-class:  RuNeNe::<%= struct_name %>
+/* Document-class:  <%= lib_module_name %>::<%= struct_name %>
  *
  */
 
@@ -42,19 +42,21 @@ void assert_value_wraps_<%= short_name %>( VALUE obj ) {
  * Creates a new network and initializes the weights in all layers.
  * @param [NArray] inputs size of input array for first layer
  * @param [NArray] targets sizes of output arrays for each hidden layer
- * @return [RuNeNe::<%= struct_name %>] new network consisting of new layers, with random weights
+ * @return [<%= lib_module_name %>::<%= struct_name %>] new network consisting of new layers, with random weights
  */
 VALUE <%= short_name %>_class_initialize( VALUE self ) {
   <%= struct_name %> *<%= short_name %> = get_<%= short_name %>_struct( self );
 
+<% if needs_init? -%>
   <%= short_name %>__init( <%= short_name %>, 1, {10} );
 
+<% end -%>
   return self;
 }
 
 /* @overload clone
  * When cloned, the returned <%= struct_name %> has deep copies of inputs and outputs,
- * @return [RuNeNe::<%= struct_name %>] new training data with identical items to caller.
+ * @return [<%= lib_module_name %>::<%= struct_name %>] new training data with identical items to caller.
  */
 VALUE <%= short_name %>_class_initialize_copy( VALUE copy, VALUE orig ) {
   <%= struct_name %> *<%= short_name %>_copy;
@@ -92,11 +94,11 @@ VALUE <%= short_name %>_object_num_items( VALUE self ) {
 
 void init_<%= short_name %>_class( ) {
   // <%= struct_name %> instantiation and class methods
-  rb_define_alloc_func( RuNeNe_<%= struct_name %>, <%= short_name %>_alloc );
-  rb_define_method( RuNeNe_<%= struct_name %>, "initialize", <%= short_name %>_class_initialize, 0 );
-  rb_define_method( RuNeNe_<%= struct_name %>, "initialize_copy", <%= short_name %>_class_initialize_copy, 1 );
+  rb_define_alloc_func( <%= lib_module_name %>_<%= struct_name %>, <%= short_name %>_alloc );
+  rb_define_method( <%= lib_module_name %>_<%= struct_name %>, "initialize", <%= short_name %>_class_initialize, 0 );
+  rb_define_method( <%= lib_module_name %>_<%= struct_name %>, "initialize_copy", <%= short_name %>_class_initialize_copy, 1 );
 
   // <%= struct_name %> attributes
-  rb_define_method( RuNeNe_<%= struct_name %>, "inputs", <%= short_name %>_object_inputs, 0 );
-  rb_define_method( RuNeNe_<%= struct_name %>, "num_items", <%= short_name %>_object_num_items, 0 );
+  rb_define_method( <%= lib_module_name %>_<%= struct_name %>, "inputs", <%= short_name %>_object_inputs, 0 );
+  rb_define_method( <%= lib_module_name %>_<%= struct_name %>, "num_items", <%= short_name %>_object_num_items, 0 );
 }

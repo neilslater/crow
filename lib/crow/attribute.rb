@@ -6,7 +6,10 @@ module Crow
       :double => [ 'Double', 'P_Double' ],
       :char => [ 'Char', 'P_Char' ],
       :VALUE => [ 'Value', 'Value' ],
-      :NARRAY => [ 'NArray', 'NArray' ],
+      :NARRAY_FLOAT => [ 'NArrayFloat', 'NArrayFloat' ],
+      :NARRAY_DOUBLE => [ 'NArrayDouble', 'NArrayDouble' ],
+      :NARRAY_INT => [ 'NArrayInt', 'NArrayInt' ],
+      :NARRAY_LONG => [ 'NArrayLong', 'NArrayLong' ],
       :long => [ 'Long', 'P_Long' ],
       :uint => [ 'UInt', 'P_UInt' ],
       :ulong => [ 'ULong', 'P_ULong' ],
@@ -57,6 +60,10 @@ module Crow
     def cast
       "(#{cbase}#{pointer_star})"
     end
+
+    def is_narray?
+      false
+    end
   end
 
   module NotA_C_Pointer
@@ -68,6 +75,14 @@ module Crow
   module IsA_C_Pointer
     def needs_alloc?
       true
+    end
+
+    def size_expr
+      '200'
+    end
+
+    def init_expr
+      '0'
     end
   end
 
@@ -228,6 +243,34 @@ module Crow
   end
 
   class Attribute::NArray < Attribute::Value
+    include NotA_C_Pointer
+
+    self.default = 'Qnil'
+
+    def is_narray?
+      true
+    end
+  end
+
+  class Attribute::NArrayFloat < Attribute::NArray
+    include NotA_C_Pointer
+
+    self.default = 'Qnil'
+  end
+
+  class Attribute::NArrayDouble < Attribute::NArray
+    include NotA_C_Pointer
+
+    self.default = 'Qnil'
+  end
+
+  class Attribute::NArrayInt < Attribute::NArray
+    include NotA_C_Pointer
+
+    self.default = 'Qnil'
+  end
+
+  class Attribute::NArrayLong < Attribute::NArray
     include NotA_C_Pointer
 
     self.default = 'Qnil'
