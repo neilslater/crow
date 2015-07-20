@@ -289,7 +289,7 @@ module Crow
     end
 
     def narray_enum_type
-      'NA_FLOAT'
+      'NA_DFLOAT'
     end
   end
 
@@ -303,21 +303,21 @@ module Crow
     end
 
     def narray_enum_type
-      'NA_INT'
+      'NA_SINT'
     end
   end
 
   class Attribute::NArrayLong < Attribute::NArray
     include NotA_C_Pointer
     self.default = 'Qnil'
-    self.item_default = '0'
+    self.item_default = '0L'
 
     def item_ctype
       'long'
     end
 
     def narray_enum_type
-      'NA_LONG'
+      'NA_LINT'
     end
   end
 end
