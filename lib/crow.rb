@@ -61,7 +61,8 @@ module Crow
         else
           class_lookup.first
       end
-      class_lookup.new( name, opts )
+
+      self.const_get( attribute_class ).new( name, opts )
     end
 
     def self.default
@@ -87,7 +88,7 @@ module Crow
 
   class Attribute::Int < Attribute
     include NotA_C_Pointer
-    default = '0'
+    self.default = '0'
 
     def declare
       "int #{name};"
@@ -96,7 +97,7 @@ module Crow
 
   class Attribute::P_Int < Attribute
     include IsA_C_Pointer
-    default = 'NULL'
+    self.default = 'NULL'
 
     def declare
       "int *#{name};"
@@ -106,7 +107,7 @@ module Crow
   class Attribute::UInt < Attribute::Int
     include NotA_C_Pointer
 
-    default = '0'
+    self.default = '0'
 
     def declare
       "unsigned int #{name};"
@@ -116,7 +117,7 @@ module Crow
   class Attribute::P_UInt < Attribute
     include IsA_C_Pointer
 
-    default = 'NULL'
+    self.default = 'NULL'
 
     def declare
       "unsigned int *#{name};"
@@ -126,7 +127,7 @@ module Crow
   class Attribute::Long < Attribute
     include NotA_C_Pointer
 
-    default = '0L'
+    self.default = '0L'
 
     def declare
       "long #{name};"
@@ -136,7 +137,7 @@ module Crow
   class Attribute::P_Long < Attribute
     include IsA_C_Pointer
 
-    default = 'NULL'
+    self.default = 'NULL'
 
     def declare
       "long *#{name};"
@@ -146,7 +147,7 @@ module Crow
   class Attribute::ULong < Attribute::Long
     include NotA_C_Pointer
 
-    default = '0L'
+    self.default = '0L'
 
     def declare
       "unsigned long #{name};"
@@ -156,7 +157,7 @@ module Crow
   class Attribute::P_ULong < Attribute
     include IsA_C_Pointer
 
-    default = 'NULL'
+    self.default = 'NULL'
 
     def declare
       "unsigned long *#{name};"
@@ -176,7 +177,7 @@ module Crow
   class Attribute::P_Float < Attribute
     include IsA_C_Pointer
 
-    default = 'NULL'
+    self.default = 'NULL'
 
     def declare
       "float *#{name};"
@@ -186,7 +187,7 @@ module Crow
   class Attribute::Double < Attribute
     include NotA_C_Pointer
 
-    default = '0.0'
+    self.default = '0.0'
 
     def declare
       "double #{name};"
@@ -196,7 +197,7 @@ module Crow
   class Attribute::P_Double < Attribute
     include IsA_C_Pointer
 
-    default = 'NULL'
+    self.default = 'NULL'
 
     def declare
       "double *#{name};"
@@ -206,7 +207,7 @@ module Crow
   class Attribute::Char < Attribute
     include NotA_C_Pointer
 
-    default = '0'
+    self.default = '0'
 
     def declare
       "char #{name};"
@@ -216,7 +217,7 @@ module Crow
   class Attribute::P_Char < Attribute
     include IsA_C_Pointer
 
-    default = 'NULL'
+    self.default = 'NULL'
 
     def declare
       "char *#{name};"
@@ -226,7 +227,7 @@ module Crow
   class Attribute::Value < Attribute
     include NotA_C_Pointer
 
-    default = 'Qnil'
+    self.default = 'Qnil'
 
     def declare
       "VALUE #{name};"
@@ -236,6 +237,6 @@ module Crow
   class Attribute::NArray < Attribute::Value
     include NotA_C_Pointer
 
-    default = 'Qnil'
+    self.default = 'Qnil'
   end
 end
