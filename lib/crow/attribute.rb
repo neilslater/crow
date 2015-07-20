@@ -45,6 +45,15 @@ module Crow
       @class_default = new_default
     end
 
+    def self.item_default
+      @class_item_default
+    end
+
+    def self.item_default= new_default
+      @class_item_default = new_default
+    end
+
+
     def needs_gc_mark?
       false
     end
@@ -77,12 +86,12 @@ module Crow
       true
     end
 
-    def size_expr
-      '200'
-    end
+    attr_reader :size_expr, :init_expr
 
-    def init_expr
-      '0'
+    def initialize name, opts = {}
+      super( name, opts )
+      @size_expr = opts[:size_expr] || @name.upcase + '_SIZE'
+      @init_expr = opts[:init_expr] || self.class.item_default
     end
   end
 
@@ -98,6 +107,7 @@ module Crow
   class Attribute::P_Int < Attribute
     include IsA_C_Pointer
     self.default = 'NULL'
+    self.item_default = '0'
 
     def cbase
       "int"
@@ -116,8 +126,8 @@ module Crow
 
   class Attribute::P_UInt < Attribute
     include IsA_C_Pointer
-
     self.default = 'NULL'
+    self.item_default = '0'
 
     def cbase
       "unsigned int"
@@ -136,8 +146,8 @@ module Crow
 
   class Attribute::P_Long < Attribute
     include IsA_C_Pointer
-
     self.default = 'NULL'
+    self.item_default = '0L'
 
     def cbase
       "long"
@@ -146,7 +156,6 @@ module Crow
 
   class Attribute::ULong < Attribute::Long
     include NotA_C_Pointer
-
     self.default = '0L'
 
     def cbase
@@ -156,8 +165,8 @@ module Crow
 
   class Attribute::P_ULong < Attribute
     include IsA_C_Pointer
-
     self.default = 'NULL'
+    self.item_default = '0L'
 
     def cbase
       "unsigned long"
@@ -166,7 +175,6 @@ module Crow
 
   class Attribute::Float < Attribute
     include NotA_C_Pointer
-
     self.default = '0.0'
 
     def cbase
@@ -176,8 +184,8 @@ module Crow
 
   class Attribute::P_Float < Attribute
     include IsA_C_Pointer
-
     self.default = 'NULL'
+    self.item_default = '0.0'
 
     def cbase
       "float"
@@ -186,7 +194,6 @@ module Crow
 
   class Attribute::Double < Attribute
     include NotA_C_Pointer
-
     self.default = '0.0'
 
     def cbase
@@ -196,8 +203,8 @@ module Crow
 
   class Attribute::P_Double < Attribute
     include IsA_C_Pointer
-
     self.default = 'NULL'
+    self.item_default = '0.0'
 
     def cbase
       "double"
@@ -206,7 +213,6 @@ module Crow
 
   class Attribute::Char < Attribute
     include NotA_C_Pointer
-
     self.default = '0'
 
     def cbase
@@ -216,8 +222,8 @@ module Crow
 
   class Attribute::P_Char < Attribute
     include IsA_C_Pointer
-
     self.default = 'NULL'
+    self.item_default = '0'
 
     def cbase
       "char"
@@ -226,7 +232,6 @@ module Crow
 
   class Attribute::Value < Attribute
     include NotA_C_Pointer
-
     self.default = 'Qnil'
 
     def cbase
@@ -244,8 +249,16 @@ module Crow
 
   class Attribute::NArray < Attribute::Value
     include NotA_C_Pointer
-
     self.default = 'Qnil'
+
+    attr_reader :rank_expr, :shape_expr, :init_expr
+
+    def initialize name, opts = {}
+      super( name, opts )
+      @rank_expr = opts[:rank_expr] || @name.upcase + '_RANK'
+      @shape_expr = opts[:shape_expr] || @name.upcase + '_SHAPE'
+      @init_expr = opts[:init_expr] || self.class.item_default
+    end
 
     def is_narray?
       true
@@ -254,25 +267,57 @@ module Crow
 
   class Attribute::NArrayFloat < Attribute::NArray
     include NotA_C_Pointer
-
     self.default = 'Qnil'
+    self.item_default = '0.0'
+
+    def item_ctype
+      'float'
+    end
+
+    def narray_enum_type
+      'NA_SFLOAT'
+    end
   end
 
   class Attribute::NArrayDouble < Attribute::NArray
     include NotA_C_Pointer
-
     self.default = 'Qnil'
+    self.item_default = '0.0'
+
+    def item_ctype
+      'double'
+    end
+
+    def narray_enum_type
+      'NA_FLOAT'
+    end
   end
 
   class Attribute::NArrayInt < Attribute::NArray
     include NotA_C_Pointer
-
     self.default = 'Qnil'
+    self.item_default = '0'
+
+    def item_ctype
+      'int'
+    end
+
+    def narray_enum_type
+      'NA_INT'
+    end
   end
 
   class Attribute::NArrayLong < Attribute::NArray
     include NotA_C_Pointer
-
     self.default = 'Qnil'
+    self.item_default = '0'
+
+    def item_ctype
+      'long'
+    end
+
+    def narray_enum_type
+      'NA_LONG'
+    end
   end
 end

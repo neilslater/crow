@@ -21,6 +21,9 @@ void <%= short_name %>__init( <%= struct_name %> *<%= short_name %><% if init_pa
   int i;
 <% if any_narray? -%>
   struct NARRAY *narr;
+<% attributes.select(&:is_narray?).each do |attribute| -%>
+  <%= attribute.item_ctype %> *<%= attribute.name %>_ptr;
+<% end -%>
 <% end -%>
 
 <% attributes.select(&:needs_alloc?).each do |attribute| -%>
@@ -30,13 +33,15 @@ void <%= short_name %>__init( <%= struct_name %> *<%= short_name %><% if init_pa
   }
 
 <% end -%>
-  <%= short_name %>->input_item_shape[input_rank] = num_items;
-  <%= short_name %>->narr_inputs = na_make_object( NA_SFLOAT, input_rank + 1, <%= short_name %>->input_item_shape, cNArray );
-  GetNArray( <%= short_name %>->narr_inputs, narr );
-  na_sfloat_set( narr->total, (float*) narr->ptr, (float) 0.0 );
+<% attributes.select(&:is_narray?).each do |attribute| -%>
+  <%= short_name %>-><%= attribute.name %> = na_make_object( <%= attribute.narray_enum_type %>, <%= attribute.rank_expr %>, <%= attribute.shape_expr %>, cNArray );
+  GetNArray( <%= short_name %>-><%= attribute.name %>, narr );
+  <%= attribute.name %>_ptr = (<%= attribute.item_ctype %>*) narr->ptr;
+  for( i = 0; i < narr->total; i++ ) {
+    <%= attribute.name %>_ptr[i] = <%= attribute.init_expr %>;
+  }
 
-  <%= short_name %>->num_items = num_items;
-
+<% end -%>
   return;
 }
 
