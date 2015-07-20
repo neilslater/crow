@@ -1,0 +1,43 @@
+Basic plan:
+
+  * Crow rake tasks:
+   * init_ext adds:
+    * folders ext, ext/<project>
+    * ext/<project>/extconf.rb with default settings
+    * ext/<project>/<project>.c as init entry point
+    * ext/<project>/shared_values.h for extern module definitions
+    * ext/<project>/<project>_module.h and ext/<project>/<project>_module.c for defining classes
+    * (Also available as CL utility?)
+
+  * crow task works from map of classes to structs
+   * e.g. Crow::RakeTasks.new(:exts) do |t|
+            t.wrap_struct(
+              :struct => 'MyStructName',
+              :class => 'MyProject::MyClass',
+              :short_name => 'my_name' *,
+              :from_include => 'my_struct_name.h' *,
+              :to_struct_def_files => 'struct_my_name' *,
+              :to_class_def_files => 'ruby_class_my_class' *,
+            )
+          end
+    * Params marked * are optional
+    * Creates tasks 'exts:my_name'
+    * Running task
+      * Finds and parses C struct
+      * Generates missing files
+      * Generates missing methods
+      * Removes unexpected methods that match templated orginals
+    * Files
+      * ext/<project>/<struct_my_name>.h/c
+        * Boilerplate memory management
+      * ext/<project>/<ruby_class_my_class>.h/c
+        * Boilerplate Ruby integration
+        * Class initialisation
+    * Edits:
+      * ext/<project>/shared_values.h
+        * Adds extern VALUE variables for holding class references
+        * Removes no-longer-requires VALUEs
+      * ext/<project>/<project>_module.h
+        * Adds include for each class
+      * ext/<project>/<project>_module.c
+        * Ensure each class is defined and initialiser called
