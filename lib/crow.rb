@@ -12,7 +12,14 @@ module Crow
       raise "Short name '#{short_name}' cannot be used" if short_name !~ /\A[a-zA-Z0-9_]+\z/
       @short_name = short_name
       @struct_name = opts[:struct_name] || struct_name_from_short_name( @short_name )
-      @attributes = []
+      if opts[:attributes]
+        @attributes = opts[:attributes].map do | attr_opts |
+          attr_name = attr_opts[:name]
+          Attribute.create( attr_name, attr_opts )
+        end
+      else
+        @attributes = []
+      end
     end
 
     def write path
@@ -25,6 +32,14 @@ module Crow
 
     def add_attribute name, opts = {}
       @attributes << Attribute.create( name, opts )
+    end
+
+    def any_narray?
+      @attributes.any? { |a| [:NARRAY].include?( a.ctype ) }
+    end
+
+    def any_alloc?
+      @attributes.any? { |a| a.needs_alloc? }
     end
 
     private
@@ -86,6 +101,18 @@ module Crow
     def needs_gc_mark?
       false
     end
+
+    def pointer_star
+      pointer ? '*' : ''
+    end
+
+    def declare
+      "#{cbase} #{pointer_star}#{name};"
+    end
+
+    def cast
+      "(#{cbase}#{pointer_star})"
+    end
   end
 
   module NotA_C_Pointer
@@ -104,8 +131,8 @@ module Crow
     include NotA_C_Pointer
     self.default = '0'
 
-    def declare
-      "int #{name};"
+    def cbase
+      "int"
     end
   end
 
@@ -113,8 +140,8 @@ module Crow
     include IsA_C_Pointer
     self.default = 'NULL'
 
-    def declare
-      "int *#{name};"
+    def cbase
+      "int"
     end
   end
 
@@ -123,8 +150,8 @@ module Crow
 
     self.default = '0'
 
-    def declare
-      "unsigned int #{name};"
+    def cbase
+      "unsigned int"
     end
   end
 
@@ -133,8 +160,8 @@ module Crow
 
     self.default = 'NULL'
 
-    def declare
-      "unsigned int *#{name};"
+    def cbase
+      "unsigned int"
     end
   end
 
@@ -143,8 +170,8 @@ module Crow
 
     self.default = '0L'
 
-    def declare
-      "long #{name};"
+    def cbase
+      "long"
     end
   end
 
@@ -153,8 +180,8 @@ module Crow
 
     self.default = 'NULL'
 
-    def declare
-      "long *#{name};"
+    def cbase
+      "long"
     end
   end
 
@@ -163,8 +190,8 @@ module Crow
 
     self.default = '0L'
 
-    def declare
-      "unsigned long #{name};"
+    def cbase
+      "unsigned long"
     end
   end
 
@@ -173,8 +200,8 @@ module Crow
 
     self.default = 'NULL'
 
-    def declare
-      "unsigned long *#{name};"
+    def cbase
+      "unsigned long"
     end
   end
 
@@ -183,8 +210,8 @@ module Crow
 
     self.default = '0.0'
 
-    def declare
-      "float #{name};"
+    def cbase
+      "float"
     end
   end
 
@@ -193,8 +220,8 @@ module Crow
 
     self.default = 'NULL'
 
-    def declare
-      "float *#{name};"
+    def cbase
+      "float"
     end
   end
 
@@ -203,8 +230,8 @@ module Crow
 
     self.default = '0.0'
 
-    def declare
-      "double #{name};"
+    def cbase
+      "double"
     end
   end
 
@@ -213,8 +240,8 @@ module Crow
 
     self.default = 'NULL'
 
-    def declare
-      "double *#{name};"
+    def cbase
+      "double"
     end
   end
 
@@ -223,8 +250,8 @@ module Crow
 
     self.default = '0'
 
-    def declare
-      "char #{name};"
+    def cbase
+      "char"
     end
   end
 
@@ -233,8 +260,8 @@ module Crow
 
     self.default = 'NULL'
 
-    def declare
-      "char *#{name};"
+    def cbase
+      "char"
     end
   end
 
@@ -243,12 +270,16 @@ module Crow
 
     self.default = 'Qnil'
 
-    def declare
-      "VALUE #{name};"
+    def cbase
+      "VALUE"
     end
 
     def needs_gc_mark?
       true
+    end
+
+    def cast
+      "ERROR"
     end
   end
 
