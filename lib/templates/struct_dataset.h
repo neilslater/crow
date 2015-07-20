@@ -12,9 +12,9 @@
 #include "narray.h"
 
 typedef struct _<%= short_name %>_raw {
-    int *input_item_shape;
-    int num_items;
-    VALUE narr_inputs;
+  <% attributes.each do |attribute| -%>
+  <%= attribute.declare %>
+  <% end -%>
   } <%= struct_name %>;
 
 <%= struct_name %> *<%= short_name %>__create();

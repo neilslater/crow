@@ -10,9 +10,9 @@
 <%= struct_name %> *<%= short_name %>__create() {
   <%= struct_name %> *<%= short_name %>;
   <%= short_name %> = xmalloc( sizeof(<%= struct_name %>) );
-  <%= short_name %>->narr_inputs = Qnil;
-  <%= short_name %>->input_item_shape = NULL;
-  <%= short_name %>->num_items = 0;
+<% attributes.each do |attribute| -%>
+  <%= short_name %>-><%= attribute.name %> = <%= attribute.default %>;
+<% end -%>
   return <%= short_name %>;
 }
 
@@ -37,12 +37,16 @@ void <%= short_name %>__init( <%= struct_name %> *<%= short_name %>, int input_r
 }
 
 void <%= short_name %>__destroy( <%= struct_name %> *<%= short_name %> ) {
-  xfree( <%= short_name %>->input_item_shape );
+<% attributes.select(&:needs_alloc?).each do |attribute| -%>
+  xfree( <%= short_name %>-><%= attribute.name %> );
+<% end -%>
   xfree( <%= short_name %> );
   return;
 }
 
 void <%= short_name %>__gc_mark( <%= struct_name %> *<%= short_name %> ) {
-  rb_gc_mark( <%= short_name %>->narr_inputs );
+<% attributes.select(&:needs_gc_mark?).each do |attribute| -%>
+  rb_gc_mark( <%= short_name %>-><%= attribute.name %> );
+<% end -%>
   return;
 }

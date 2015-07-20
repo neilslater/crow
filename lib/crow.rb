@@ -6,11 +6,12 @@ module Crow
     attr_accessor :short_name, :struct_name, :attributes
 
     TEMPLATE_DIR = File.realdirpath( File.join( __dir__, '../lib/templates' ) )
-    TEMPLATES = [ 'ruby_class_dataset.c', 'ruby_class_dataset.h', 'struct_dataset.c', 'struct_dataset.h' ]
+    TEMPLATES = [ 'struct_dataset.h', 'struct_dataset.c', 'ruby_class_dataset.h', 'ruby_class_dataset.c' ]
 
-    def initialize( short_name, struct_name )
+    def initialize( short_name, opts = {} )
+      raise "Short name '#{short_name}' cannot be used" if short_name !~ /\A[a-zA-Z0-9_]+\z/
       @short_name = short_name
-      @struct_name = struct_name
+      @struct_name = opts[:struct_name] || struct_name_from_short_name( @short_name )
       @attributes = []
     end
 
@@ -22,11 +23,20 @@ module Crow
       end
     end
 
+    def add_attribute name, opts = {}
+      @attributes << Attribute.create( name, opts )
+    end
+
     private
 
     def render template_file
-      erb = ERB.new( File.read( template_file ) )
+      erb = ERB.new( File.read( template_file ), 0, '-' )
       erb.result( binding )
+    end
+
+    def struct_name_from_short_name sname
+      parts = sname.split('_')
+      parts.map { |part| part[0].upcase + part[1,30] }.join
     end
   end
 
@@ -71,6 +81,10 @@ module Crow
 
     def self.default= new_default
       @class_default = new_default
+    end
+
+    def needs_gc_mark?
+      false
     end
   end
 
@@ -231,6 +245,10 @@ module Crow
 
     def declare
       "VALUE #{name};"
+    end
+
+    def needs_gc_mark?
+      true
     end
   end
 
