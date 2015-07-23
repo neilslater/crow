@@ -38,13 +38,13 @@ void assert_value_wraps_<%= short_name %>( VALUE obj ) {
 //  Network method definitions
 //
 
-/* @overload initialize( )
+/* @overload initialize( <%= init_params.map(&:name).join(', ') %> )
  * Creates a new network and initializes the weights in all layers.
  * @param [NArray] inputs size of input array for first layer
  * @param [NArray] targets sizes of output arrays for each hidden layer
  * @return [<%= lib_module_name %>::<%= struct_name %>] new network consisting of new layers, with random weights
  */
-VALUE <%= short_name %>_class_initialize( VALUE self ) {
+VALUE <%= short_name %>_class_initialize( VALUE self<% unless init_params.empty? %>, <%= init_params.map(&:as_rv_param).join(', ') %><% end %> ) {
   <%= struct_name %> *<%= short_name %> = get_<%= short_name %>_struct( self );
 
 <% if needs_init? -%>

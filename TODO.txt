@@ -1,10 +1,8 @@
 TODO:
 
   NArray confirm sub-types
-
-  Cover different constructions of rank, shape
-    1. From constants - defined in .h and used in .c
-    2. Shape built from expressions - needs temp var
+    sint = 16-bit
+    lint = 32-bit ?
 
   ruby_class_dataset.c template support:
     params for initialize
@@ -14,6 +12,10 @@ TODO:
       pointers
       NArrays
 
+  Cover different constructions of rank, shape
+    1. From constants - defined in .h and used in .c
+    2. Shape built from expressions - needs temp var
+
   Specs
     - How to do test at all?
 
@@ -22,6 +24,18 @@ TODO:
   Different class names to struct names
 
   Handle deeper class names
+
+
+require 'crow'
+m = Crow::LibDef.new( 'the_module', {
+  :structs => [
+    { :name => 'hello',
+      :attributes => [{:name=>'hi',:ctype=>:NARRAY_INT_32 }],
+      :init_params => [{:name=>'n',:ctype=>:int }]
+    }
+  ]
+} )
+m.structs.first.write( '/tmp' )
 
 
 DONE:

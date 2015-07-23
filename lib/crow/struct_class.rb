@@ -44,13 +44,21 @@ module Crow
       if opts[:attributes]
         @attributes = opts[:attributes].map do | attr_opts |
           attr_name = attr_opts[:name]
-          Attribute.create( attr_name, attr_opts )
+          TypeMap.create( attr_name, attr_opts )
         end
       else
         @attributes = []
       end
+      if opts[:init_params]
+        @init_params = opts[:init_params].map do | init_param_opts |
+          param_name = init_param_opts[:name]
+          TypeMap.create( param_name, init_param_opts )
+        end
+      else
+        @attributes = []
+      end
+
       @parent_lib = opts[:parent_lib] || LibDef.new( 'module' )
-      @init_params = opts[:init_params]
     end
 
     def write path
@@ -62,7 +70,7 @@ module Crow
     end
 
     def add_attribute name, opts = {}
-      @attributes << Attribute.create( name, opts )
+      @attributes << TypeMap.create( name, opts )
     end
 
     def any_narray?

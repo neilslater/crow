@@ -20,7 +20,7 @@ typedef struct _<%= short_name %>_raw {
 <%= struct_name %> *<%= short_name %>__create();
 
 <% if needs_init? -%>
-void <%= short_name %>__init( <%= struct_name %> *<%= short_name %><% if init_params %>, <%= init_params %><% end %> );
+void <%= short_name %>__init( <%= struct_name %> *<%= short_name %><% unless init_params.empty? %>, <%= init_params.map(&:as_param).join(', ') %><% end %> );
 
 <% end -%>
 void <%= short_name %>__destroy( <%= struct_name %> *<%= short_name %> );

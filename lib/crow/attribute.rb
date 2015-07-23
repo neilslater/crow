@@ -1,5 +1,5 @@
 module Crow
-  class Attribute
+  class TypeMap
     CTYPES = Hash[
       :int => [ 'Int', 'P_Int' ],
       :float => [ 'Float', 'P_Float' ],
@@ -8,8 +8,8 @@ module Crow
       :VALUE => [ 'Value', 'Value' ],
       :NARRAY_FLOAT => [ 'NArrayFloat', 'NArrayFloat' ],
       :NARRAY_DOUBLE => [ 'NArrayDouble', 'NArrayDouble' ],
-      :NARRAY_INT => [ 'NArrayInt', 'NArrayInt' ],
-      :NARRAY_LONG => [ 'NArrayLong', 'NArrayLong' ],
+      :NARRAY_INT_16 => [ 'NArraySInt', 'NArraySInt' ],
+      :NARRAY_INT_32 => [ 'NArrayLInt', 'NArrayLInt' ],
       :long => [ 'Long', 'P_Long' ],
       :uint => [ 'UInt', 'P_UInt' ],
       :ulong => [ 'ULong', 'P_ULong' ],
@@ -53,7 +53,6 @@ module Crow
       @class_item_default = new_default
     end
 
-
     def needs_gc_mark?
       false
     end
@@ -66,12 +65,24 @@ module Crow
       "#{cbase} #{pointer_star}#{name};"
     end
 
+    def as_param
+      "#{cbase} #{pointer_star}#{name}"
+    end
+
     def cast
       "(#{cbase}#{pointer_star})"
     end
 
     def is_narray?
       false
+    end
+
+    def rv_name
+      "rv_#{name}"
+    end
+
+    def as_rv_param
+      "VALUE rv_#{name}"
     end
   end
 
@@ -95,7 +106,7 @@ module Crow
     end
   end
 
-  class Attribute::Int < Attribute
+  class TypeMap::Int < TypeMap
     include NotA_C_Pointer
     self.default = '0'
 
@@ -104,7 +115,7 @@ module Crow
     end
   end
 
-  class Attribute::P_Int < Attribute
+  class TypeMap::P_Int < TypeMap
     include IsA_C_Pointer
     self.default = 'NULL'
     self.item_default = '0'
@@ -114,7 +125,7 @@ module Crow
     end
   end
 
-  class Attribute::UInt < Attribute::Int
+  class TypeMap::UInt < TypeMap::Int
     include NotA_C_Pointer
 
     self.default = '0'
@@ -124,7 +135,7 @@ module Crow
     end
   end
 
-  class Attribute::P_UInt < Attribute
+  class TypeMap::P_UInt < TypeMap
     include IsA_C_Pointer
     self.default = 'NULL'
     self.item_default = '0'
@@ -134,7 +145,7 @@ module Crow
     end
   end
 
-  class Attribute::Long < Attribute
+  class TypeMap::Long < TypeMap
     include NotA_C_Pointer
 
     self.default = '0L'
@@ -144,7 +155,7 @@ module Crow
     end
   end
 
-  class Attribute::P_Long < Attribute
+  class TypeMap::P_Long < TypeMap
     include IsA_C_Pointer
     self.default = 'NULL'
     self.item_default = '0L'
@@ -154,7 +165,7 @@ module Crow
     end
   end
 
-  class Attribute::ULong < Attribute::Long
+  class TypeMap::ULong < TypeMap::Long
     include NotA_C_Pointer
     self.default = '0L'
 
@@ -163,7 +174,7 @@ module Crow
     end
   end
 
-  class Attribute::P_ULong < Attribute
+  class TypeMap::P_ULong < TypeMap
     include IsA_C_Pointer
     self.default = 'NULL'
     self.item_default = '0L'
@@ -173,7 +184,7 @@ module Crow
     end
   end
 
-  class Attribute::Float < Attribute
+  class TypeMap::Float < TypeMap
     include NotA_C_Pointer
     self.default = '0.0'
 
@@ -182,7 +193,7 @@ module Crow
     end
   end
 
-  class Attribute::P_Float < Attribute
+  class TypeMap::P_Float < TypeMap
     include IsA_C_Pointer
     self.default = 'NULL'
     self.item_default = '0.0'
@@ -192,7 +203,7 @@ module Crow
     end
   end
 
-  class Attribute::Double < Attribute
+  class TypeMap::Double < TypeMap
     include NotA_C_Pointer
     self.default = '0.0'
 
@@ -201,7 +212,7 @@ module Crow
     end
   end
 
-  class Attribute::P_Double < Attribute
+  class TypeMap::P_Double < TypeMap
     include IsA_C_Pointer
     self.default = 'NULL'
     self.item_default = '0.0'
@@ -211,7 +222,7 @@ module Crow
     end
   end
 
-  class Attribute::Char < Attribute
+  class TypeMap::Char < TypeMap
     include NotA_C_Pointer
     self.default = '0'
 
@@ -220,7 +231,7 @@ module Crow
     end
   end
 
-  class Attribute::P_Char < Attribute
+  class TypeMap::P_Char < TypeMap
     include IsA_C_Pointer
     self.default = 'NULL'
     self.item_default = '0'
@@ -230,7 +241,7 @@ module Crow
     end
   end
 
-  class Attribute::Value < Attribute
+  class TypeMap::Value < TypeMap
     include NotA_C_Pointer
     self.default = 'Qnil'
 
@@ -247,7 +258,7 @@ module Crow
     end
   end
 
-  class Attribute::NArray < Attribute::Value
+  class TypeMap::NArray < TypeMap::Value
     include NotA_C_Pointer
     self.default = 'Qnil'
 
@@ -265,7 +276,7 @@ module Crow
     end
   end
 
-  class Attribute::NArrayFloat < Attribute::NArray
+  class TypeMap::NArrayFloat < TypeMap::NArray
     include NotA_C_Pointer
     self.default = 'Qnil'
     self.item_default = '0.0'
@@ -279,7 +290,7 @@ module Crow
     end
   end
 
-  class Attribute::NArrayDouble < Attribute::NArray
+  class TypeMap::NArrayDouble < TypeMap::NArray
     include NotA_C_Pointer
     self.default = 'Qnil'
     self.item_default = '0.0'
@@ -293,13 +304,13 @@ module Crow
     end
   end
 
-  class Attribute::NArrayInt < Attribute::NArray
+  class TypeMap::NArraySInt < TypeMap::NArray
     include NotA_C_Pointer
     self.default = 'Qnil'
     self.item_default = '0'
 
     def item_ctype
-      'int'
+      'int16_t'
     end
 
     def narray_enum_type
@@ -307,13 +318,13 @@ module Crow
     end
   end
 
-  class Attribute::NArrayLong < Attribute::NArray
+  class TypeMap::NArrayLInt < TypeMap::NArray
     include NotA_C_Pointer
     self.default = 'Qnil'
-    self.item_default = '0L'
+    self.item_default = '0'
 
     def item_ctype
-      'long'
+      'int32_t'
     end
 
     def narray_enum_type

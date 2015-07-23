@@ -17,7 +17,7 @@
 }
 
 <% if needs_init? -%>
-void <%= short_name %>__init( <%= struct_name %> *<%= short_name %><% if init_params %>, <%= init_params %><% end %> ) {
+void <%= short_name %>__init( <%= struct_name %> *<%= short_name %><% unless init_params.empty? %>, <%= init_params.map(&:as_param).join(', ') %><% end %> ) {
   int i;
 <% if any_narray? -%>
   struct NARRAY *narr;
