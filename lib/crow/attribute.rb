@@ -15,7 +15,7 @@ module Crow
       :ulong => [ 'ULong', 'P_ULong' ],
     ]
 
-    attr_reader :name, :ctype, :pointer, :default
+    attr_reader :name, :ctype, :pointer, :default, :parent_struct
 
     def initialize name, opts = {}
       raise "Variable name '#{name}' cannot be used" if name !~ /\A[a-zA-Z0-9_]+\z/
@@ -23,6 +23,7 @@ module Crow
       @default = opts[:default] || self.class.default
       @pointer = !! opts[:pointer]
       @ctype = opts[:ctype]
+      @parent_struct = opts[:parent_struct]
     end
 
     def self.create name, opts = {}
@@ -84,6 +85,18 @@ module Crow
     def as_rv_param
       "VALUE rv_#{name}"
     end
+
+    def struct_item
+      "#{parent_struct.short_name}->#{name}"
+    end
+
+    def struct_item_to_ruby
+      self.class.c_to_ruby( struct_item )
+    end
+
+    def param_item_to_c
+      self.class.ruby_to_c( rv_name )
+    end
   end
 
   module NotA_C_Pointer
@@ -113,6 +126,18 @@ module Crow
     def cbase
       "int"
     end
+
+    def rdoc_type
+      'Integer'
+    end
+
+    def self.ruby_to_c ruby_name
+      "NUM2INT( #{ruby_name} )"
+    end
+
+    def self.c_to_ruby c_name
+      "INT2NUM( #{c_name} )"
+    end
   end
 
   class TypeMap::P_Int < TypeMap
@@ -122,6 +147,10 @@ module Crow
 
     def cbase
       "int"
+    end
+
+    def rdoc_type
+      'Array<Integer>'
     end
   end
 
@@ -133,6 +162,18 @@ module Crow
     def cbase
       "unsigned int"
     end
+
+    def rdoc_type
+      'Integer'
+    end
+
+    def self.ruby_to_c ruby_name
+      "NUM2UINT( #{ruby_name} )"
+    end
+
+    def self.c_to_ruby c_name
+      "UINT2NUM( #{c_name} )"
+    end
   end
 
   class TypeMap::P_UInt < TypeMap
@@ -142,6 +183,10 @@ module Crow
 
     def cbase
       "unsigned int"
+    end
+
+    def rdoc_type
+      'Array<Integer>'
     end
   end
 
@@ -153,6 +198,18 @@ module Crow
     def cbase
       "long"
     end
+
+    def rdoc_type
+      'Integer'
+    end
+
+    def self.ruby_to_c ruby_name
+      "NUM2LONG( #{ruby_name} )"
+    end
+
+    def self.c_to_ruby c_name
+      "LONG2NUM( #{c_name} )"
+    end
   end
 
   class TypeMap::P_Long < TypeMap
@@ -163,6 +220,10 @@ module Crow
     def cbase
       "long"
     end
+
+    def rdoc_type
+      'Integer'
+    end
   end
 
   class TypeMap::ULong < TypeMap::Long
@@ -171,6 +232,18 @@ module Crow
 
     def cbase
       "unsigned long"
+    end
+
+    def rdoc_type
+      'Integer'
+    end
+
+    def self.ruby_to_c ruby_name
+      "NUM2ULONG( #{ruby_name} )"
+    end
+
+    def self.c_to_ruby c_name
+      "ULONG2NUM( #{c_name} )"
     end
   end
 
@@ -182,6 +255,10 @@ module Crow
     def cbase
       "unsigned long"
     end
+
+    def rdoc_type
+      'Array<Integer>'
+    end
   end
 
   class TypeMap::Float < TypeMap
@@ -190,6 +267,18 @@ module Crow
 
     def cbase
       "float"
+    end
+
+    def rdoc_type
+      'Float'
+    end
+
+    def self.ruby_to_c ruby_name
+      "NUM2FLT( #{ruby_name} )"
+    end
+
+    def self.c_to_ruby c_name
+      "FLT2NUM( #{c_name} )"
     end
   end
 
@@ -201,6 +290,10 @@ module Crow
     def cbase
       "float"
     end
+
+    def rdoc_type
+      'Array<Float>'
+    end
   end
 
   class TypeMap::Double < TypeMap
@@ -209,6 +302,18 @@ module Crow
 
     def cbase
       "double"
+    end
+
+    def rdoc_type
+      'Float'
+    end
+
+    def self.ruby_to_c ruby_name
+      "NUM2DBL( #{ruby_name} )"
+    end
+
+    def self.c_to_ruby c_name
+      "DBL2NUM( #{c_name} )"
     end
   end
 
@@ -220,6 +325,10 @@ module Crow
     def cbase
       "double"
     end
+
+    def rdoc_type
+      'Array<Float>'
+    end
   end
 
   class TypeMap::Char < TypeMap
@@ -228,6 +337,10 @@ module Crow
 
     def cbase
       "char"
+    end
+
+    def rdoc_type
+      'Byte'
     end
   end
 
@@ -238,6 +351,10 @@ module Crow
 
     def cbase
       "char"
+    end
+
+    def rdoc_type
+      'String'
     end
   end
 
@@ -255,6 +372,18 @@ module Crow
 
     def cast
       "ERROR"
+    end
+
+    def rdoc_type
+      'Object'
+    end
+
+    def self.ruby_to_c ruby_name
+      ruby_name
+    end
+
+    def self.c_to_ruby c_name
+      c_name
     end
   end
 
@@ -274,6 +403,10 @@ module Crow
     def is_narray?
       true
     end
+
+    def rdoc_type
+      'NArray'
+    end
   end
 
   class TypeMap::NArrayFloat < TypeMap::NArray
@@ -287,6 +420,10 @@ module Crow
 
     def narray_enum_type
       'NA_SFLOAT'
+    end
+
+    def rdoc_type
+      'NArray<sfloat>'
     end
   end
 
@@ -302,6 +439,10 @@ module Crow
     def narray_enum_type
       'NA_DFLOAT'
     end
+
+    def rdoc_type
+      'NArray<float>'
+    end
   end
 
   class TypeMap::NArraySInt < TypeMap::NArray
@@ -316,6 +457,10 @@ module Crow
     def narray_enum_type
       'NA_SINT'
     end
+
+    def rdoc_type
+      'NArray<sint>'
+    end
   end
 
   class TypeMap::NArrayLInt < TypeMap::NArray
@@ -329,6 +474,10 @@ module Crow
 
     def narray_enum_type
       'NA_LINT'
+    end
+
+    def rdoc_type
+      'NArray<int>'
     end
   end
 end

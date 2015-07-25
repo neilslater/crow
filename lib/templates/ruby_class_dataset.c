@@ -39,16 +39,17 @@ void assert_value_wraps_<%= short_name %>( VALUE obj ) {
 //
 
 /* @overload initialize( <%= init_params.map(&:name).join(', ') %> )
- * Creates a new network and initializes the weights in all layers.
- * @param [NArray] inputs size of input array for first layer
- * @param [NArray] targets sizes of output arrays for each hidden layer
- * @return [<%= lib_module_name %>::<%= struct_name %>] new network consisting of new layers, with random weights
+ * Creates a new ...
+<% init_params.each do |ip| -%>
+ * @param [<%= ip.rdoc_type %>] <%= ip.name %> ...
+<% end -%>
+ * @return [<%= lib_module_name %>::<%= struct_name %>] new ...
  */
 VALUE <%= short_name %>_class_initialize( VALUE self<% unless init_params.empty? %>, <%= init_params.map(&:as_rv_param).join(', ') %><% end %> ) {
   <%= struct_name %> *<%= short_name %> = get_<%= short_name %>_struct( self );
 
 <% if needs_init? -%>
-  <%= short_name %>__init( <%= short_name %>, 1, {10} );
+  <%= short_name %>__init( <%= short_name %><% unless init_params.empty? %>, <%= init_params.map(&:param_item_to_c).join(', ') %><% end %> );
 
 <% end -%>
   return self;

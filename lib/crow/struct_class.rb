@@ -43,8 +43,10 @@ module Crow
       @struct_name = opts[:struct_name] || struct_name_from_short_name( @short_name )
       if opts[:attributes]
         @attributes = opts[:attributes].map do | attr_opts |
-          attr_name = attr_opts[:name]
-          TypeMap.create( attr_name, attr_opts )
+          use_opts = attr_opts.clone
+          attr_name = use_opts[:name]
+          use_opts[:parent_struct] = self
+          TypeMap.create( attr_name, use_opts )
         end
       else
         @attributes = []
