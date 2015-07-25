@@ -1,12 +1,15 @@
 TODO:
 
-  NArray confirm sub-types
-    sint = 16-bit
-    lint = 32-bit ?
+  pointer and NArray size control
+    Constant
+    Set by other attribute (link attribute to init value)
+
+  validate/cast NArray and pointer inputs
 
   ruby_class_dataset.c template support:
     params for initialize
     clone
+      struct_name__deep_clone ? (can it be done?)
     accessors and mutators
       direct
       pointers
@@ -15,6 +18,7 @@ TODO:
   Cover different constructions of rank, shape
     1. From constants - defined in .h and used in .c
     2. Shape built from expressions - needs temp var
+    (read from narr struct when needed?)
 
   Specs
     - How to do test at all?
