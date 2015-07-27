@@ -56,8 +56,8 @@ VALUE <%= short_name %>_class_initialize( VALUE self<% unless init_params.empty?
 }
 
 /* @overload clone
- * When cloned, the returned <%= struct_name %> has deep copies of inputs and outputs,
- * @return [<%= lib_module_name %>::<%= struct_name %>] new training data with identical items to caller.
+ * When cloned, the returned <%= struct_name %> has deep copies of C data.
+ * @return [<%= lib_module_name %>::<%= struct_name %>] new
  */
 VALUE <%= short_name %>_class_initialize_copy( VALUE copy, VALUE orig ) {
   <%= struct_name %> *<%= short_name %>_copy;
@@ -67,29 +67,44 @@ VALUE <%= short_name %>_class_initialize_copy( VALUE copy, VALUE orig ) {
   <%= short_name %>_orig = get_<%= short_name %>_struct( orig );
   <%= short_name %>_copy = get_<%= short_name %>_struct( copy );
 
-  <%= short_name %>_copy->num_items = <%= short_name %>_orig->num_items;
-  <%= short_name %>_copy->narr_inputs = na_clone( <%= short_name %>_orig->narr_inputs );
+<% simple_attributes.each do |attribute| -%>
+  <%= short_name %>_copy-><%= attribute.name %> = <%= short_name %>_orig-><%= attribute.name %>;
+<% end -%>
+
+<% narray_attributes.each do |attribute| -%>
+  <%= short_name %>_copy-><%= attribute.name %> = na_clone( <%= short_name %>_orig-><%= attribute.name %> );
+<% end -%>
+<% init_attributes.each do |attribute| -%>
+
+  <%= short_name %>_copy-><%= attribute.name %> = ALLOC_N( <%= attribute.cbase %>, <%= attribute.size_expr %> );
+  memcpy( <%= short_name %>_copy-><%= attribute.name %>, <%= short_name %>_orig-><%= attribute.name %>, ( <%= attribute.size_expr %> ) * sizeof(<%= attribute.cbase %>) );
+<% end -%>
 
   return copy;
 }
 
-/* @!attribute [r] inputs
- * The inputs array.
- * @return [NArray<sfloat>]
+<% simple_attributes.each do |attribute| -%>
+/* @!attribute [r] <%= attribute.name %>
+ * Description goes here
+ * @return [<%= attribute.rdoc_type %>]
  */
-VALUE <%= short_name %>_object_inputs( VALUE self ) {
+VALUE <%= short_name %>_object_<%= attribute.name %>( VALUE self ) {
   <%= struct_name %> *<%= short_name %> = get_<%= short_name %>_struct( self );
-  return <%= short_name %>->narr_inputs;
+  return <%= attribute.struct_item_to_ruby %>;
 }
 
-/* @!attribute [r] num_items
- * The number of training items.
- * @return [Integer]
+<% end -%>
+<% narray_attributes.each do |attribute| -%>
+/* @!attribute [r] <%= attribute.name %>
+ * Description goes here
+ * @return [<%= attribute.rdoc_type %>]
  */
-VALUE <%= short_name %>_object_num_items( VALUE self ) {
+VALUE <%= short_name %>_object_<%= attribute.name %>( VALUE self ) {
   <%= struct_name %> *<%= short_name %> = get_<%= short_name %>_struct( self );
-  return INT2NUM( <%= short_name %>->num_items );
+  return <%= attribute.struct_item_to_ruby %>;
 }
+
+<% end -%>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -100,6 +115,7 @@ void init_<%= short_name %>_class( ) {
   rb_define_method( <%= lib_module_name %>_<%= struct_name %>, "initialize_copy", <%= short_name %>_class_initialize_copy, 1 );
 
   // <%= struct_name %> attributes
-  rb_define_method( <%= lib_module_name %>_<%= struct_name %>, "inputs", <%= short_name %>_object_inputs, 0 );
-  rb_define_method( <%= lib_module_name %>_<%= struct_name %>, "num_items", <%= short_name %>_object_num_items, 0 );
+<% attributes.each do |attribute| -%>
+  rb_define_method( <%= lib_module_name %>_<%= struct_name %>, "<%= attribute.name %>", <%= short_name %>_object_<%= attribute.name %>, 0 );
+<% end -%>
 }

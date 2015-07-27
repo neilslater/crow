@@ -29,7 +29,7 @@ void <%= short_name %>__init( <%= struct_name %> *<%= short_name %><% unless ini
 <% attributes.select(&:needs_alloc?).each do |attribute| -%>
   <%= short_name %>-><%= attribute.name %> = ALLOC_N( <%= attribute.cbase %>, <%= attribute.size_expr %> );
   for( i = 0; i < <%= attribute.size_expr %>; i++ ) {
-    <%= short_name %>-><%= attribute.name %> = <%= attribute.init_expr %>;
+    <%= short_name %>-><%= attribute.name %>[i] = <%= attribute.init_expr %>;
   }
 
 <% end -%>

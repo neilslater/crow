@@ -79,12 +79,24 @@ module Crow
       @attributes.any? { |a| a.is_narray? }
     end
 
+    def narray_attributes
+      @attributes.select { |a| a.is_narray? }
+    end
+
     def any_alloc?
       @attributes.any? { |a| a.needs_alloc? }
     end
 
     def needs_init?
       any_narray? || any_alloc?
+    end
+
+    def init_attributes
+      @attributes.select { |a| a.needs_alloc? }
+    end
+
+    def simple_attributes
+      @attributes.reject { |a| a.needs_alloc? || a.is_narray? }
     end
 
     def lib_short_name
