@@ -74,7 +74,7 @@ VALUE <%= short_name %>_class_initialize_copy( VALUE copy, VALUE orig ) {
 <% narray_attributes.each do |attribute| -%>
   <%= short_name %>_copy-><%= attribute.name %> = na_clone( <%= short_name %>_orig-><%= attribute.name %> );
 <% end -%>
-<% init_attributes.each do |attribute| -%>
+<% alloc_attributes.each do |attribute| -%>
 
   <%= short_name %>_copy-><%= attribute.name %> = ALLOC_N( <%= attribute.cbase %>, <%= attribute.size_expr %> );
   memcpy( <%= short_name %>_copy-><%= attribute.name %>, <%= short_name %>_orig-><%= attribute.name %>, ( <%= attribute.size_expr %> ) * sizeof(<%= attribute.cbase %>) );

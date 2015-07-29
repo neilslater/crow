@@ -1,8 +1,9 @@
 TODO:
 
   pointer and NArray size control
-    Constant
-    Set by other attribute (link attribute to init value)
+    References to variables, not just strings, for init and copy purposes
+    Difference between init_  settings and others
+    Options: Using a constant, or link an attribute (can set the attribute in init)
 
   validate/cast NArray and pointer inputs
 

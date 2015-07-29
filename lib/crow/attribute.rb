@@ -15,7 +15,7 @@ module Crow
       :ulong => [ 'ULong', 'P_ULong' ],
     ]
 
-    attr_reader :name, :ctype, :pointer, :default, :parent_struct
+    attr_reader :name, :ctype, :pointer, :default, :parent_struct, :init_expr
 
     def initialize name, opts = {}
       raise "Variable name '#{name}' cannot be used" if name !~ /\A[a-zA-Z0-9_]+\z/
@@ -24,6 +24,7 @@ module Crow
       @pointer = !! opts[:pointer]
       @ctype = opts[:ctype]
       @parent_struct = opts[:parent_struct]
+      @init_expr ||= opts[:init_expr]
     end
 
     def self.create name, opts = {}
@@ -97,6 +98,18 @@ module Crow
     def param_item_to_c
       self.class.ruby_to_c( rv_name )
     end
+
+    def init_expr_c
+      Expression.new( init_expr, @parent_struct.attributes, @parent_struct.init_params ).as_c_code
+    end
+
+    def needs_init?
+      !! init_expr
+    end
+
+    def needs_simple_init?
+      needs_init? && ! is_narray? && ! pointer
+    end
   end
 
   module NotA_C_Pointer
@@ -114,8 +127,12 @@ module Crow
 
     def initialize name, opts = {}
       super( name, opts )
-      @size_expr = opts[:size_expr] || @name.upcase + '_SIZE'
+      @size_expr = opts[:size_expr] || [@parent_struct.short_name,@name.upcase,'SIZE'].join('_')
       @init_expr = opts[:init_expr] || self.class.item_default
+    end
+
+    def size_expr_c
+      Expression.new( size_expr, @parent_struct.attributes ).as_c_code
     end
   end
 

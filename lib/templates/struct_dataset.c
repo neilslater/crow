@@ -21,24 +21,28 @@ void <%= short_name %>__init( <%= struct_name %> *<%= short_name %><% unless ini
   int i;
 <% if any_narray? -%>
   struct NARRAY *narr;
-<% attributes.select(&:is_narray?).each do |attribute| -%>
+<% narray_attributes.each do |attribute| -%>
   <%= attribute.item_ctype %> *<%= attribute.name %>_ptr;
 <% end -%>
 <% end -%>
 
-<% attributes.select(&:needs_alloc?).each do |attribute| -%>
-  <%= short_name %>-><%= attribute.name %> = ALLOC_N( <%= attribute.cbase %>, <%= attribute.size_expr %> );
-  for( i = 0; i < <%= attribute.size_expr %>; i++ ) {
-    <%= short_name %>-><%= attribute.name %>[i] = <%= attribute.init_expr %>;
+<% simple_attributes_with_init.each do |attribute| -%>
+  <%= short_name %>-><%= attribute.name %> = <%= attribute.init_expr_c %>;
+
+<% end -%>
+<% alloc_attributes.each do |attribute| -%>
+  <%= short_name %>-><%= attribute.name %> = ALLOC_N( <%= attribute.cbase %>, <%= attribute.size_expr_c %> );
+  for( i = 0; i < <%= attribute.size_expr_c %>; i++ ) {
+    <%= short_name %>-><%= attribute.name %>[i] = <%= attribute.init_expr_c %>;
   }
 
 <% end -%>
-<% attributes.select(&:is_narray?).each do |attribute| -%>
+<% narray_attributes.each do |attribute| -%>
   <%= short_name %>-><%= attribute.name %> = na_make_object( <%= attribute.narray_enum_type %>, <%= attribute.rank_expr %>, <%= attribute.shape_expr %>, cNArray );
   GetNArray( <%= short_name %>-><%= attribute.name %>, narr );
   <%= attribute.name %>_ptr = (<%= attribute.item_ctype %>*) narr->ptr;
   for( i = 0; i < narr->total; i++ ) {
-    <%= attribute.name %>_ptr[i] = <%= attribute.init_expr %>;
+    <%= attribute.name %>_ptr[i] = <%= attribute.init_expr_c %>;
   }
 
 <% end -%>
