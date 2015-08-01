@@ -76,15 +76,15 @@ VALUE <%= short_name %>_class_initialize_copy( VALUE copy, VALUE orig ) {
 <% end -%>
 <% alloc_attributes.each do |attribute| -%>
 
-  <%= short_name %>_copy-><%= attribute.name %> = ALLOC_N( <%= attribute.cbase %>, <%= attribute.size_expr %> );
-  memcpy( <%= short_name %>_copy-><%= attribute.name %>, <%= short_name %>_orig-><%= attribute.name %>, ( <%= attribute.size_expr %> ) * sizeof(<%= attribute.cbase %>) );
+  <%= short_name %>_copy-><%= attribute.name %> = ALLOC_N( <%= attribute.cbase %>, <%= attribute.size_expr_c( short_name + "_copy" ) %> );
+  memcpy( <%= short_name %>_copy-><%= attribute.name %>, <%= short_name %>_orig-><%= attribute.name %>, ( <%= attribute.size_expr_c %> ) * sizeof(<%= attribute.cbase %>) );
 <% end -%>
 
   return copy;
 }
 
 <% simple_attributes.each do |attribute| -%>
-/* @!attribute [r] <%= attribute.name %>
+/* @!attribute <% if attribute.read_only? %>[r] <% end %><%= attribute.name %>
  * Description goes here
  * @return [<%= attribute.rdoc_type %>]
  */

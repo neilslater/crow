@@ -1,3 +1,5 @@
+require 'set'
+
 module Crow
   class TypeMap
     CTYPES = Hash[
@@ -15,7 +17,7 @@ module Crow
       :ulong => [ 'ULong', 'P_ULong' ],
     ]
 
-    attr_reader :name, :ctype, :pointer, :default, :parent_struct, :init_expr
+    attr_reader :name, :ctype, :pointer, :default, :parent_struct, :init_expr, :ruby_read, :ruby_write
 
     def initialize name, opts = {}
       raise "Variable name '#{name}' cannot be used" if name !~ /\A[a-zA-Z0-9_]+\z/
@@ -25,6 +27,8 @@ module Crow
       @ctype = opts[:ctype]
       @parent_struct = opts[:parent_struct]
       @init_expr ||= opts[:init_expr]
+      @ruby_read = opts[:ruby_read].nil? ? true : opts[:ruby_read]
+      @ruby_write  = opts[:ruby_write].nil? ? false : opts[:ruby_write]
     end
 
     def self.create name, opts = {}
@@ -99,8 +103,8 @@ module Crow
       self.class.ruby_to_c( rv_name )
     end
 
-    def init_expr_c
-      Expression.new( init_expr, @parent_struct.attributes, @parent_struct.init_params ).as_c_code
+    def init_expr_c container_name = parent_struct.short_name
+      Expression.new( init_expr, @parent_struct.attributes, @parent_struct.init_params ).as_c_code( container_name )
     end
 
     def needs_init?
@@ -109,6 +113,10 @@ module Crow
 
     def needs_simple_init?
       needs_init? && ! is_narray? && ! pointer
+    end
+
+    def read_only?
+      ruby_read && ! ruby_write
     end
   end
 
@@ -123,16 +131,36 @@ module Crow
       true
     end
 
-    attr_reader :size_expr, :init_expr
+    ROLES = Set[ :array, :narray_cache, :itemised ]
+
+    attr_reader :size_expr, :init_expr, :pointer_role
 
     def initialize name, opts = {}
       super( name, opts )
       @size_expr = opts[:size_expr] || [@parent_struct.short_name,@name.upcase,'SIZE'].join('_')
       @init_expr = opts[:init_expr] || self.class.item_default
+      @pointer_role = opts[:pointer_role] || :array
+      unless ROLES.include?( @pointer_role )
+        raise ArgumentError, "Bad pointer role #{@pointer_role}, should be one of #{ROLES.to_a.join(', ')}"
+      end
+
+      # Over-ride other defaults depending on role
+      case @pointer_role
+      when :array
+        @ruby_read = opts[:ruby_read].nil? ? true : opts[:ruby_read]
+        @ruby_write  = opts[:ruby_write].nil? ? false : opts[:ruby_write]
+      when :narray_cache
+        @ruby_read = opts[:ruby_read].nil? ? false : opts[:ruby_read]
+        @ruby_write  = opts[:ruby_write].nil? ? false : opts[:ruby_write]
+      when :itemised
+        @ruby_read = opts[:ruby_read].nil? ? true : opts[:ruby_read]
+        @ruby_write = opts[:ruby_write].nil? ? false : opts[:ruby_write]
+      end
     end
 
-    def size_expr_c
-      Expression.new( size_expr, @parent_struct.attributes ).as_c_code
+    def size_expr_c container_name = parent_struct.short_name
+      e = Expression.new( size_expr, @parent_struct.attributes, @parent_struct.init_params )
+      e.as_c_code( container_name )
     end
   end
 

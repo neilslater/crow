@@ -1,7 +1,12 @@
 TODO:
 
   pointer and NArray size control
-    References to variables, not just strings, for init and copy purposes
+    References to variables, not just strings, for init and copy purposes DONE
+    pointers can be:
+      defaulted array of size x. COVERED
+      typed cache for NArray pointer. No xfree, no public interface, different setup
+      sequence of individual values (e.g. a Shape).
+
     Difference between init_  settings and others
     Options: Using a constant, or link an attribute (can set the attribute in init)
 
