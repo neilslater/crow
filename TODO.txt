@@ -1,30 +1,9 @@
 TODO:
 
-  pointer and NArray size control
-    References to variables, not just strings, for init and copy purposes DONE
-    pointers can be:
-      defaulted array of size x. COVERED
-      typed cache for NArray pointer. No xfree, no public interface, different setup COVERED by NArray option
-      sequence of individual values (e.g. a Shape).
-
-    Difference between init_  settings and others
-    Options: Using a constant, or link an attribute (can set the attribute in init)
-
-  validate/cast NArray and pointer inputs
-
   ruby_class_dataset.c template support:
-    params for initialize
-    clone
-      struct_name__deep_clone ? (can it be done?)
     accessors and mutators
-      direct
       pointers
-      NArrays
-
-  Cover different constructions of rank, shape
-    1. From constants - defined in .h and used in .c
-    2. Shape built from expressions - needs temp var
-    (read from narr struct when needed?)
+      NArrays (no mutator)
 
   Specs
     - How to do test at all?
