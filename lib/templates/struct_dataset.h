@@ -13,7 +13,11 @@
 
 typedef struct _<%= short_name %>_raw {
 <% attributes.each do |attribute| -%>
+<% if attribute.shape_var %>  <%= attribute.declare_shape_var %>
+<% end -%>
   <%= attribute.declare %>
+<% if attribute.ptr_cache %>  <%= attribute.declare_ptr_cache %>
+<% end -%>
 <% end -%>
   } <%= struct_name %>;
 

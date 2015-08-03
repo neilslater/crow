@@ -62,6 +62,9 @@ VALUE <%= short_name %>_class_initialize( VALUE self<% unless init_params.empty?
 VALUE <%= short_name %>_class_initialize_copy( VALUE copy, VALUE orig ) {
   <%= struct_name %> *<%= short_name %>_copy;
   <%= struct_name %> *<%= short_name %>_orig;
+<% if narray_attributes.any? { |a| a.ptr_cache } -%>
+  struct NARRAY *narr;
+<% end -%>
 
   if (copy == orig) return copy;
   <%= short_name %>_orig = get_<%= short_name %>_struct( orig );
@@ -73,6 +76,10 @@ VALUE <%= short_name %>_class_initialize_copy( VALUE copy, VALUE orig ) {
 
 <% narray_attributes.each do |attribute| -%>
   <%= short_name %>_copy-><%= attribute.name %> = na_clone( <%= short_name %>_orig-><%= attribute.name %> );
+<% if attribute.ptr_cache -%>
+  GetNArray( <%= short_name %>_copy-><%= attribute.name %>, narr );
+  <%= attribute.set_ptr_cache( short_name + "_copy" ) %>;
+<% end -%>
 <% end -%>
 <% alloc_attributes.each do |attribute| -%>
 
@@ -84,15 +91,25 @@ VALUE <%= short_name %>_class_initialize_copy( VALUE copy, VALUE orig ) {
 }
 
 <% simple_attributes.each do |attribute| -%>
+<% if attribute.ruby_read -%>
 /* @!attribute <% if attribute.read_only? %>[r] <% end %><%= attribute.name %>
  * Description goes here
  * @return [<%= attribute.rdoc_type %>]
  */
-VALUE <%= short_name %>_object_<%= attribute.name %>( VALUE self ) {
+VALUE <%= short_name %>_rbobject__get_<%= attribute.name %>( VALUE self ) {
   <%= struct_name %> *<%= short_name %> = get_<%= short_name %>_struct( self );
   return <%= attribute.struct_item_to_ruby %>;
 }
 
+<% end -%>
+<% if attribute.ruby_write -%>
+VALUE <%= short_name %>_rbobject__set_<%= attribute.name %>( VALUE self, VALUE <%= attribute.rv_name %> ) {
+  <%= struct_name %> *<%= short_name %> = get_<%= short_name %>_struct( self );
+  <%= short_name %>-><%= attribute.name %> = <%= attribute.param_item_to_c %>;
+  return <%= attribute.rv_name %>;
+}
+
+<% end -%>
 <% end -%>
 <% narray_attributes.each do |attribute| -%>
 /* @!attribute [r] <%= attribute.name %>
@@ -116,6 +133,11 @@ void init_<%= short_name %>_class( ) {
 
   // <%= struct_name %> attributes
 <% attributes.each do |attribute| -%>
-  rb_define_method( <%= lib_module_name %>_<%= struct_name %>, "<%= attribute.name %>", <%= short_name %>_object_<%= attribute.name %>, 0 );
+<% if attribute.ruby_read -%>
+  rb_define_method( <%= lib_module_name %>_<%= struct_name %>, "<%= attribute.name %>", <%= short_name %>_rbobject__get_<%= attribute.name %>, 0 );
+<% end -%>
+<% if attribute.ruby_write -%>
+  rb_define_method( <%= lib_module_name %>_<%= struct_name %>, "<%= attribute.name %>=", <%= short_name %>_rbobject__set<%= attribute.name %>, 1 );
+<% end -%>
 <% end -%>
 }

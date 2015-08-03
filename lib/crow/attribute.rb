@@ -17,7 +17,7 @@ module Crow
       :ulong => [ 'ULong', 'P_ULong' ],
     ]
 
-    attr_reader :name, :ctype, :pointer, :default, :parent_struct, :init_expr, :ruby_read, :ruby_write
+    attr_reader :name, :ctype, :pointer, :default, :parent_struct, :init_expr, :ruby_read, :ruby_write, :ptr_cache, :shape_var
 
     def initialize name, opts = {}
       raise "Variable name '#{name}' cannot be used" if name !~ /\A[a-zA-Z0-9_]+\z/
@@ -117,6 +117,18 @@ module Crow
 
     def read_only?
       ruby_read && ! ruby_write
+    end
+
+    def declare_ptr_cache struct_name = parent_struct.short_name
+      "#{item_ctype} *#{ptr_cache};"
+    end
+
+    def init_ptr_cache struct_name = parent_struct.short_name
+      "#{struct_name}->#{ptr_cache} = NULL"
+    end
+
+    def set_ptr_cache struct_name = parent_struct.short_name
+      "#{struct_name}->#{ptr_cache} = (#{item_ctype} *) #{struct_name}->#{name}->ptr"
     end
   end
 
@@ -436,13 +448,20 @@ module Crow
     include NotA_C_Pointer
     self.default = 'Qnil'
 
-    attr_reader :rank_expr, :shape_expr, :init_expr
+    attr_reader :rank_expr, :shape_expr, :shape_exprs, :init_expr
 
     def initialize name, opts = {}
       super( name, opts )
-      @rank_expr = opts[:rank_expr] || @name.upcase + '_RANK'
-      @shape_expr = opts[:shape_expr] || @name.upcase + '_SHAPE'
+      @rank_expr = opts[:rank_expr] || @parent_struct.short_name + '_'  + @name + '_rank'
+      if ( opts[:shape_var] )
+        @shape_var = opts[:shape_var]
+        @shape_expr = "%#{@shape_var}"
+        @shape_exprs =  opts[:shape_exprs] || []
+      else
+        @shape_expr = opts[:shape_expr] || @parent_struct.short_name + '_'  + @name + '_shape'
+      end
       @init_expr = opts[:init_expr] || self.class.item_default
+      @ptr_cache = opts[:ptr_cache]
     end
 
     def is_narray?
@@ -451,6 +470,35 @@ module Crow
 
     def rdoc_type
       'NArray'
+    end
+
+    def declare_ptr_cache
+      "#{item_ctype} *#{ptr_cache};"
+    end
+
+    def init_ptr_cache struct_name = parent_struct.short_name
+      "#{struct_name}->#{ptr_cache} = NULL"
+    end
+
+    def set_ptr_cache struct_name = parent_struct.short_name, narray_var = 'narr'
+      "#{struct_name}->#{ptr_cache} = (#{item_ctype} *) #{narray_var}->ptr"
+    end
+
+    def declare_shape_var
+      "int *#{shape_var};"
+    end
+
+    def init_shape_var struct_name = parent_struct.short_name
+      "#{struct_name}->#{shape_var} = NULL"
+    end
+
+    def shape_expr_c container_name = parent_struct.short_name
+      allowed_attributes = @parent_struct.attributes.clone
+      if shape_var
+        allowed_attributes << TypeMap::P_Int.new( shape_var, :parent_struct => @parent_struct )
+      end
+
+      Expression.new( shape_expr, allowed_attributes, @parent_struct.init_params ).as_c_code( container_name )
     end
   end
 

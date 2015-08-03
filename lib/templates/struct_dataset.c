@@ -12,6 +12,8 @@
   <%= short_name %> = xmalloc( sizeof(<%= struct_name %>) );
 <% attributes.each do |attribute| -%>
   <%= short_name %>-><%= attribute.name %> = <%= attribute.default %>;
+<% if attribute.ptr_cache %>  <%= attribute.init_ptr_cache %>;
+<% end -%>
 <% end -%>
   return <%= short_name %>;
 }
@@ -38,12 +40,20 @@ void <%= short_name %>__init( <%= struct_name %> *<%= short_name %><% unless ini
 
 <% end -%>
 <% narray_attributes.each do |attribute| -%>
-  <%= short_name %>-><%= attribute.name %> = na_make_object( <%= attribute.narray_enum_type %>, <%= attribute.rank_expr %>, <%= attribute.shape_expr %>, cNArray );
+<% if attribute.shape_var -%>
+  <%= short_name %>-><%= attribute.shape_var %> = ALLOC_N( int, <%= attribute.rank_expr %> );
+<% attribute.shape_exprs.each_with_index do |expr,n| -%>
+  <%= short_name %>-><%= attribute.shape_var %>[<%= n %>] = <%= Expression.new( expr, attribute.parent_struct.attributes, attribute.parent_struct.init_params ).as_c_code( short_name ) %>;
+<% end -%>
+<% end -%>
+  <%= short_name %>-><%= attribute.name %> = na_make_object( <%= attribute.narray_enum_type %>, <%= attribute.rank_expr %>, <%= attribute.shape_expr_c %>, cNArray );
   GetNArray( <%= short_name %>-><%= attribute.name %>, narr );
   <%= attribute.name %>_ptr = (<%= attribute.item_ctype %>*) narr->ptr;
   for( i = 0; i < narr->total; i++ ) {
     <%= attribute.name %>_ptr[i] = <%= attribute.init_expr_c %>;
   }
+<% if attribute.ptr_cache %>  <%= attribute.set_ptr_cache %>;
+<% end -%>
 
 <% end -%>
   return;
@@ -51,8 +61,11 @@ void <%= short_name %>__init( <%= struct_name %> *<%= short_name %><% unless ini
 
 <% end -%>
 void <%= short_name %>__destroy( <%= struct_name %> *<%= short_name %> ) {
-<% attributes.select(&:needs_alloc?).each do |attribute| -%>
+<% alloc_attributes.each do |attribute| -%>
   xfree( <%= short_name %>-><%= attribute.name %> );
+<% end -%>
+<% narray_attributes.select(&:shape_var).each do |attribute| -%>
+  xfree( <%= short_name %>-><%= attribute.shape_var %> );
 <% end -%>
   xfree( <%= short_name %> );
   return;
