@@ -31,4 +31,8 @@ void <%= short_name %>__destroy( <%= struct_name %> *<%= short_name %> );
 
 void <%= short_name %>__gc_mark( <%= struct_name %> *<%= short_name %> );
 
+void <%= short_name %>__copy( <%= struct_name %> *<%= short_name %>_copy, <%= struct_name %> *<%= short_name %>_orig );
+
+<%= struct_name %> * <%= short_name %>__clone( <%= struct_name %> *<%= short_name %>_orig );
+
 #endif

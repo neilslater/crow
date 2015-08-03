@@ -45,7 +45,7 @@ void assert_value_wraps_<%= short_name %>( VALUE obj ) {
 <% end -%>
  * @return [<%= lib_module_name %>::<%= struct_name %>] new ...
  */
-VALUE <%= short_name %>_class_initialize( VALUE self<% unless init_params.empty? %>, <%= init_params.map(&:as_rv_param).join(', ') %><% end %> ) {
+VALUE <%= short_name %>_rbobject__initialize( VALUE self<% unless init_params.empty? %>, <%= init_params.map(&:as_rv_param).join(', ') %><% end %> ) {
   <%= struct_name %> *<%= short_name %> = get_<%= short_name %>_struct( self );
 
 <% if needs_init? -%>
@@ -59,33 +59,15 @@ VALUE <%= short_name %>_class_initialize( VALUE self<% unless init_params.empty?
  * When cloned, the returned <%= struct_name %> has deep copies of C data.
  * @return [<%= lib_module_name %>::<%= struct_name %>] new
  */
-VALUE <%= short_name %>_class_initialize_copy( VALUE copy, VALUE orig ) {
+VALUE <%= short_name %>_rbobject__initialize_copy( VALUE copy, VALUE orig ) {
   <%= struct_name %> *<%= short_name %>_copy;
   <%= struct_name %> *<%= short_name %>_orig;
-<% if narray_attributes.any? { |a| a.ptr_cache } -%>
-  struct NARRAY *narr;
-<% end -%>
 
   if (copy == orig) return copy;
   <%= short_name %>_orig = get_<%= short_name %>_struct( orig );
   <%= short_name %>_copy = get_<%= short_name %>_struct( copy );
 
-<% simple_attributes.each do |attribute| -%>
-  <%= short_name %>_copy-><%= attribute.name %> = <%= short_name %>_orig-><%= attribute.name %>;
-<% end -%>
-
-<% narray_attributes.each do |attribute| -%>
-  <%= short_name %>_copy-><%= attribute.name %> = na_clone( <%= short_name %>_orig-><%= attribute.name %> );
-<% if attribute.ptr_cache -%>
-  GetNArray( <%= short_name %>_copy-><%= attribute.name %>, narr );
-  <%= attribute.set_ptr_cache( short_name + "_copy" ) %>;
-<% end -%>
-<% end -%>
-<% alloc_attributes.each do |attribute| -%>
-
-  <%= short_name %>_copy-><%= attribute.name %> = ALLOC_N( <%= attribute.cbase %>, <%= attribute.size_expr_c( short_name + "_copy" ) %> );
-  memcpy( <%= short_name %>_copy-><%= attribute.name %>, <%= short_name %>_orig-><%= attribute.name %>, ( <%= attribute.size_expr_c %> ) * sizeof(<%= attribute.cbase %>) );
-<% end -%>
+  <%= short_name %>__copy( <%= short_name %>_copy, <%= short_name %>_orig );
 
   return copy;
 }
@@ -116,7 +98,7 @@ VALUE <%= short_name %>_rbobject__set_<%= attribute.name %>( VALUE self, VALUE <
  * Description goes here
  * @return [<%= attribute.rdoc_type %>]
  */
-VALUE <%= short_name %>_object_<%= attribute.name %>( VALUE self ) {
+VALUE <%= short_name %>_rbobject__get_<%= attribute.name %>( VALUE self ) {
   <%= struct_name %> *<%= short_name %> = get_<%= short_name %>_struct( self );
   return <%= attribute.struct_item_to_ruby %>;
 }
@@ -128,8 +110,8 @@ VALUE <%= short_name %>_object_<%= attribute.name %>( VALUE self ) {
 void init_<%= short_name %>_class( ) {
   // <%= struct_name %> instantiation and class methods
   rb_define_alloc_func( <%= lib_module_name %>_<%= struct_name %>, <%= short_name %>_alloc );
-  rb_define_method( <%= lib_module_name %>_<%= struct_name %>, "initialize", <%= short_name %>_class_initialize, 0 );
-  rb_define_method( <%= lib_module_name %>_<%= struct_name %>, "initialize_copy", <%= short_name %>_class_initialize_copy, 1 );
+  rb_define_method( <%= lib_module_name %>_<%= struct_name %>, "initialize", <%= short_name %>_rbobject__initialize, 0 );
+  rb_define_method( <%= lib_module_name %>_<%= struct_name %>, "initialize_copy", <%= short_name %>_rbobject__initialize_copy, 1 );
 
   // <%= struct_name %> attributes
 <% attributes.each do |attribute| -%>
@@ -137,7 +119,7 @@ void init_<%= short_name %>_class( ) {
   rb_define_method( <%= lib_module_name %>_<%= struct_name %>, "<%= attribute.name %>", <%= short_name %>_rbobject__get_<%= attribute.name %>, 0 );
 <% end -%>
 <% if attribute.ruby_write -%>
-  rb_define_method( <%= lib_module_name %>_<%= struct_name %>, "<%= attribute.name %>=", <%= short_name %>_rbobject__set<%= attribute.name %>, 1 );
+  rb_define_method( <%= lib_module_name %>_<%= struct_name %>, "<%= attribute.name %>=", <%= short_name %>_rbobject__set_<%= attribute.name %>, 1 );
 <% end -%>
 <% end -%>
 }

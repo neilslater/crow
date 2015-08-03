@@ -43,7 +43,6 @@ void <%= short_name %>__init( <%= struct_name %> *<%= short_name %><% unless ini
 <% end -%>
 <% narray_attributes.each do |attribute| -%>
 <% if attribute.shape_var -%>
-  <%= short_name %>-><%= attribute.shape_var %> = ALLOC_N( int, <%= attribute.rank_expr %> );
 <% attribute.shape_exprs.each_with_index do |expr,n| -%>
   <%= short_name %>-><%= attribute.shape_var %>[<%= n %>] = <%= Expression.new( expr, attribute.parent_struct.attributes, attribute.parent_struct.init_params ).as_c_code( short_name ) %>;
 <% end -%>
@@ -78,4 +77,39 @@ void <%= short_name %>__gc_mark( <%= struct_name %> *<%= short_name %> ) {
   rb_gc_mark( <%= short_name %>-><%= attribute.name %> );
 <% end -%>
   return;
+}
+
+void <%= short_name %>__copy( <%= struct_name %> *<%= short_name %>_copy, <%= struct_name %> *<%= short_name %>_orig ) {
+<% if narray_attributes.any? { |a| a.ptr_cache } -%>
+  struct NARRAY *narr;
+
+<% end -%>
+<% simple_attributes.each do |attribute| -%>
+  <%= short_name %>_copy-><%= attribute.name %> = <%= short_name %>_orig-><%= attribute.name %>;
+<% end -%>
+
+<% narray_attributes.each do |attribute| -%>
+  <%= short_name %>_copy-><%= attribute.name %> = na_clone( <%= short_name %>_orig-><%= attribute.name %> );
+<% if attribute.ptr_cache -%>
+  GetNArray( <%= short_name %>_copy-><%= attribute.name %>, narr );
+  <%= attribute.set_ptr_cache( short_name + "_copy" ) %>;
+<% end -%>
+<% if attribute.shape_var -%>
+  <%= short_name %>_copy-><%= attribute.shape_var %> = ALLOC_N( int, <%= attribute.rank_expr %> );
+  memcpy( <%= short_name %>_copy-><%= attribute.shape_var %>, <%= short_name %>_orig-><%= attribute.shape_var %>, ( <%= attribute.rank_expr %> * sizeof(int) );
+<% end -%>
+<% end -%>
+<% alloc_attributes.each do |attribute| -%>
+
+  <%= short_name %>_copy-><%= attribute.name %> = ALLOC_N( <%= attribute.cbase %>, <%= attribute.size_expr_c( short_name + "_copy" ) %> );
+  memcpy( <%= short_name %>_copy-><%= attribute.name %>, <%= short_name %>_orig-><%= attribute.name %>, ( <%= attribute.size_expr_c %> ) * sizeof(<%= attribute.cbase %>) );
+<% end -%>
+
+  return;
+}
+
+<%= struct_name %> * <%= short_name %>__clone( <%= struct_name %> *<%= short_name %>_orig ) {
+  <%= struct_name %> * <%= short_name %>_copy = <%= short_name %>__create();
+  <%= short_name %>__copy( <%= short_name %>_copy, <%= short_name %>_orig );
+  return <%= short_name %>_copy;
 }
