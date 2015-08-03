@@ -29,7 +29,7 @@ void assert_value_wraps_<%= short_name %>( VALUE obj ) {
   }
 }
 
-/* Document-class:  <%= lib_module_name %>::<%= struct_name %>
+/* Document-class: <%= full_class_name_ruby %>
  *
  */
 
@@ -43,7 +43,7 @@ void assert_value_wraps_<%= short_name %>( VALUE obj ) {
 <% init_params.each do |ip| -%>
  * @param [<%= ip.rdoc_type %>] <%= ip.name %> ...
 <% end -%>
- * @return [<%= lib_module_name %>::<%= struct_name %>] new ...
+ * @return [<%= full_class_name_ruby %>] new ...
  */
 VALUE <%= short_name %>_rbobject__initialize( VALUE self<% unless init_params.empty? %>, <%= init_params.map(&:as_rv_param).join(', ') %><% end %> ) {
   <%= struct_name %> *<%= short_name %> = get_<%= short_name %>_struct( self );
@@ -57,7 +57,7 @@ VALUE <%= short_name %>_rbobject__initialize( VALUE self<% unless init_params.em
 
 /* @overload clone
  * When cloned, the returned <%= struct_name %> has deep copies of C data.
- * @return [<%= lib_module_name %>::<%= struct_name %>] new
+ * @return [<%= full_class_name_ruby %>] new
  */
 VALUE <%= short_name %>_rbobject__initialize_copy( VALUE copy, VALUE orig ) {
   <%= struct_name %> *<%= short_name %>_copy;
@@ -74,7 +74,7 @@ VALUE <%= short_name %>_rbobject__initialize_copy( VALUE copy, VALUE orig ) {
 
 <% simple_attributes.each do |attribute| -%>
 <% if attribute.ruby_read -%>
-/* @!attribute <% if attribute.read_only? %>[r] <% end %><%= attribute.name %>
+/* @!attribute <% if attribute.read_only? %>[r] <% end %><%= attribute.ruby_name %>
  * Description goes here
  * @return [<%= attribute.rdoc_type %>]
  */
@@ -94,7 +94,7 @@ VALUE <%= short_name %>_rbobject__set_<%= attribute.name %>( VALUE self, VALUE <
 <% end -%>
 <% end -%>
 <% narray_attributes.each do |attribute| -%>
-/* @!attribute  <% if attribute.read_only? %>[r] <% end %><%= attribute.name %>
+/* @!attribute <% if attribute.read_only? %>[r] <% end %><%= attribute.ruby_name %>
  * Description goes here
  * @return [<%= attribute.rdoc_type %>]
  */
@@ -106,7 +106,7 @@ VALUE <%= short_name %>_rbobject__get_<%= attribute.name %>( VALUE self ) {
 <% end -%>
 <% alloc_attributes.each do |attribute| -%>
 <% if attribute.ruby_read -%>
-/* @!attribute <% if attribute.read_only? %>[r] <% end %><%= attribute.name %>
+/* @!attribute <% if attribute.read_only? %>[r] <% end %><%= attribute.ruby_name %>
  * Description goes here
  * @return [<%= attribute.rdoc_type %>]
  */
@@ -138,17 +138,17 @@ VALUE <%= short_name %>_rbobject__set_<%= attribute.name %>( VALUE self, VALUE <
 
 void init_<%= short_name %>_class( ) {
   // <%= struct_name %> instantiation and class methods
-  rb_define_alloc_func( <%= lib_module_name %>_<%= struct_name %>, <%= short_name %>_alloc );
-  rb_define_method( <%= lib_module_name %>_<%= struct_name %>, "initialize", <%= short_name %>_rbobject__initialize, <%= init_params.count %> );
-  rb_define_method( <%= lib_module_name %>_<%= struct_name %>, "initialize_copy", <%= short_name %>_rbobject__initialize_copy, 1 );
+  rb_define_alloc_func( <%= full_class_name %>, <%= short_name %>_alloc );
+  rb_define_method( <%= full_class_name %>, "initialize", <%= short_name %>_rbobject__initialize, <%= init_params.count %> );
+  rb_define_method( <%= full_class_name %>, "initialize_copy", <%= short_name %>_rbobject__initialize_copy, 1 );
 
   // <%= struct_name %> attributes
 <% attributes.each do |attribute| -%>
 <% if attribute.ruby_read -%>
-  rb_define_method( <%= lib_module_name %>_<%= struct_name %>, "<%= attribute.name %>", <%= short_name %>_rbobject__get_<%= attribute.name %>, 0 );
+  rb_define_method( <%= full_class_name %>, "<%= attribute.ruby_name %>", <%= short_name %>_rbobject__get_<%= attribute.name %>, 0 );
 <% end -%>
 <% if attribute.ruby_write -%>
-  rb_define_method( <%= lib_module_name %>_<%= struct_name %>, "<%= attribute.name %>=", <%= short_name %>_rbobject__set_<%= attribute.name %>, 1 );
+  rb_define_method( <%= full_class_name %>, "<%= attribute.ruby_name %>=", <%= short_name %>_rbobject__set_<%= attribute.name %>, 1 );
 <% end -%>
 <% end -%>
 }

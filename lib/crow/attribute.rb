@@ -17,18 +17,20 @@ module Crow
       :ulong => [ 'ULong', 'P_ULong' ],
     ]
 
-    attr_reader :name, :ctype, :pointer, :default, :parent_struct, :init_expr, :ruby_read, :ruby_write, :ptr_cache, :shape_var
+    attr_reader :name, :ruby_name, :ctype, :pointer, :default, :parent_struct
+    attr_reader :init_expr, :ruby_read, :ruby_write, :ptr_cache, :shape_var
 
     def initialize name, opts = {}
       raise "Variable name '#{name}' cannot be used" if name !~ /\A[a-zA-Z0-9_]+\z/
       @name = name
+      @ruby_name = opts[:ruby_name] || name
       @default = opts[:default] || self.class.default
       @pointer = !! opts[:pointer]
       @ctype = opts[:ctype]
       @parent_struct = opts[:parent_struct]
       @init_expr ||= opts[:init_expr]
       @ruby_read = opts[:ruby_read].nil? ? true : opts[:ruby_read]
-      @ruby_write  = opts[:ruby_write].nil? ? false : opts[:ruby_write]
+      @ruby_write = opts[:ruby_write].nil? ? false : opts[:ruby_write]
     end
 
     def self.create name, opts = {}

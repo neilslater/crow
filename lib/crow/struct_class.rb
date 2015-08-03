@@ -32,7 +32,7 @@ module Crow
   end
 
   class StructClass
-    attr_accessor :short_name, :struct_name, :attributes, :parent_lib, :init_params
+    attr_accessor :short_name, :struct_name, :rb_class_name, :attributes, :parent_lib, :init_params
 
     TEMPLATE_DIR = File.realdirpath( File.join( __dir__, '../../lib/templates' ) )
     TEMPLATES = [ 'struct_dataset.h', 'struct_dataset.c', 'ruby_class_dataset.h', 'ruby_class_dataset.c' ]
@@ -41,6 +41,7 @@ module Crow
       raise "Short name '#{short_name}' cannot be used" if short_name !~ /\A[a-zA-Z0-9_]+\z/
       @short_name = short_name
       @struct_name = opts[:struct_name] || struct_name_from_short_name( @short_name )
+      @rb_class_name = opts[:rb_class_name] || @struct_name
       if opts[:attributes]
         @attributes = opts[:attributes].map do | attr_opts |
           use_opts = attr_opts.clone
@@ -109,6 +110,14 @@ module Crow
 
     def lib_module_name
       parent_lib.module_name
+    end
+
+    def full_class_name
+      parent_lib.module_name + '_' + rb_class_name
+    end
+
+    def full_class_name_ruby
+      parent_lib.module_name + '::' + rb_class_name.gsub(/_/,'::')
     end
 
     private

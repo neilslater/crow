@@ -1,14 +1,18 @@
 TODO:
 
-  Temporary vars for setting shape
+  Temp vars for setting shape
+
+  enum variable type
+
+  Public attribute names != struct attribute names
 
   Specs
     - How to do test at all?
 
-  Integration type - extendable (written once then edited) versus maintained (separate written files that can be over-written)
-
-  Different class names to struct names
-
-  Handle deeper class names
-
   Templates for spec files
+
+  Validating init params (use temp vars to unpack and test)
+
+  Validating/casting NArray inputs
+
+  Support for Marshal serialise via hash
