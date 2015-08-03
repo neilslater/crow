@@ -94,7 +94,7 @@ VALUE <%= short_name %>_rbobject__set_<%= attribute.name %>( VALUE self, VALUE <
 <% end -%>
 <% end -%>
 <% narray_attributes.each do |attribute| -%>
-/* @!attribute [r] <%= attribute.name %>
+/* @!attribute  <% if attribute.read_only? %>[r] <% end %><%= attribute.name %>
  * Description goes here
  * @return [<%= attribute.rdoc_type %>]
  */
@@ -104,7 +104,36 @@ VALUE <%= short_name %>_rbobject__get_<%= attribute.name %>( VALUE self ) {
 }
 
 <% end -%>
+<% alloc_attributes.each do |attribute| -%>
+<% if attribute.ruby_read -%>
+/* @!attribute <% if attribute.read_only? %>[r] <% end %><%= attribute.name %>
+ * Description goes here
+ * @return [<%= attribute.rdoc_type %>]
+ */
+VALUE <%= short_name %>_rbobject__get_<%= attribute.name %>( VALUE self ) {
+  int i, s;
+  volatile VALUE rv_ary_<%= attribute.name %>;
+  <%= struct_name %> *<%= short_name %> = get_<%= short_name %>_struct( self );
 
+  s = <%= attribute.size_expr_c %>;
+  rv_ary_<%= attribute.name %> = rb_ary_new2( s );
+  for( i = 0; i < s; i++ ) {
+    rb_ary_store( rv_ary_<%= attribute.name %>, i,  <%= attribute.array_item_to_ruby_converter %>( <%= short_name %>-><%= attribute.name %>[i] ) );
+  }
+
+  return rv_ary_<%= attribute.name %>;
+}
+
+<% end -%>
+<% if attribute.ruby_write -%>
+VALUE <%= short_name %>_rbobject__set_<%= attribute.name %>( VALUE self, VALUE <%= attribute.rv_name %> ) {
+  int i;
+  <%= struct_name %> *<%= short_name %> = get_<%= short_name %>_struct( self );
+  // TODO: Implement array writing routine
+}
+
+<% end -%>
+<% end -%>
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void init_<%= short_name %>_class( ) {

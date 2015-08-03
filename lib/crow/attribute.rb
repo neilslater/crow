@@ -209,6 +209,10 @@ module Crow
     def rdoc_type
       'Array<Integer>'
     end
+
+    def array_item_to_ruby_converter
+      'INT2NUM'
+    end
   end
 
   class TypeMap::UInt < TypeMap::Int
@@ -244,6 +248,10 @@ module Crow
 
     def rdoc_type
       'Array<Integer>'
+    end
+
+    def array_item_to_ruby_converter
+      'UINT2NUM'
     end
   end
 
@@ -281,6 +289,10 @@ module Crow
     def rdoc_type
       'Integer'
     end
+
+    def array_item_to_ruby_converter
+      'LONG2NUM'
+    end
   end
 
   class TypeMap::ULong < TypeMap::Long
@@ -315,6 +327,10 @@ module Crow
 
     def rdoc_type
       'Array<Integer>'
+    end
+
+    def array_item_to_ruby_converter
+      'ULONG2NUM'
     end
   end
 
@@ -351,6 +367,10 @@ module Crow
     def rdoc_type
       'Array<Float>'
     end
+
+    def array_item_to_ruby_converter
+      'FLT2NUM'
+    end
   end
 
   class TypeMap::Double < TypeMap
@@ -385,6 +405,10 @@ module Crow
 
     def rdoc_type
       'Array<Float>'
+    end
+
+    def array_item_to_ruby_converter
+      'DBL2NUM'
     end
   end
 
