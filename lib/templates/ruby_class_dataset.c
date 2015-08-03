@@ -139,7 +139,7 @@ VALUE <%= short_name %>_rbobject__set_<%= attribute.name %>( VALUE self, VALUE <
 void init_<%= short_name %>_class( ) {
   // <%= struct_name %> instantiation and class methods
   rb_define_alloc_func( <%= lib_module_name %>_<%= struct_name %>, <%= short_name %>_alloc );
-  rb_define_method( <%= lib_module_name %>_<%= struct_name %>, "initialize", <%= short_name %>_rbobject__initialize, 0 );
+  rb_define_method( <%= lib_module_name %>_<%= struct_name %>, "initialize", <%= short_name %>_rbobject__initialize, <%= init_params.count %> );
   rb_define_method( <%= lib_module_name %>_<%= struct_name %>, "initialize_copy", <%= short_name %>_rbobject__initialize_copy, 1 );
 
   // <%= struct_name %> attributes

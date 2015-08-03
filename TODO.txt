@@ -1,9 +1,6 @@
 TODO:
 
-  ruby_class_dataset.c template support:
-    accessors and mutators
-      pointers
-      NArrays (no mutator)
+  Temporary vars for setting shape
 
   Specs
     - How to do test at all?
@@ -14,17 +11,4 @@ TODO:
 
   Handle deeper class names
 
-
-require 'crow'
-m = Crow::LibDef.new( 'the_module', {
-  :structs => [
-    { :name => 'hello',
-      :attributes => [{:name=>'hi',:ctype=>:NARRAY_INT_32 }],
-      :init_params => [{:name=>'n',:ctype=>:int }]
-    }
-  ]
-} )
-m.structs.first.write( '/tmp' )
-
-
-DONE:
+  Templates for spec files
