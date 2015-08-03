@@ -79,7 +79,7 @@ void <%= short_name %>__gc_mark( <%= struct_name %> *<%= short_name %> ) {
   return;
 }
 
-void <%= short_name %>__copy( <%= struct_name %> *<%= short_name %>_copy, <%= struct_name %> *<%= short_name %>_orig ) {
+void <%= short_name %>__deep_copy( <%= struct_name %> *<%= short_name %>_copy, <%= struct_name %> *<%= short_name %>_orig ) {
 <% if narray_attributes.any? { |a| a.ptr_cache } -%>
   struct NARRAY *narr;
 

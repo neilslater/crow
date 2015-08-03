@@ -67,7 +67,7 @@ VALUE <%= short_name %>_rbobject__initialize_copy( VALUE copy, VALUE orig ) {
   <%= short_name %>_orig = get_<%= short_name %>_struct( orig );
   <%= short_name %>_copy = get_<%= short_name %>_struct( copy );
 
-  <%= short_name %>__copy( <%= short_name %>_copy, <%= short_name %>_orig );
+  <%= short_name %>__deep_copy( <%= short_name %>_copy, <%= short_name %>_orig );
 
   return copy;
 }
