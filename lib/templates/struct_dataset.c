@@ -11,6 +11,8 @@
   <%= struct_name %> *<%= short_name %>;
   <%= short_name %> = xmalloc( sizeof(<%= struct_name %>) );
 <% attributes.each do |attribute| -%>
+<% if attribute.shape_var %>  <%= attribute.init_shape_var %>;
+<% end -%>
   <%= short_name %>-><%= attribute.name %> = <%= attribute.default %>;
 <% if attribute.ptr_cache %>  <%= attribute.init_ptr_cache %>;
 <% end -%>
