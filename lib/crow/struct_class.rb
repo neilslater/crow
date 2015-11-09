@@ -1,4 +1,5 @@
 require 'erb'
+require 'fileutils'
 
 # m = Crow::LibDef.new( 'the_module', { :structs => [ { :name => 'hello', :attributes => [{:name=>'hi',:ctype=>:NARRAY}] } ] } )
 # m.structs.first.write( '/tmp' )
@@ -23,7 +24,56 @@ module Crow
       end
     end
 
+    def copy_project source_dir, target_dir, source_names = { :short_name => 'kaggle_skeleton', :module_name => 'KaggleSkeleton' }
+      raise "No source project in #{source_dir}" unless File.directory?( source_dir ) && File.exists?( File.join( source_dir, 'Gemfile' ) )
+      FileUtils.mkdir_p target_dir
+      Dir.glob( File.join( source_dir, '**', '*' ) ) do |source_file|
+        copy_project_file source_file, source_dir, target_dir, source_names
+      end
+    end
+
     private
+
+    def copy_project_file source_file, source_dir, target_dir, source_names
+      rel_source_file = source_file.sub( File.join(source_dir,'/'), '' )
+      return if skip_project_file?( rel_source_file ) || File.directory?( source_file )
+
+      rel_target_file = rel_source_file
+
+      if change_names?( rel_target_file )
+        rel_target_file.gsub!( source_names[:short_name], self.short_name )
+      end
+
+      target_file = File.join( target_dir, rel_target_file )
+
+      unless File.directory?( File.dirname( target_file ) )
+        FileUtils.mkdir_p File.dirname( target_file )
+      end
+
+      FileUtils.cp( source_file, target_file )
+
+      if change_names?( rel_target_file )
+        change_names_in_file( target_file, source_names )
+      end
+    end
+
+    def change_names_in_file target_file, source_names
+      contents = File.read( target_file )
+      contents.gsub!( source_names[:short_name], self.short_name )
+      contents.gsub!( source_names[:module_name], self.module_name )
+      File.open( target_file, 'w' ) { |file| file.puts contents }
+    end
+
+    def skip_project_file? rel_source_file
+      return true if rel_source_file =~ /\Atmp/
+      false
+    end
+
+    def change_names? rel_source_file
+      rel_ext = File.extname( rel_source_file )
+      return true if rel_ext =~ /\A\.(?:c|h|txt|rb|gemspec|md)\z/ || rel_ext == ''
+      false
+    end
 
     def module_name_from_short_name sname
       parts = sname.split('_')

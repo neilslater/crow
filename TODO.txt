@@ -13,6 +13,8 @@ TODO:
 
   Validating init params (use temp vars to unpack and test)
 
-  Validating/casting NArray inputs
+  Validating/casting NArray inputs on Ruby class level
 
   Support for Marshal serialise via hash
+
+  Taking named hash params for Ruby init

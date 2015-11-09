@@ -446,7 +446,7 @@ module Crow
     self.default = 'Qnil'
 
     def cbase
-      "VALUE"
+      "volatile VALUE"
     end
 
     def needs_gc_mark?
