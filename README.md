@@ -9,7 +9,9 @@ lot of boiler-plate C for other projects, and the gem includes templates for tha
 
 Although packaged as a gem, there is no intent to release this onto rubygems.
 
-This very early version does not include documentation or tests. Use it at your own risk!
+This project does not include documentation or tests. Use it at your own risk!
+
+Feel free to fork this code and adapt it to your code generating needs.
 
 ## Development
 
