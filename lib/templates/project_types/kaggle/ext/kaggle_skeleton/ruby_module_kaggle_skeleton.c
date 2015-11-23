@@ -60,5 +60,8 @@ void init_module_kaggle_skeleton() {
   rb_define_singleton_method( KaggleSkeleton, "srand_array", rbmodule__srand_array, 1 );
   rb_define_singleton_method( KaggleSkeleton, "rand", rbmodule__rand_float, 0 );
 
+<% structs.each do |s| -%>
+  init_<%= s.short_name %>_class();
+<% end -%>
   init_srand_by_time();
 }

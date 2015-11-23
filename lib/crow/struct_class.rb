@@ -66,7 +66,13 @@ module Crow
       raise "No source project in #{source_dir}" unless File.directory?( source_dir ) && File.exists?( File.join( source_dir, 'Gemfile' ) )
       source_names = { :source_short_name => 'kaggle_skeleton', :source_module_name => 'KaggleSkeleton' }
       copy_project( source_dir, target_dir, source_names )
-      # TODO: Write files for class_structs
+
+      ext_dir = File.join( target_dir, 'ext', short_name )
+      structs.each do |struct_class|
+        # NB the _class refers to class inside target project, not in current process
+        struct_class.write ext_dir
+      end
+
       true
     end
 
@@ -225,7 +231,7 @@ module Crow
           TypeMap.create( param_name, init_param_opts )
         end
       else
-        @attributes = []
+        @init_params = []
       end
 
       @parent_lib = opts[:parent_lib] || LibDef.new( 'module' )

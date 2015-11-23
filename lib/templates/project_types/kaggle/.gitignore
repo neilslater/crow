@@ -18,3 +18,4 @@ test/version_tmp
 tmp
 data/*.csv
 data/*.dat
+**/.DS_Store
