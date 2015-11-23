@@ -12,12 +12,9 @@ module Crow
   # NB Some functions are incomplete and manual editing may be required in order to create a working
   # Ruby project.
   #
-  # @example Create a new project based on template file
-  #  libdef = Crow::LibDef.new('the_module', :structs => [ { :name => 'hello', :attributes => [{:name=>'hi',:ctype=>:NARRAY}] } ] )
-  #  libdef.copy_project( '/path/to/source_project', '/path/to/target_project',
-  #      :source_short_name => 'kaggle_skeleton', :source_module_name => 'KaggleSkeleton' )
-  #  # The :source_short_name will be changed to 'the_module' in all source file names and contents
-  #  # The :source_module_name will be changed to 'TheModule' in all source file contents
+  # @example Create a new Kaggle project based on template file
+  #  libdef = Crow::LibDef.new('the_module', :structs => [ { :name => 'hello', :attributes => [{:name=>'hi',:ctype=>:NARRAY_DOUBLE}] } ] )
+  #  libdef.create_project( '/path/to/target_project' )
   #
   class LibDef
     TEMPLATE_DIR = File.realdirpath( File.join( __dir__, '../../lib/templates/project_types' ) )
@@ -79,8 +76,11 @@ module Crow
     # @param [String] target_dir folder where files will be copied to. New files will be written, existing files are skipped.
     # @return [true]
     #
-    def copy_project project_type, target_dir
+    def create_project target_dir, project_type = 'kaggle'
+      raise "Unknown project type '#{project_type}" unless TEMPLATES.include?( project_type )
+      source_dir = File.join( TEMPLATE_DIR, project_type )
       raise "No source project in #{source_dir}" unless File.directory?( source_dir ) && File.exists?( File.join( source_dir, 'Gemfile' ) )
+
       source_names = { :source_short_name => 'kaggle_skeleton', :source_module_name => 'KaggleSkeleton' }
       FileUtils.mkdir_p target_dir
       Dir.glob( File.join( source_dir, '**', '*' ) ) do |source_file|
@@ -114,6 +114,10 @@ module Crow
       if change_names?( rel_target_file )
         change_names_in_file( target_file, source_names )
       end
+
+      if run_template?( rel_target_file )
+        # TODO: Apply template to file
+      end
     end
 
     def change_names_in_file target_file, source_names
@@ -131,6 +135,12 @@ module Crow
     def change_names? rel_source_file
       rel_ext = File.extname( rel_source_file )
       return true if rel_ext =~ /\A\.(?:c|h|txt|rb|gemspec|md)\z/ || rel_ext == ''
+      false
+    end
+
+    def run_template? rel_source_file
+      rel_ext = File.extname( rel_source_file )
+      return true if rel_ext =~ /\A\.(?:c|h|rb)\z/
       false
     end
 
