@@ -20,6 +20,9 @@ module Crow
   #  # The :source_module_name will be changed to 'TheModule' in all source file contents
   #
   class LibDef
+    TEMPLATE_DIR = File.realdirpath( File.join( __dir__, '../../lib/templates/project_types' ) )
+    TEMPLATES = [ 'kaggle' ]
+
     # The label used for file names relating to the whole project. E.g. the lib folder will contain /lib/<short_name>/<short_name>.rb
     # @return [String]
     attr_accessor :short_name
@@ -64,6 +67,21 @@ module Crow
     #
     def copy_project source_dir, target_dir, source_names = { :source_short_name => 'kaggle_skeleton', :source_module_name => 'KaggleSkeleton' }
       raise "No source project in #{source_dir}" unless File.directory?( source_dir ) && File.exists?( File.join( source_dir, 'Gemfile' ) )
+      FileUtils.mkdir_p target_dir
+      Dir.glob( File.join( source_dir, '**', '*' ) ) do |source_file|
+        copy_project_file source_file, source_dir, target_dir, source_names
+      end
+      true
+    end
+
+    # Writes project files from a standard Crow template.
+    # @param [String] project_type identifier for template. Supported value 'kaggle'.
+    # @param [String] target_dir folder where files will be copied to. New files will be written, existing files are skipped.
+    # @return [true]
+    #
+    def copy_project project_type, target_dir
+      raise "No source project in #{source_dir}" unless File.directory?( source_dir ) && File.exists?( File.join( source_dir, 'Gemfile' ) )
+      source_names = { :source_short_name => 'kaggle_skeleton', :source_module_name => 'KaggleSkeleton' }
       FileUtils.mkdir_p target_dir
       Dir.glob( File.join( source_dir, '**', '*' ) ) do |source_file|
         copy_project_file source_file, source_dir, target_dir, source_names
@@ -159,7 +177,7 @@ module Crow
     # @return [Array<Crow::TypeMap>]
     attr_accessor :init_params
 
-    TEMPLATE_DIR = File.realdirpath( File.join( __dir__, '../../lib/templates' ) )
+    TEMPLATE_DIR = File.realdirpath( File.join( __dir__, '../../lib/templates/struct_class' ) )
     TEMPLATES = [ 'struct_dataset.h', 'struct_dataset.c', 'ruby_class_dataset.h', 'ruby_class_dataset.c' ]
 
     # Creates a new struct description.
