@@ -177,7 +177,7 @@ module Crow
     # @return [Array<Crow::TypeMap>]
     attr_accessor :init_params
 
-    TEMPLATE_DIR = File.realdirpath( File.join( __dir__, '../../lib/templates/struct_class' ) )
+    TEMPLATE_DIR = File.realdirpath( File.join( __dir__, '../../lib/templates/class_structs' ) )
     TEMPLATES = [ 'struct_dataset.h', 'struct_dataset.c', 'ruby_class_dataset.h', 'ruby_class_dataset.c' ]
 
     # Creates a new struct description.
