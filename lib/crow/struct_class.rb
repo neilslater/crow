@@ -55,6 +55,23 @@ module Crow
       end
     end
 
+    # Writes project files from a standard Crow template.
+    # @param [String] project_type identifier for template. Supported value 'kaggle'.
+    # @param [String] target_dir folder where files will be copied to. New files will be written, existing files are skipped.
+    # @return [true]
+    #
+    def create_project target_dir, project_type = 'kaggle'
+      raise "Unknown project type '#{project_type}" unless TEMPLATES.include?( project_type )
+      source_dir = File.join( TEMPLATE_DIR, project_type )
+      raise "No source project in #{source_dir}" unless File.directory?( source_dir ) && File.exists?( File.join( source_dir, 'Gemfile' ) )
+      source_names = { :source_short_name => 'kaggle_skeleton', :source_module_name => 'KaggleSkeleton' }
+      copy_project( source_dir, target_dir, source_names )
+      # TODO: Write files for class_structs
+      true
+    end
+
+    private
+
     # Writes project files copied from a template directory.
     # @param [String] source_dir template folder that files are recursively copied from.
     # @param [String] target_dir folder where files will be copied to. New files will be written, existing files are skipped.
@@ -70,26 +87,6 @@ module Crow
       end
       true
     end
-
-    # Writes project files from a standard Crow template.
-    # @param [String] project_type identifier for template. Supported value 'kaggle'.
-    # @param [String] target_dir folder where files will be copied to. New files will be written, existing files are skipped.
-    # @return [true]
-    #
-    def create_project target_dir, project_type = 'kaggle'
-      raise "Unknown project type '#{project_type}" unless TEMPLATES.include?( project_type )
-      source_dir = File.join( TEMPLATE_DIR, project_type )
-      raise "No source project in #{source_dir}" unless File.directory?( source_dir ) && File.exists?( File.join( source_dir, 'Gemfile' ) )
-
-      source_names = { :source_short_name => 'kaggle_skeleton', :source_module_name => 'KaggleSkeleton' }
-      FileUtils.mkdir_p target_dir
-      Dir.glob( File.join( source_dir, '**', '*' ) ) do |source_file|
-        copy_project_file source_file, source_dir, target_dir, source_names
-      end
-      true
-    end
-
-    private
 
     def copy_project_file source_file, source_dir, target_dir, source_names
       rel_source_file = source_file.sub( File.join(source_dir,'/'), '' )
@@ -116,7 +113,7 @@ module Crow
       end
 
       if run_template?( rel_target_file )
-        # TODO: Apply template to file
+        render_and_overwrite_template( target_file )
       end
     end
 
@@ -129,6 +126,7 @@ module Crow
 
     def skip_project_file? rel_source_file
       return true if rel_source_file =~ /\Atmp/
+      return true if rel_source_file =~ /\.DS_Store\z/
       false
     end
 
@@ -147,6 +145,12 @@ module Crow
     def module_name_from_short_name sname
       parts = sname.split('_')
       parts.map { |part| part[0].upcase + part[1,30] }.join
+    end
+
+    def render_and_overwrite_template target_file
+      erb = ERB.new( File.read( target_file ), 0, '-' )
+      rendering = erb.result( binding )
+      File.open( target_file, 'w' ) { |file| file.puts rendering }
     end
   end
 

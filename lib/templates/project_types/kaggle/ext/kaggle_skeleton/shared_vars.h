@@ -14,5 +14,8 @@
 #endif
 
 extern VALUE KaggleSkeleton;
+<% structs.each do |s| -%>
+extern VALUE <%= s.full_class_name %>;
+<% end -%>
 
 #endif

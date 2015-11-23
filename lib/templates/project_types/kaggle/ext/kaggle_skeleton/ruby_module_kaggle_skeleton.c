@@ -46,9 +46,15 @@ static VALUE rbmodule__rand_float( VALUE self ) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 VALUE KaggleSkeleton = Qnil;
+<% structs.each do |s| -%>
+VALUE <%= s.full_class_name %> = Qnil;
+<% end -%>
 
 void init_module_kaggle_skeleton() {
   KaggleSkeleton = rb_define_module( "KaggleSkeleton" );
+<% structs.each do |s| -%>
+  <%= s.full_class_name %> = rb_define_class_under( KaggleSkeleton, "<%= s.rb_class_name %>", rb_cObject );
+<% end -%>
 
   rb_define_singleton_method( KaggleSkeleton, "srand", rbmodule__srand, 1 );
   rb_define_singleton_method( KaggleSkeleton, "srand_array", rbmodule__srand_array, 1 );
