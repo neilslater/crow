@@ -8,15 +8,15 @@
 //  struct_<%= short_name %>.c
 //
 
-inline VALUE <%= short_name %>_as_ruby_class( <%= struct_name %> *<%= short_name %> , VALUE klass ) {
+VALUE <%= short_name %>_as_ruby_class( <%= struct_name %> *<%= short_name %> , VALUE klass ) {
   return Data_Wrap_Struct( klass, <%= short_name %>__gc_mark, <%= short_name %>__destroy, <%= short_name %> );
 }
 
-VALUE <%= short_name %>_alloc(VALUE klass) {
+VALUE <%= short_name %>_alloc( VALUE klass ) {
   return <%= short_name %>_as_ruby_class( <%= short_name %>__create(), klass );
 }
 
-inline <%= struct_name %> *get_<%= short_name %>_struct( VALUE obj ) {
+<%= struct_name %> *get_<%= short_name %>_struct( VALUE obj ) {
   <%= struct_name %> *<%= short_name %>;
   Data_Get_Struct( obj, <%= struct_name %>, <%= short_name %> );
   return <%= short_name %>;
