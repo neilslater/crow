@@ -3,6 +3,20 @@ require 'spec_helper'
 describe Crow::StructClass do
   let(:libdef) { Crow::LibDef.new('foo') }
 
+  shared_examples 'a C source creator' do |expected_name|
+    describe '#write' do
+      it 'creates four suitably-named files' do
+        Dir.mktmpdir do |dir|
+          subject.write(dir)
+          expect( File.exists?( File.join(dir, "struct_#{expected_name}.h")) ).to be true
+          expect( File.exists?( File.join(dir, "struct_#{expected_name}.c")) ).to be true
+          expect( File.exists?( File.join(dir, "ruby_class_#{expected_name}.h")) ).to be true
+          expect( File.exists?( File.join(dir, "ruby_class_#{expected_name}.c")) ).to be true
+        end
+      end
+    end
+  end
+
   describe 'minimal struct' do
     subject { Crow::StructClass.new('bar', parent_lib: libdef) }
 
@@ -43,5 +57,7 @@ describe Crow::StructClass do
       expect(subject.simple_attributes).to be_empty
       expect(subject.simple_attributes_with_init).to be_empty
     end
+
+    it_behaves_like 'a C source creator', 'bar'
   end
 end
