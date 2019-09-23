@@ -1,4 +1,4 @@
 require "crow/version"
 require 'crow/struct_class'
-require 'crow/attribute'
+require 'crow/typemap'
 require 'crow/expression'

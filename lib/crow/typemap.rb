@@ -20,22 +20,27 @@ module Crow
     attr_reader :name, :ruby_name, :ctype, :pointer, :default, :parent_struct
     attr_reader :init_expr, :ruby_read, :ruby_write, :ptr_cache, :shape_var
 
-    def initialize name, opts = {}
+    def initialize name, ruby_name: name, default: self.class.default, pointer: false, ctype:, parent_struct:, init_expr: nil, ruby_read: true, ruby_write: false
       raise "Variable name '#{name}' cannot be used" if name !~ /\A[a-zA-Z0-9_]+\z/
       @name = name
-      @ruby_name = opts[:ruby_name] || name
-      @default = opts[:default] || self.class.default
-      @pointer = !! opts[:pointer]
-      @ctype = opts[:ctype]
-      @parent_struct = opts[:parent_struct]
-      @init_expr ||= opts[:init_expr]
-      @ruby_read = opts[:ruby_read].nil? ? true : opts[:ruby_read]
-      @ruby_write = opts[:ruby_write].nil? ? false : opts[:ruby_write]
+      @ruby_name = ruby_name
+      @default = default
+      @pointer = !! pointer
+      @ctype = ctype
+      unless parent_struct.is_a? Crow::StructClass
+        raise ArgumentError, "parent_struct must be a Crow::StructClass"
+      end
+      @parent_struct = parent_struct
+      @init_expr ||= init_expr
+      @ruby_read = !! ruby_read
+      @ruby_write = !! ruby_write
     end
 
     def self.create name, opts = {}
-      class_lookup = CTYPES[ opts[:ctype] ]
-      raise "Type '#{opts[:ctype]}' not supported. Allowed types #{CTYPES.keys.join(', ')}" unless class_lookup
+      unless class_lookup = CTYPES[ opts[:ctype] ]
+        raise ArgumentError, "Type '#{opts[:ctype]}' not supported. Allowed types #{CTYPES.keys.join(', ')}"
+      end
+
       attribute_class = if opts[:pointer]
           class_lookup.last
         else

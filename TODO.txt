@@ -1,20 +1,45 @@
 TODO:
 
-  Temp vars for setting shape
+Crow follow ups:
 
-  enum variable type
+  * Specs - How to do test at all?
 
-  Public attribute names != struct attribute names
+  * Templates for spec files of target system
 
-  Specs
-    - How to do test at all?
+  * bool vars - add <stdbool.h>
 
-  Templates for spec files
+  * Varied initialisation for init sequences of pointers (in clone)
 
-  Validating init params (use temp vars to unpack and test)
+  * Template pointers as read/write from Ruby (requires associated shape)
 
-  Validating/casting NArray inputs on Ruby class level
+  * Automated support for Marshal
 
-  Support for Marshal serialise via hash
+  * Allow writable NArrays?
 
-  Taking named hash params for Ruby init
+  * Allow NArrays as input and use them for initialisers
+
+  * Allow other structs as input and unwrap them
+
+  * Add ruby class initialisers to their .h files (so classes can init other classes)
+
+  * Support changes to structs/classes without breaking added code (also adding new structs...)
+
+  * Allow short struct pointer names
+
+  * Allow non-allocated pointers
+
+  * enum variable type
+
+  * Public attribute names != struct attribute names
+
+  * Validating init params (use temp vars to unpack and test)
+
+  * Validating/casting NArray inputs on Ruby class level
+
+  * Support for Marshal serialise via hash
+
+  * Taking named hash params for Ruby init
+
+  * More pre-built utilities:
+    * Sorting, shuffling, random numbers
+    *
