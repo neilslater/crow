@@ -7,14 +7,14 @@ module Crow
       :float => [ 'Float', 'P_Float' ],
       :double => [ 'Double', 'P_Double' ],
       :char => [ 'Char', 'P_Char' ],
+      :long => [ 'Long', 'P_Long' ],
+      :uint => [ 'UInt', 'P_UInt' ],
+      :ulong => [ 'ULong', 'P_ULong' ],
       :VALUE => [ 'Value', 'Value' ],
       :NARRAY_FLOAT => [ 'NArrayFloat', 'NArrayFloat' ],
       :NARRAY_DOUBLE => [ 'NArrayDouble', 'NArrayDouble' ],
       :NARRAY_INT_16 => [ 'NArraySInt', 'NArraySInt' ],
       :NARRAY_INT_32 => [ 'NArrayLInt', 'NArrayLInt' ],
-      :long => [ 'Long', 'P_Long' ],
-      :uint => [ 'UInt', 'P_UInt' ],
-      :ulong => [ 'ULong', 'P_ULong' ],
     ]
 
     attr_reader :name, :ruby_name, :ctype, :pointer, :default, :parent_struct
@@ -429,6 +429,14 @@ module Crow
 
     def rdoc_type
       'Byte'
+    end
+
+    def self.ruby_to_c ruby_name
+      "NUM2CHR( #{ruby_name} )"
+    end
+
+    def self.c_to_ruby c_name
+      "LONG2FIX( #{c_name} )"
     end
   end
 

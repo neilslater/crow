@@ -108,4 +108,308 @@ describe Crow::TypeMap do
 
     # No Ruby/C converters for arrays yet . . .
   end
+
+  describe Crow::TypeMap::Float do
+    subject { Crow::TypeMap.create('x', ctype: :float, parent_struct: container) }
+
+    it 'has correct template declare' do
+      expect(subject.declare).to eql 'float x;'
+    end
+
+    it 'has correct template as_param' do
+      expect(subject.as_param).to eql 'float x'
+    end
+
+    it 'has correct template cast' do
+      expect(subject.cast).to eql '(float)'
+    end
+
+    it 'is not a NArray' do
+      expect(subject.is_narray?).to be false
+    end
+
+    it 'has correct to Ruby converter for template' do
+      expect(subject.struct_item_to_ruby).to eql 'FLT2NUM( foo->x )'
+    end
+
+    it 'has correct from Ruby converter for template' do
+      expect(subject.param_item_to_c).to eql 'NUM2FLT( rv_x )'
+    end
+  end
+
+  describe Crow::TypeMap::P_Float do
+    subject { Crow::TypeMap.create('x', ctype: :float, pointer: true, parent_struct: container) }
+
+    it 'has correct template declare' do
+      expect(subject.declare).to eql 'float *x;'
+    end
+
+    it 'has correct template as_param' do
+      expect(subject.as_param).to eql 'float *x'
+    end
+
+    it 'has correct template cast' do
+      expect(subject.cast).to eql '(float*)'
+    end
+
+    it 'is not a NArray' do
+      expect(subject.is_narray?).to be false
+    end
+
+    # No Ruby/C converters for arrays yet . . .
+  end
+
+  describe Crow::TypeMap::Double do
+    subject { Crow::TypeMap.create('x', ctype: :double, parent_struct: container) }
+
+    it 'has correct template declare' do
+      expect(subject.declare).to eql 'double x;'
+    end
+
+    it 'has correct template as_param' do
+      expect(subject.as_param).to eql 'double x'
+    end
+
+    it 'has correct template cast' do
+      expect(subject.cast).to eql '(double)'
+    end
+
+    it 'is not a NArray' do
+      expect(subject.is_narray?).to be false
+    end
+
+    it 'has correct to Ruby converter for template' do
+      expect(subject.struct_item_to_ruby).to eql 'DBL2NUM( foo->x )'
+    end
+
+    it 'has correct from Ruby converter for template' do
+      expect(subject.param_item_to_c).to eql 'NUM2DBL( rv_x )'
+    end
+  end
+
+  describe Crow::TypeMap::P_Double do
+    subject { Crow::TypeMap.create('x', ctype: :double, pointer: true, parent_struct: container) }
+
+    it 'has correct template declare' do
+      expect(subject.declare).to eql 'double *x;'
+    end
+
+    it 'has correct template as_param' do
+      expect(subject.as_param).to eql 'double *x'
+    end
+
+    it 'has correct template cast' do
+      expect(subject.cast).to eql '(double*)'
+    end
+
+    it 'is not a NArray' do
+      expect(subject.is_narray?).to be false
+    end
+
+    # No Ruby/C converters for arrays yet . . .
+  end
+
+  describe Crow::TypeMap::Char do
+    subject { Crow::TypeMap.create('x', ctype: :char, parent_struct: container) }
+
+    it 'has correct template declare' do
+      expect(subject.declare).to eql 'char x;'
+    end
+
+    it 'has correct template as_param' do
+      expect(subject.as_param).to eql 'char x'
+    end
+
+    it 'has correct template cast' do
+      expect(subject.cast).to eql '(char)'
+    end
+
+    it 'is not a NArray' do
+      expect(subject.is_narray?).to be false
+    end
+
+    it 'has correct to Ruby converter for template' do
+      expect(subject.struct_item_to_ruby).to eql 'LONG2FIX( foo->x )'
+    end
+
+    it 'has correct from Ruby converter for template' do
+      expect(subject.param_item_to_c).to eql 'NUM2CHR( rv_x )'
+    end
+  end
+
+  describe Crow::TypeMap::P_Char do
+    subject { Crow::TypeMap.create('x', ctype: :char, pointer: true, parent_struct: container) }
+
+    it 'has correct template declare' do
+      expect(subject.declare).to eql 'char *x;'
+    end
+
+    it 'has correct template as_param' do
+      expect(subject.as_param).to eql 'char *x'
+    end
+
+    it 'has correct template cast' do
+      expect(subject.cast).to eql '(char*)'
+    end
+
+    it 'is not a NArray' do
+      expect(subject.is_narray?).to be false
+    end
+
+    # No Ruby/C converters for arrays yet . . .
+  end
+
+
+  describe Crow::TypeMap::Long do
+    subject { Crow::TypeMap.create('x', ctype: :long, parent_struct: container) }
+
+    it 'has correct template declare' do
+      expect(subject.declare).to eql 'long x;'
+    end
+
+    it 'has correct template as_param' do
+      expect(subject.as_param).to eql 'long x'
+    end
+
+    it 'has correct template cast' do
+      expect(subject.cast).to eql '(long)'
+    end
+
+    it 'is not a NArray' do
+      expect(subject.is_narray?).to be false
+    end
+
+    it 'has correct to Ruby converter for template' do
+      expect(subject.struct_item_to_ruby).to eql 'LONG2NUM( foo->x )'
+    end
+
+    it 'has correct from Ruby converter for template' do
+      expect(subject.param_item_to_c).to eql 'NUM2LONG( rv_x )'
+    end
+  end
+
+  describe Crow::TypeMap::P_Long do
+    subject { Crow::TypeMap.create('x', ctype: :long, pointer: true, parent_struct: container) }
+
+    it 'has correct template declare' do
+      expect(subject.declare).to eql 'long *x;'
+    end
+
+    it 'has correct template as_param' do
+      expect(subject.as_param).to eql 'long *x'
+    end
+
+    it 'has correct template cast' do
+      expect(subject.cast).to eql '(long*)'
+    end
+
+    it 'is not a NArray' do
+      expect(subject.is_narray?).to be false
+    end
+
+    # No Ruby/C converters for arrays yet . . .
+  end
+
+
+  describe Crow::TypeMap::UInt do
+    subject { Crow::TypeMap.create('x', ctype: :uint, parent_struct: container) }
+
+    it 'has correct template declare' do
+      expect(subject.declare).to eql 'unsigned int x;'
+    end
+
+    it 'has correct template as_param' do
+      expect(subject.as_param).to eql 'unsigned int x'
+    end
+
+    it 'has correct template cast' do
+      expect(subject.cast).to eql '(unsigned int)'
+    end
+
+    it 'is not a NArray' do
+      expect(subject.is_narray?).to be false
+    end
+
+    it 'has correct to Ruby converter for template' do
+      expect(subject.struct_item_to_ruby).to eql 'UINT2NUM( foo->x )'
+    end
+
+    it 'has correct from Ruby converter for template' do
+      expect(subject.param_item_to_c).to eql 'NUM2UINT( rv_x )'
+    end
+  end
+
+  describe Crow::TypeMap::P_UInt do
+    subject { Crow::TypeMap.create('x', ctype: :uint, pointer: true, parent_struct: container) }
+
+    it 'has correct template declare' do
+      expect(subject.declare).to eql 'unsigned int *x;'
+    end
+
+    it 'has correct template as_param' do
+      expect(subject.as_param).to eql 'unsigned int *x'
+    end
+
+    it 'has correct template cast' do
+      expect(subject.cast).to eql '(unsigned int*)'
+    end
+
+    it 'is not a NArray' do
+      expect(subject.is_narray?).to be false
+    end
+
+    # No Ruby/C converters for arrays yet . . .
+  end
+
+
+
+  describe Crow::TypeMap::ULong do
+    subject { Crow::TypeMap.create('x', ctype: :ulong, parent_struct: container) }
+
+    it 'has correct template declare' do
+      expect(subject.declare).to eql 'unsigned long x;'
+    end
+
+    it 'has correct template as_param' do
+      expect(subject.as_param).to eql 'unsigned long x'
+    end
+
+    it 'has correct template cast' do
+      expect(subject.cast).to eql '(unsigned long)'
+    end
+
+    it 'is not a NArray' do
+      expect(subject.is_narray?).to be false
+    end
+
+    it 'has correct to Ruby converter for template' do
+      expect(subject.struct_item_to_ruby).to eql 'ULONG2NUM( foo->x )'
+    end
+
+    it 'has correct from Ruby converter for template' do
+      expect(subject.param_item_to_c).to eql 'NUM2ULONG( rv_x )'
+    end
+  end
+
+  describe Crow::TypeMap::P_ULong do
+    subject { Crow::TypeMap.create('x', ctype: :ulong, pointer: true, parent_struct: container) }
+
+    it 'has correct template declare' do
+      expect(subject.declare).to eql 'unsigned long *x;'
+    end
+
+    it 'has correct template as_param' do
+      expect(subject.as_param).to eql 'unsigned long *x'
+    end
+
+    it 'has correct template cast' do
+      expect(subject.cast).to eql '(unsigned long*)'
+    end
+
+    it 'is not a NArray' do
+      expect(subject.is_narray?).to be false
+    end
+
+    # No Ruby/C converters for arrays yet . . .
+  end
 end
