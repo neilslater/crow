@@ -47,7 +47,7 @@ class Crow::StructClass
   # @option opts [String] :struct_name if provided then over-rides name automatically derived from short_name
   # @option opts [String] :rb_class_name if provided then over-rides name automatically derived from short_name
   # @option opts [Array<Hash>] :attributes, if provided these are used to create new Crow::TypeMap objects that describe attributes
-  # @option opts [Array<Hash>] :init_params, if provided these are used to create new Crow::TypeMap objects that describe params to initialise of the new class
+  # @option opts [Array<Hash>] :init_params, if provided these are used to create new Crow::TypeMap objects that describe params to initialise instances of the new class
   # @option opts [Crow::LibDef] :parent_lib, if provided then sets parent_lib
   # @return [Crow::StructClass]
   #
