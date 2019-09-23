@@ -412,4 +412,206 @@ describe Crow::TypeMap do
 
     # No Ruby/C converters for arrays yet . . .
   end
+
+
+  describe Crow::TypeMap::Value do
+    subject { Crow::TypeMap.create('x', ctype: :VALUE, parent_struct: container) }
+
+    it 'has correct template declare' do
+      expect(subject.declare).to eql 'volatile VALUE x;'
+    end
+
+    it 'has correct template as_param' do
+      # TODO: Is this correct?
+      expect(subject.as_param).to eql 'volatile VALUE x'
+    end
+
+    it 'has correct template cast' do
+      expect(subject.cast).to eql 'ERROR'
+    end
+
+    it 'is not a NArray' do
+      expect(subject.is_narray?).to be false
+    end
+
+    it 'has correct to Ruby converter for template' do
+      expect(subject.struct_item_to_ruby).to eql 'foo->x'
+    end
+
+    it 'has correct from Ruby converter for template' do
+      # TODO: There should be a validation that we have a T_OBJECT here?
+      expect(subject.param_item_to_c).to eql 'rv_x'
+    end
+  end
+
+
+  describe Crow::TypeMap::NArrayFloat do
+    subject { Crow::TypeMap.create('x', ctype: :NARRAY_FLOAT, parent_struct: container) }
+
+    it 'has correct template declare' do
+      expect(subject.declare).to eql 'volatile VALUE x;'
+    end
+
+    it 'has correct template as_param' do
+      # TODO: Is this correct?
+      expect(subject.as_param).to eql 'volatile VALUE x'
+    end
+
+    it 'has correct template cast' do
+      expect(subject.cast).to eql 'ERROR'
+    end
+
+    it 'is a NArray' do
+      expect(subject.is_narray?).to be true
+    end
+
+    it 'has correct to Ruby converter for template' do
+      expect(subject.struct_item_to_ruby).to eql 'foo->x'
+    end
+
+    it 'has correct from Ruby converter for template' do
+      # TODO: There should be a validation that we have a NArray here, and casting from existing type
+      expect(subject.param_item_to_c).to eql 'rv_x'
+    end
+
+    it 'overrides item_ctype' do
+      expect(subject.item_ctype).to eql 'float'
+    end
+
+    it 'overrides narray_enum_type' do
+      expect(subject.narray_enum_type).to eql 'NA_SFLOAT'
+    end
+
+    it 'overrides rdoc_type' do
+      expect(subject.rdoc_type).to eql 'NArray<sfloat>'
+    end
+  end
+
+
+  describe Crow::TypeMap::NArrayDouble do
+    subject { Crow::TypeMap.create('x', ctype: :NARRAY_DOUBLE, parent_struct: container) }
+
+    it 'has correct template declare' do
+      expect(subject.declare).to eql 'volatile VALUE x;'
+    end
+
+    it 'has correct template as_param' do
+      # TODO: Is this correct?
+      expect(subject.as_param).to eql 'volatile VALUE x'
+    end
+
+    it 'has correct template cast' do
+      expect(subject.cast).to eql 'ERROR'
+    end
+
+    it 'is a NArray' do
+      expect(subject.is_narray?).to be true
+    end
+
+    it 'has correct to Ruby converter for template' do
+      expect(subject.struct_item_to_ruby).to eql 'foo->x'
+    end
+
+    it 'has correct from Ruby converter for template' do
+      # TODO: There should be a validation that we have a NArray here, and casting from existing type
+      expect(subject.param_item_to_c).to eql 'rv_x'
+    end
+
+    it 'overrides item_ctype' do
+      expect(subject.item_ctype).to eql 'double'
+    end
+
+    it 'overrides narray_enum_type' do
+      expect(subject.narray_enum_type).to eql 'NA_DFLOAT'
+    end
+
+    it 'overrides rdoc_type' do
+      expect(subject.rdoc_type).to eql 'NArray<float>'
+    end
+  end
+
+
+  describe Crow::TypeMap::NArraySInt do
+    subject { Crow::TypeMap.create('x', ctype: :NARRAY_INT_16, parent_struct: container) }
+
+    it 'has correct template declare' do
+      expect(subject.declare).to eql 'volatile VALUE x;'
+    end
+
+    it 'has correct template as_param' do
+      # TODO: Is this correct?
+      expect(subject.as_param).to eql 'volatile VALUE x'
+    end
+
+    it 'has correct template cast' do
+      expect(subject.cast).to eql 'ERROR'
+    end
+
+    it 'is a NArray' do
+      expect(subject.is_narray?).to be true
+    end
+
+    it 'has correct to Ruby converter for template' do
+      expect(subject.struct_item_to_ruby).to eql 'foo->x'
+    end
+
+    it 'has correct from Ruby converter for template' do
+      # TODO: There should be a validation that we have a NArray here, and casting from existing type
+      expect(subject.param_item_to_c).to eql 'rv_x'
+    end
+
+    it 'overrides item_ctype' do
+      expect(subject.item_ctype).to eql 'int16_t'
+    end
+
+    it 'overrides narray_enum_type' do
+      expect(subject.narray_enum_type).to eql 'NA_SINT'
+    end
+
+    it 'overrides rdoc_type' do
+      expect(subject.rdoc_type).to eql 'NArray<sint>'
+    end
+  end
+
+  describe Crow::TypeMap::NArrayLInt do
+    subject { Crow::TypeMap.create('x', ctype: :NARRAY_INT_32, parent_struct: container) }
+
+    it 'has correct template declare' do
+      expect(subject.declare).to eql 'volatile VALUE x;'
+    end
+
+    it 'has correct template as_param' do
+      # TODO: Is this correct?
+      expect(subject.as_param).to eql 'volatile VALUE x'
+    end
+
+    it 'has correct template cast' do
+      expect(subject.cast).to eql 'ERROR'
+    end
+
+    it 'is a NArray' do
+      expect(subject.is_narray?).to be true
+    end
+
+    it 'has correct to Ruby converter for template' do
+      expect(subject.struct_item_to_ruby).to eql 'foo->x'
+    end
+
+    it 'has correct from Ruby converter for template' do
+      # TODO: There should be a validation that we have a NArray here, and casting from existing type
+      expect(subject.param_item_to_c).to eql 'rv_x'
+    end
+
+    it 'overrides item_ctype' do
+      expect(subject.item_ctype).to eql 'int32_t'
+    end
+
+    it 'overrides narray_enum_type' do
+      expect(subject.narray_enum_type).to eql 'NA_LINT'
+    end
+
+    it 'overrides rdoc_type' do
+      expect(subject.rdoc_type).to eql 'NArray<int>'
+    end
+  end
 end
