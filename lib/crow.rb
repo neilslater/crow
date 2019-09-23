@@ -1,4 +1,7 @@
-require "crow/version"
-require 'crow/struct_class'
-require 'crow/typemap'
-require 'crow/expression'
+module Crow
+  require_relative "crow/version"
+  require_relative 'crow/libdef'
+  require_relative 'crow/struct_class'
+  require_relative 'crow/typemap'
+  require_relative 'crow/expression'
+end

@@ -20,7 +20,7 @@ module Crow
     attr_reader :name, :ruby_name, :ctype, :pointer, :default, :parent_struct
     attr_reader :init_expr, :ruby_read, :ruby_write, :ptr_cache, :shape_var
 
-    def initialize name, ruby_name: name, default: self.class.default, pointer: false, ctype:, parent_struct:, init_expr: nil, ruby_read: true, ruby_write: false
+    def initialize n, name: n, ruby_name: name, default: self.class.default, pointer: false, ctype:, parent_struct:, init_expr: nil, ruby_read: true, ruby_write: false
       raise "Variable name '#{name}' cannot be used" if name !~ /\A[a-zA-Z0-9_]+\z/
       @name = name
       @ruby_name = ruby_name

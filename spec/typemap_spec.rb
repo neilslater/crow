@@ -56,6 +56,19 @@ describe Crow::TypeMap do
       expect(typemap.as_rv_param).to eql 'VALUE rv_x'
       expect(typemap.struct_item).to eql 'foo->x'
     end
+
+    context 'initialisation' do
+      it 'can accept arbitrary initialisation' do
+        typemap = Crow::TypeMap.create('x', ctype: :int, parent_struct: container, init_expr: 'frobnicate()')
+        expect(typemap.init_expr_c).to eql 'frobnicate()'
+      end
+
+      it 'can refer other parameters from the same struct using %' do
+        container.add_attribute( 'y', ctype: :int )
+        typemap = Crow::TypeMap.create('x', ctype: :int, parent_struct: container, init_expr: '%y')
+        expect(typemap.init_expr_c).to eql 'foo->y'
+      end
+    end
   end
 
   describe Crow::TypeMap::Int do
