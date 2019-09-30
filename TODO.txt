@@ -3,6 +3,10 @@ TODO:
 Crow follow ups:
 
   * Specs - How to do test at all?
+    * expression_spec.rb - basic
+    * typemap_spec.rb - done
+    * struct_class_spec.rb - done
+    * libdef_spec.rb
 
   * Templates for spec files of target system
 

@@ -84,7 +84,7 @@ class Crow::LibDef
   # @option source_names [String] :source_module_name, namespace used in template project content, will be globally replaced
   # @return [true]
   #
-  def copy_project source_dir, target_dir, source_names = { :source_short_name => 'kaggle_skeleton', :source_module_name => 'KaggleSkeleton' }
+  def copy_project source_dir, target_dir, source_names = { source_short_name: 'kaggle_skeleton', source_module_name: 'KaggleSkeleton' }
     raise "No source project in #{source_dir}" unless File.directory?( source_dir ) && File.exists?( File.join( source_dir, 'Gemfile' ) )
     FileUtils.mkdir_p target_dir
     Dir.glob( File.join( source_dir, '**', '*' ) ) do |source_file|
