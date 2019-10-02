@@ -47,4 +47,6 @@ task :solve do
   solver.submission.write_csv( submission_file )
 end
 
-task :default => [:compile, :import_csv, :test, :solve]
+task :default => [:compile, :test]
+
+task :pipeline => [:compile, :import_csv, :test, :solve]

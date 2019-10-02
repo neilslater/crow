@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'open3'
 
 describe Crow::LibDef do
   let(:simple_libdef) do
@@ -15,19 +16,38 @@ describe Crow::LibDef do
     )
   end
 
-  def build_kaggle_project lib_name, dir
-    result01 = `cd #{dir} && BUNDLE_GEMFILE=#{dir}/Gemfile bundle install`
-    expect(result01).to include "Bundle complete!"
+  def run_command command
+    output, exit_code = Open3.popen3(command) do |stdin, stdout, stderr, wait_thr|
+      [stdout.read, wait_thr.value.to_i]
+    end
 
-    result02 = `cd #{dir} && BUNDLE_GEMFILE=#{dir}/Gemfile bundle exec rake compile 2>&1`
+    [output, exit_code]
+  end
+
+  def build_and_run_rake lib_name, dir, task=''
+    command = "cd #{dir} && BUNDLE_GEMFILE=#{dir}/Gemfile bundle install"
+    output, exit_code = run_command "cd #{dir} && BUNDLE_GEMFILE=#{dir}/Gemfile bundle install"
+
+    expect(exit_code).to be 0
+    expect(output).to include "Bundle complete!"
+
+    output, exit_code = run_command "cd #{dir} && BUNDLE_GEMFILE=#{dir}/Gemfile bundle exec rake #{task} 2>&1"
+    expect(exit_code).to be 0
+    output
+  end
+
+  def compile_project lib_name, dir
+    result =  build_and_run_rake lib_name, dir, 'compile'
     # TODO: Check for compiler warnings and fail if any
-    expect(result02).to include "compiling"
-    expect(result02).to include "linking shared-object #{lib_name}/#{lib_name}"
+    expect(result).to include "compiling"
+    expect(result).to include "linking shared-object #{lib_name}/#{lib_name}"
   end
 
   def run_ruby_in_project lib_name, dir, ruby_script
     ruby_script = %Q{require "#{lib_name}/#{lib_name}"; #{ruby_script}}
-    `cd #{dir} && BUNDLE_GEMFILE=#{dir}/Gemfile bundle exec ruby -Ilib -e '#{ruby_script}'`
+    output, exit_code = run_command "cd #{dir} && BUNDLE_GEMFILE=#{dir}/Gemfile bundle exec ruby -Ilib -e '#{ruby_script}'"
+    expect(exit_code).to be 0
+    output
   end
 
   shared_examples 'a source code generator' do |lib_name, struct_names|
@@ -89,9 +109,17 @@ describe Crow::LibDef do
       it "can build a project and compile the C files" do
         Dir.mktmpdir do |dir|
           subject.create_project(dir)
-          build_kaggle_project(lib_name, dir)
+          compile_project(lib_name, dir)
           result = run_ruby_in_project( lib_name, dir, %Q{puts "Loaded OK"} )
           expect(result.chomp).to eql "Loaded OK"
+        end
+      end
+
+      it "can run default rake task and pass tests" do
+        Dir.mktmpdir do |dir|
+          subject.create_project(dir)
+          result = build_and_run_rake(lib_name, dir)
+          expect(result.chomp).to match(/\d+ examples, 0 failures/)
         end
       end
     end
@@ -105,7 +133,7 @@ describe Crow::LibDef do
     it "creates a module in C extension, named after the library" do
       Dir.mktmpdir do |dir|
         subject.create_project(dir)
-        build_kaggle_project('foo', dir)
+        compile_project('foo', dir)
 
         result = run_ruby_in_project( 'foo', dir, %Q{p [Foo, Foo.class]} )
         expect(result.chomp).to eql "[Foo, Module]"
@@ -115,7 +143,7 @@ describe Crow::LibDef do
     it "creates a class in C extension, with correct name and properties" do
       Dir.mktmpdir do |dir|
         subject.create_project(dir)
-        build_kaggle_project('foo', dir)
+        compile_project('foo', dir)
 
         result = run_ruby_in_project( 'foo', dir, %Q{p [Foo::Bar, Foo::Bar.class]} )
         expect(result.chomp).to eql "[Foo::Bar, Class]"
