@@ -9,6 +9,7 @@ Crow follow ups:
     * libdef_spec.rb - started
 
   * Templates for spec files of target system
+    * Start with assertions that classes exist
 
   * bool vars - add <stdbool.h>
 
@@ -43,6 +44,8 @@ Crow follow ups:
   * Support for Marshal serialise via hash
 
   * Taking named hash params for Ruby init
+
+  * Build from a YAML definition
 
   * More pre-built utilities:
     * Sorting, shuffling, random numbers

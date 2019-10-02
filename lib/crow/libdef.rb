@@ -67,9 +67,15 @@ class Crow::LibDef
     copy_project( source_dir, target_dir, source_names )
 
     ext_dir = File.join( target_dir, 'ext', short_name )
+    spec_dir = File.join( target_dir, 'spec' )
+    unless File.directory?( spec_dir )
+      FileUtils.mkdir_p spec_dir
+    end
+
     structs.each do |struct_class|
       # NB the _class refers to class inside target project, not in current process
       struct_class.write ext_dir
+      struct_class.write_specs spec_dir
     end
 
     true

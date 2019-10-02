@@ -26,12 +26,13 @@ describe Crow::LibDef do
 
   def build_and_run_rake lib_name, dir, task=''
     command = "cd #{dir} && BUNDLE_GEMFILE=#{dir}/Gemfile bundle install"
-    output, exit_code = run_command "cd #{dir} && BUNDLE_GEMFILE=#{dir}/Gemfile bundle install"
+    output, exit_code = run_command(command)
 
     expect(exit_code).to be 0
     expect(output).to include "Bundle complete!"
 
-    output, exit_code = run_command "cd #{dir} && BUNDLE_GEMFILE=#{dir}/Gemfile bundle exec rake #{task} 2>&1"
+    command = "cd #{dir} && BUNDLE_GEMFILE=#{dir}/Gemfile bundle exec rake #{task} 2>&1"
+    output, exit_code = run_command(command)
     expect(exit_code).to be 0
     output
   end
@@ -43,11 +44,17 @@ describe Crow::LibDef do
     expect(result).to include "linking shared-object #{lib_name}/#{lib_name}"
   end
 
-  def run_ruby_in_project lib_name, dir, ruby_script
+  def run_script_in_project lib_name, dir, script
     ruby_script = %Q{require "#{lib_name}/#{lib_name}"; #{ruby_script}}
-    output, exit_code = run_command "cd #{dir} && BUNDLE_GEMFILE=#{dir}/Gemfile bundle exec ruby -Ilib -e '#{ruby_script}'"
+    command = "cd #{dir} && BUNDLE_GEMFILE=#{dir}/Gemfile bundle exec #{script}"
+    output, exit_code = run_command(command)
     expect(exit_code).to be 0
     output
+  end
+
+  def run_ruby_in_project lib_name, dir, ruby_script
+    ruby_script = %Q{require "#{lib_name}/#{lib_name}"; #{ruby_script}}
+    run_script_in_project(lib_name, dir, "ruby -Ilib -e '#{ruby_script}'")
   end
 
   shared_examples 'a source code generator' do |lib_name, struct_names|
@@ -74,6 +81,18 @@ describe Crow::LibDef do
             expect( File.exists?( File.join(c_path, "struct_#{expected_name}.c")) ).to be true
             expect( File.exists?( File.join(c_path, "ruby_class_#{expected_name}.h")) ).to be true
             expect( File.exists?( File.join(c_path, "ruby_class_#{expected_name}.c")) ).to be true
+          end
+        end
+      end
+
+      it 'creates a spec file for each struct' do
+        Dir.mktmpdir do |dir|
+          subject.create_project(dir)
+
+          spec_path = File.join( dir, 'spec' )
+
+          struct_names.each do |expected_name|
+            expect( File.exists?( File.join(spec_path, "#{expected_name}_spec.rb")) ).to be true
           end
         end
       end
@@ -153,6 +172,23 @@ describe Crow::LibDef do
 
         result = run_ruby_in_project( 'foo', dir, %Q{f = Foo::Bar.new; f.hi = -17; p f.hi} )
         expect(result.chomp).to eql "-17"
+      end
+    end
+
+    it "creates a spec file for testing Foo::Bar" do
+      Dir.mktmpdir do |dir|
+        subject.create_project(dir)
+        compile_project('foo', dir)
+
+        result = run_script_in_project( 'foo', dir, "rspec -f d -c spec/bar_spec.rb" )
+        expect(result).to include("\nFoo::Bar\n")
+        expect(result).to match(/\d+ examples?, 0 failures/)
+
+        # Individual spec examples we expect
+        expected_specs = ['is a valid Class']
+        expected_specs.each do |spec_text|
+          expect(result).to include(spec_text)
+        end
       end
     end
   end

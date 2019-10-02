@@ -41,6 +41,9 @@ class Crow::StructClass
   TEMPLATE_DIR = File.realdirpath( File.join( __dir__, '../../lib/templates/class_structs' ) )
   TEMPLATES = [ 'struct_dataset.h', 'struct_dataset.c', 'ruby_class_dataset.h', 'ruby_class_dataset.c' ]
 
+  SPEC_TEMPLATE_DIR = File.realdirpath( File.join( __dir__, '../../lib/templates/spec' ) )
+  SPEC_TEMPLATES = [ 'dataset_spec.rb' ]
+
   # Creates a new struct description.
   # @param [String] short_name identifying name for struct and class
   # @param [Hash] opts
@@ -88,6 +91,19 @@ class Crow::StructClass
     TEMPLATES.each do |template|
       File.open( File.join( path, template.sub( /dataset/, short_name ) ), 'w' ) do |file|
         file.puts render( File.join( TEMPLATE_DIR, template ) )
+      end
+    end
+    true
+  end
+
+  # Writes a Ruby source file containing basic spec examples that exercise standard functions of
+  # the structure as defined.
+  # @param [String] path directory to write spec files to.
+  # @return [true]
+  def write_specs path
+    SPEC_TEMPLATES.each do |template|
+      File.open( File.join( path, template.sub( /dataset/, short_name ) ), 'w' ) do |file|
+        file.puts render( File.join( SPEC_TEMPLATE_DIR, template ) )
       end
     end
     true
