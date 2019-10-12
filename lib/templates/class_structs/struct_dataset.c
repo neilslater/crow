@@ -34,7 +34,7 @@ void <%= short_name %>__init( <%= struct_name %> *<%= short_name %><% unless ini
 <% end -%>
 
 <% simple_attributes_with_init.each do |attribute| -%>
-  <%= short_name %>-><%= attribute.name %> = <%= attribute.init_expr_c %>;
+  <%= short_name %>-><%= attribute.name %> = <%= attribute.init_expr_c(init_context: true) %>;
 
 <% end -%>
 <% alloc_attributes.each do |attribute| -%>

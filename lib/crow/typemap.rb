@@ -193,9 +193,9 @@ module Crow
 
       if size_expr.start_with?( '.' )
         if init_context
-          use_size_expr.sub( '.', '$' )
+          use_size_expr = size_expr.sub( '.', '$' )
         else
-          use_size_expr.sub( '.', '%' )
+          use_size_expr = size_expr.sub( '.', '%' )
         end
       end
 
