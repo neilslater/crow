@@ -53,7 +53,7 @@ void <%= short_name %>__init( <%= struct_name %> *<%= short_name %><% unless ini
   <%= attribute.shape_tmp_var %> = ALLOC_N( int, <%= attribute.rank_expr %> );
 <% end -%>
 <% attribute.shape_exprs.each_with_index do |expr,n| -%>
-  <%= short_name %>-><%= attribute.shape_var %>[<%= n %>] = <%= Expression.new( expr, attribute.parent_struct.attributes, attribute.parent_struct.init_params ).as_c_code( short_name ) %>;
+  <%= short_name %>-><%= attribute.shape_var %>[<%= n %>] = <%= Crow::Expression.new( expr, attribute.parent_struct.attributes, attribute.parent_struct.init_params ).as_c_code( short_name ) %>;
 <% end -%>
 <% end -%>
   <%= short_name %>-><%= attribute.name %> = na_make_object( <%= attribute.narray_enum_type %>, <%= attribute.rank_expr %>, <%= attribute.shape_expr_c %>, cNArray );
