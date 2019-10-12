@@ -27,6 +27,9 @@ void <%= short_name %>__init( <%= struct_name %> *<%= short_name %><% unless ini
   struct NARRAY *narr;
 <% narray_attributes.each do |attribute| -%>
   <%= attribute.item_ctype %> *<%= attribute.name %>_ptr;
+<% if attribute.shape_tmp_var -%>
+  int *<%= attribute.shape_tmp_var %> = ALLOC_N( int, <%= attribute.rank_expr %> );
+<% end -%>
 <% end -%>
 <% end -%>
 
@@ -35,15 +38,20 @@ void <%= short_name %>__init( <%= struct_name %> *<%= short_name %><% unless ini
 
 <% end -%>
 <% alloc_attributes.each do |attribute| -%>
-  <%= short_name %>-><%= attribute.name %> = ALLOC_N( <%= attribute.cbase %>, <%= attribute.size_expr_c %> );
-  for( i = 0; i < <%= attribute.size_expr_c %>; i++ ) {
+  <%= short_name %>-><%= attribute.name %> = ALLOC_N( <%= attribute.cbase %>, <%= attribute.size_expr_c(init_context: true) %> );
+  for( i = 0; i < <%= attribute.size_expr_c(init_context: true) %>; i++ ) {
     <%= short_name %>-><%= attribute.name %>[i] = <%= attribute.init_expr_c %>;
   }
 
 <% end -%>
 <% narray_attributes.each do |attribute| -%>
+<% if attribute.shape_var || attribute.shape_tmp_var -%>
 <% if attribute.shape_var -%>
   <%= short_name %>-><%= attribute.shape_var %> = ALLOC_N( int, <%= attribute.rank_expr %> );
+<% end -%>
+<% if attribute.shape_tmp_var -%>
+  <%= attribute.shape_tmp_var %> = ALLOC_N( int, <%= attribute.rank_expr %> );
+<% end -%>
 <% attribute.shape_exprs.each_with_index do |expr,n| -%>
   <%= short_name %>-><%= attribute.shape_var %>[<%= n %>] = <%= Expression.new( expr, attribute.parent_struct.attributes, attribute.parent_struct.init_params ).as_c_code( short_name ) %>;
 <% end -%>
@@ -57,6 +65,12 @@ void <%= short_name %>__init( <%= struct_name %> *<%= short_name %><% unless ini
 <% if attribute.ptr_cache %>  <%= attribute.set_ptr_cache %>;
 <% end -%>
 
+<% end -%>
+
+<% narray_attributes.each do |attribute| -%>
+<% if attribute.shape_tmp_var -%>
+  xfree(<%= attribute.shape_tmp_var %>);
+<% end -%>
 <% end -%>
   return;
 }
@@ -102,8 +116,8 @@ void <%= short_name %>__deep_copy( <%= struct_name %> *<%= short_name %>_copy, <
 
 <% end -%>
 <% alloc_attributes.each do |attribute| -%>
-  <%= short_name %>_copy-><%= attribute.name %> = ALLOC_N( <%= attribute.cbase %>, <%= attribute.size_expr_c( short_name + "_copy" ) %> );
-  memcpy( <%= short_name %>_copy-><%= attribute.name %>, <%= short_name %>_orig-><%= attribute.name %>, ( <%= attribute.size_expr_c %> ) * sizeof(<%= attribute.cbase %>) );
+  <%= short_name %>_copy-><%= attribute.name %> = ALLOC_N( <%= attribute.cbase %>, <%= attribute.size_expr_c( from: short_name + "_copy" ) %> );
+  memcpy( <%= short_name %>_copy-><%= attribute.name %>, <%= short_name %>_orig-><%= attribute.name %>, ( <%= attribute.size_expr_c( from: short_name + "_copy" ) %> ) * sizeof(<%= attribute.cbase %>) );
 
 <% end -%>
   return;

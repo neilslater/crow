@@ -20,7 +20,7 @@ module Crow
     attr_reader :name, :ruby_name, :ctype, :pointer, :default, :parent_struct
     attr_reader :init_expr, :ruby_read, :ruby_write, :ptr_cache, :shape_var
 
-    def initialize n, name: n, ruby_name: name, default: self.class.default, pointer: false, ctype:, parent_struct:, init_expr: nil, ruby_read: true, ruby_write: false
+    def initialize n, name: n, ruby_name: name, default: self.class.default, pointer: false, ctype:, parent_struct:, init_expr: nil, ruby_read: true, ruby_write: false, size_expr: nil, shape_expr: nil, shape_exprs: nil, rank_expr: nil
       raise "Variable name '#{name}' cannot be used" if name !~ /\A[a-zA-Z0-9_]+\z/
       @name = name
       @ruby_name = ruby_name
@@ -110,8 +110,19 @@ module Crow
       self.class.ruby_to_c( rv_name )
     end
 
-    def init_expr_c container_name = parent_struct.short_name
-      Expression.new( init_expr, @parent_struct.attributes, @parent_struct.init_params ).as_c_code( container_name )
+    def init_expr_c from: parent_struct.short_name, init_context: false
+      use_init_expr = init_expr
+
+      if init_expr == '.'
+        if init_context
+          use_init_expr = "$#{self.name}"
+        else
+          use_init_expr = "%#{self.name}"
+        end
+      end
+
+      e = Expression.new( use_init_expr, @parent_struct.attributes, @parent_struct.init_params )
+      e.as_c_code( from )
     end
 
     def needs_init?
@@ -177,9 +188,19 @@ module Crow
       end
     end
 
-    def size_expr_c container_name = parent_struct.short_name
-      e = Expression.new( size_expr, @parent_struct.attributes, @parent_struct.init_params )
-      e.as_c_code( container_name )
+    def size_expr_c from: parent_struct.short_name, init_context: false
+      use_size_expr = size_expr
+
+      if size_expr.start_with?( '.' )
+        if init_context
+          use_size_expr.sub( '.', '$' )
+        else
+          use_size_expr.sub( '.', '%' )
+        end
+      end
+
+      e = Expression.new( use_size_expr, @parent_struct.attributes, @parent_struct.init_params )
+      e.as_c_code( from )
     end
   end
 
@@ -487,17 +508,25 @@ module Crow
     include NotA_C_Pointer
     self.default = 'Qnil'
 
-    attr_reader :rank_expr, :shape_expr, :shape_exprs, :init_expr
+    attr_reader :rank_expr, :shape_expr, :shape_exprs, :init_expr, :shape_tmp_var
 
     def initialize name, opts = {}
       super( name, opts )
-      @rank_expr = opts[:rank_expr] || @parent_struct.short_name + '_'  + @name + '_rank'
+      @rank_expr = opts[:rank_expr] || '1'
       if ( opts[:shape_var] )
         @shape_var = opts[:shape_var]
         @shape_expr = "%#{@shape_var}"
-        @shape_exprs =  opts[:shape_exprs] || []
+        @shape_exprs =  opts[:shape_exprs] || [1] * @rank_expr.to_i
       else
-        @shape_expr = opts[:shape_expr] || @parent_struct.short_name + '_'  + @name + '_shape'
+        if opts[:shape_expr]
+          @shape_expr = opts[:shape_expr]
+        elsif opts[:shape_exprs]
+          @shape_exprs =  opts[:shape_exprs]
+          @shape_tmp_var = @parent_struct.short_name + '_'  + @name + '_shape'
+          @shape_expr = @shape_tmp_var
+        else
+          @shape_expr = "{ #{([1] * @rank_expr.to_i).join(', ')} }"
+        end
       end
       @init_expr = opts[:init_expr] || self.class.item_default
       @ptr_cache = opts[:ptr_cache]
@@ -534,7 +563,7 @@ module Crow
     def shape_expr_c container_name = parent_struct.short_name
       allowed_attributes = @parent_struct.attributes.clone
       if shape_var
-        allowed_attributes << TypeMap::P_Int.new( shape_var, :parent_struct => @parent_struct )
+        allowed_attributes << TypeMap::P_Int.new( shape_var, parent_struct: @parent_struct )
       end
 
       Expression.new( shape_expr, allowed_attributes, @parent_struct.init_params ).as_c_code( container_name )

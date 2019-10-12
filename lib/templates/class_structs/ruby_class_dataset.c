@@ -46,9 +46,9 @@ void assert_value_wraps_<%= short_name %>( VALUE obj ) {
  * @return [<%= full_class_name_ruby %>] new ...
  */
 VALUE <%= short_name %>_rbobject__initialize( VALUE self<% unless init_params.empty? %>, <%= init_params.map(&:as_rv_param).join(', ') %><% end %> ) {
+<% if needs_init? -%>
   <%= struct_name %> *<%= short_name %> = get_<%= short_name %>_struct( self );
 
-<% if needs_init? -%>
   <%= short_name %>__init( <%= short_name %><% unless init_params.empty? %>, <%= init_params.map(&:param_item_to_c).join(', ') %><% end %> );
 
 <% end -%>

@@ -68,6 +68,25 @@ describe Crow::TypeMap do
         typemap = Crow::TypeMap.create('x', ctype: :int, parent_struct: container, init_expr: '%y')
         expect(typemap.init_expr_c).to eql 'foo->y'
       end
+
+      it 'can refer other parameters from a renamed struct using % and optional container name' do
+        container.add_attribute( 'y', ctype: :int )
+        typemap = Crow::TypeMap.create('x', ctype: :int, parent_struct: container, init_expr: '%y')
+        expect(typemap.init_expr_c(from: 'alt_foo')).to eql 'alt_foo->y'
+      end
+
+      it 'can accept self-referential init param "."' do
+        container.add_attribute( 'y', ctype: :int )
+        container.init_params << Crow::TypeMap.create( 'y', ctype: :int, parent_struct: container )
+        typemap = Crow::TypeMap.create('y', ctype: :int, parent_struct: container, init_expr: '.')
+        expect(typemap.init_expr_c(init_context: true)).to eql 'y'
+      end
+
+      it 'can accept self-referential init param "." in container context' do
+        container.add_attribute( 'y', ctype: :int )
+        typemap = Crow::TypeMap.create('y', ctype: :int, parent_struct: container, init_expr: '.')
+        expect(typemap.init_expr_c(from: 'alt_foo')).to eql 'alt_foo->y'
+      end
     end
   end
 

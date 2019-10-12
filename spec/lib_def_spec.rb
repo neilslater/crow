@@ -7,11 +7,41 @@ describe Crow::LibDef do
       'foo',
       structs: [
         {
-           name: 'bar',
-           attributes: [
+          name: 'bar',
+          attributes: [
             { name: 'hi', ctype: :int, ruby_write: true }
           ]
         }
+      ]
+    )
+  end
+
+  let(:libdef_b) do
+    Crow::LibDef.new(
+      'foo',
+      structs: [
+        {
+          name: 'bar',
+          attributes: [
+            { name: 'hi', ctype: :int, ruby_write: true, init_expr: '.' },
+          ],
+          init_params: [ {name: 'hello', ctype: :int} ]
+        },
+        {
+          name: 'baz',
+          attributes: [
+            { name: 'num_things', ctype: :int, init_expr: '*' },
+            { name: 'things', ctype: :int, pointer: true, size_expr: '.num_things', :init_expr => '0', :ruby_read => false },
+          ],
+          init_params: [ {name: 'num_things', ctype: :int} ]
+        },
+        #{
+        #  name: 'table',
+        #  attributes: [
+        #    { name: 'narr_data', ruby_name: 'data', ctype: :NARRAY_DOUBLE, rank_expr: '2', shape_exprs: [ '$width', '$height' ] },
+        #  ],
+        #  init_params: [{name: 'width', ctype: :int}, {name: 'height', ctype: :int}]
+        # }
       ]
     )
   end
@@ -41,6 +71,7 @@ describe Crow::LibDef do
     result =  build_and_run_rake lib_name, dir, 'compile'
     # TODO: Check for compiler warnings and fail if any
     expect(result).to include "compiling"
+    expect(result).to_not include "warning"
     expect(result).to include "linking shared-object #{lib_name}/#{lib_name}"
   end
 
@@ -191,5 +222,11 @@ describe Crow::LibDef do
         end
       end
     end
+  end
+
+  describe 'libdef with C array and NArray' do
+    subject { libdef_b }
+
+    it_behaves_like 'a source code generator', 'foo', ['bar', 'baz'] # , 'table']
   end
 end

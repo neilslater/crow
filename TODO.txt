@@ -3,17 +3,14 @@ TODO:
 Crow follow ups:
 
   * Specs - How to do test at all?
-    * expression_spec.rb - basic
-    * typemap_spec.rb - done
-    * struct_class_spec.rb - done
-    * libdef_spec.rb - started
+    * libdef - moderate complexity build
 
   * Templates for spec files of target system
     * Start with assertions that classes exist
 
   * bool vars - add <stdbool.h>
 
-  * Varied initialisation for init sequences of pointers (in clone)
+  * Clone contents of pointers (in clone)?
 
   * Template pointers as read/write from Ruby (requires associated shape)
 
@@ -46,6 +43,8 @@ Crow follow ups:
   * Taking named hash params for Ruby init
 
   * Build from a YAML definition
+
+  * Init params automatically generated from any item with init_expr='*'
 
   * More pre-built utilities:
     * Sorting, shuffling, random numbers
