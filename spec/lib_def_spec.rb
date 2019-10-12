@@ -35,13 +35,13 @@ describe Crow::LibDef do
           ],
           init_params: [ {name: 'num_things', ctype: :int} ]
         },
-        #{
-        #  name: 'table',
-        #  attributes: [
-        #    { name: 'narr_data', ruby_name: 'data', ctype: :NARRAY_DOUBLE, rank_expr: '2', shape_exprs: [ '$width', '$height' ] },
-        #  ],
-        #  init_params: [{name: 'width', ctype: :int}, {name: 'height', ctype: :int}]
-        # }
+        {
+          name: 'table',
+          attributes: [
+            { name: 'narr_data', ruby_name: 'data', ctype: :NARRAY_DOUBLE, rank_expr: '2', shape_exprs: [ '$width', '$height' ] },
+          ],
+          init_params: [{name: 'width', ctype: :int}, {name: 'height', ctype: :int}]
+        }
       ]
     )
   end
