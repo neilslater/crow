@@ -22,7 +22,7 @@ module Crow
 
     def initialize(n, name: n, ruby_name: name, default: self.class.default, pointer: false, ctype:,
                    parent_struct:, init_expr: nil, ruby_read: true, ruby_write: false, size_expr: nil,
-                   shape_expr: nil, shape_exprs: nil, rank_expr: nil, shape_var: nil)
+                   shape_expr: nil, shape_exprs: nil, rank_expr: nil, shape_var: nil, ptr_cache: nil)
       raise "Variable name '#{name}' cannot be used" if name !~ /\A[a-zA-Z0-9_]+\z/
       @name = name
       @ruby_name = ruby_name
