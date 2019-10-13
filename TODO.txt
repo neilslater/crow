@@ -6,11 +6,20 @@ Crow follow ups:
     * libdef - moderate complexity build
 
   * Templates for spec files of target system
-    * Start with assertions that classes exist
+    * Start with assertions that classes exist (done)
+    * Instantiate using size vars.
+
+  * Add validation rules for parameters
+
+  * Factor templates into partials and functions
+    * Add concept of "needs" to cover requirement to declare and populate temp vars for shapes, pointers etc
+    * Allow for difference between pre-initialisation and needs and instantiated needs
+    * Allow for getting data from NArrays or caching it in named var
+    * Have explicit shape/size var for pointers?
+
+  * Factor end C code into generated and "user" parts
 
   * bool vars - add <stdbool.h>
-
-  * Clone contents of pointers (in clone)?
 
   * Template pointers as read/write from Ruby (requires associated shape)
 

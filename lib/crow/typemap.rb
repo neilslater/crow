@@ -20,7 +20,9 @@ module Crow
     attr_reader :name, :ruby_name, :ctype, :pointer, :default, :parent_struct
     attr_reader :init_expr, :ruby_read, :ruby_write, :ptr_cache, :shape_var
 
-    def initialize n, name: n, ruby_name: name, default: self.class.default, pointer: false, ctype:, parent_struct:, init_expr: nil, ruby_read: true, ruby_write: false, size_expr: nil, shape_expr: nil, shape_exprs: nil, rank_expr: nil
+    def initialize(n, name: n, ruby_name: name, default: self.class.default, pointer: false, ctype:,
+                   parent_struct:, init_expr: nil, ruby_read: true, ruby_write: false, size_expr: nil,
+                   shape_expr: nil, shape_exprs: nil, rank_expr: nil, shape_var: nil)
       raise "Variable name '#{name}' cannot be used" if name !~ /\A[a-zA-Z0-9_]+\z/
       @name = name
       @ruby_name = ruby_name
@@ -563,7 +565,7 @@ module Crow
     def shape_expr_c container_name = parent_struct.short_name
       allowed_attributes = @parent_struct.attributes.clone
       if shape_var
-        allowed_attributes << TypeMap::P_Int.new( shape_var, parent_struct: @parent_struct )
+        allowed_attributes << TypeMap::P_Int.new( shape_var, parent_struct: @parent_struct, ctype: :int )
       end
 
       Expression.new( shape_expr, allowed_attributes, @parent_struct.init_params ).as_c_code( container_name )
