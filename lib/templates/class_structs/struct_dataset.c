@@ -28,7 +28,7 @@ void <%= short_name %>__init( <%= struct_name %> *<%= short_name %><% unless ini
 <% narray_attributes.each do |attribute| -%>
   <%= attribute.item_ctype %> *<%= attribute.name %>_ptr;
 <% if attribute.shape_tmp_var -%>
-  int *<%= attribute.shape_tmp_var %> = ALLOC_N( int, <%= attribute.rank_expr %> );
+  int *<%= attribute.shape_tmp_var %>;
 <% end -%>
 <% end -%>
 <% end -%>
@@ -48,12 +48,15 @@ void <%= short_name %>__init( <%= struct_name %> *<%= short_name %><% unless ini
 <% if attribute.shape_var || attribute.shape_tmp_var -%>
 <% if attribute.shape_var -%>
   <%= short_name %>-><%= attribute.shape_var %> = ALLOC_N( int, <%= attribute.rank_expr %> );
+<% attribute.shape_exprs.each_with_index do |expr,n| -%>
+  <%= short_name %>-><%= attribute.shape_var %>[<%= n %>] = <%= Crow::Expression.new( expr, attribute.parent_struct.attributes, attribute.parent_struct.init_params ).as_c_code( short_name ) %>;
+<% end -%>
 <% end -%>
 <% if attribute.shape_tmp_var -%>
   <%= attribute.shape_tmp_var %> = ALLOC_N( int, <%= attribute.rank_expr %> );
-<% end -%>
 <% attribute.shape_exprs.each_with_index do |expr,n| -%>
-  <%= short_name %>-><%= attribute.shape_var %>[<%= n %>] = <%= Crow::Expression.new( expr, attribute.parent_struct.attributes, attribute.parent_struct.init_params ).as_c_code( short_name ) %>;
+  <%= attribute.shape_tmp_var %>[<%= n %>] = <%= Crow::Expression.new( expr, attribute.parent_struct.attributes, attribute.parent_struct.init_params ).as_c_code( short_name ) %>;
+<% end -%>
 <% end -%>
 <% end -%>
   <%= short_name %>-><%= attribute.name %> = na_make_object( <%= attribute.narray_enum_type %>, <%= attribute.rank_expr %>, <%= attribute.shape_expr_c %>, cNArray );

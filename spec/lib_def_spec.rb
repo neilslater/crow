@@ -57,12 +57,17 @@ describe Crow::LibDef do
   def build_and_run_rake lib_name, dir, task=''
     command = "cd #{dir} && BUNDLE_GEMFILE=#{dir}/Gemfile bundle install"
     output, exit_code = run_command(command)
-
+    if (exit_code > 0)
+      puts output
+    end
     expect(exit_code).to be 0
     expect(output).to include "Bundle complete!"
 
     command = "cd #{dir} && BUNDLE_GEMFILE=#{dir}/Gemfile bundle exec rake #{task} 2>&1"
     output, exit_code = run_command(command)
+    if (exit_code > 0)
+      puts output
+    end
     expect(exit_code).to be 0
     output
   end
@@ -76,15 +81,17 @@ describe Crow::LibDef do
   end
 
   def run_script_in_project lib_name, dir, script
-    ruby_script = %Q{require "#{lib_name}/#{lib_name}"; #{ruby_script}}
     command = "cd #{dir} && BUNDLE_GEMFILE=#{dir}/Gemfile bundle exec #{script}"
     output, exit_code = run_command(command)
+    if (exit_code > 0)
+      puts output
+    end
     expect(exit_code).to be 0
     output
   end
 
   def run_ruby_in_project lib_name, dir, ruby_script
-    ruby_script = %Q{require "#{lib_name}/#{lib_name}"; #{ruby_script}}
+    ruby_script = %Q{require "#{lib_name}"; #{ruby_script}}
     run_script_in_project(lib_name, dir, "ruby -Ilib -e '#{ruby_script}'")
   end
 
@@ -161,7 +168,7 @@ describe Crow::LibDef do
           subject.create_project(dir)
           compile_project(lib_name, dir)
           result = run_ruby_in_project( lib_name, dir, %Q{puts "Loaded OK"} )
-          expect(result.chomp).to eql "Loaded OK"
+          expect(result.chomp).to end_with "Loaded OK"
         end
       end
 
@@ -186,7 +193,7 @@ describe Crow::LibDef do
         compile_project('foo', dir)
 
         result = run_ruby_in_project( 'foo', dir, %Q{p [Foo, Foo.class]} )
-        expect(result.chomp).to eql "[Foo, Module]"
+        expect(result.chomp).to end_with "[Foo, Module]"
       end
     end
 
@@ -196,13 +203,13 @@ describe Crow::LibDef do
         compile_project('foo', dir)
 
         result = run_ruby_in_project( 'foo', dir, %Q{p [Foo::Bar, Foo::Bar.class]} )
-        expect(result.chomp).to eql "[Foo::Bar, Class]"
+        expect(result.chomp).to end_with "[Foo::Bar, Class]"
 
         result = run_ruby_in_project( 'foo', dir, %Q{f = Foo::Bar.new; p f.hi} )
-        expect(result.chomp).to eql "0"
+        expect(result.chomp).to end_with "0"
 
         result = run_ruby_in_project( 'foo', dir, %Q{f = Foo::Bar.new; f.hi = -17; p f.hi} )
-        expect(result.chomp).to eql "-17"
+        expect(result.chomp).to end_with "-17"
       end
     end
 
