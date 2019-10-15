@@ -7,9 +7,9 @@ Crow follow ups:
 
   * Templates for spec files of target system
     * Start with assertions that classes exist (done)
-    * Instantiate using size vars.
+    * Instantiate using parameters (done)
 
-  * Add validation rules for parameters
+  * Add validation rules for parameters, and use to generate minimal test instantiations
 
   * Factor templates into partials and functions
     * Add concept of "needs" to cover requirement to declare and populate temp vars for shapes, pointers etc
