@@ -485,22 +485,20 @@ module Crow
     attr_reader :shape_tmp_var
 
     def initialize opts = {}
-      super( opts )
-      init.narray_post_init(opts[:shape_var])
-
       if ( opts[:shape_var] )
         @shape_var = opts[:shape_var]
-      else
-        if opts[:init] && opts[:init][:shape_expr]
-          # Do nothing
-        elsif opts[:init] && opts[:init][:shape_exprs]
-          @shape_tmp_var = @parent_struct.short_name + '_'  + @name + '_shape'
-        else
-          # Do nothing
-        end
+      end
+      super( opts )
+
+      if ! @shape_var && opts[:init] && ! opts[:init][:shape_expr] && opts[:init][:shape_exprs]
+        @shape_tmp_var = @parent_struct.short_name + '_'  + @name + '_shape'
       end
 
       @ptr_cache = opts[:ptr_cache]
+    end
+
+    def init_class
+      Crow::TypeInit::NArray
     end
 
     def is_narray?
