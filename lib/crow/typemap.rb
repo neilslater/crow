@@ -18,7 +18,7 @@ module Crow
     ]
 
     attr_reader :name, :ruby_name, :ctype, :pointer, :default, :parent_struct, :init
-    attr_reader :init_expr, :ruby_read, :ruby_write, :ptr_cache, :shape_var
+    attr_reader :ruby_read, :ruby_write, :ptr_cache, :shape_var
 
     def initialize(n, name: n, ruby_name: name, default: self.class.default, pointer: false, ctype:,
                    init: {}, parent_struct:, ruby_read: true, ruby_write: false,
@@ -113,22 +113,22 @@ module Crow
     end
 
     def init_expr_c from: parent_struct.short_name, init_context: false
-      use_init_expr = init.init_expr
+      use_expr = init.expr
 
-      if init.init_expr == '.'
+      if init.expr == '.'
         if init_context
-          use_init_expr = "$#{self.name}"
+          use_expr = "$#{self.name}"
         else
-          use_init_expr = "%#{self.name}"
+          use_expr = "%#{self.name}"
         end
       end
 
-      e = Expression.new( use_init_expr, @parent_struct.attributes, @parent_struct.init_params )
+      e = Expression.new( use_expr, @parent_struct.attributes, @parent_struct.init_params )
       e.as_c_code( from )
     end
 
     def needs_init?
-      !! init.init_expr
+      !! init.expr
     end
 
     def needs_simple_init?
@@ -165,7 +165,7 @@ module Crow
 
     def initialize name, opts = {}
       init_opts = (opts[:init] ||= {})
-      init_opts[:init_expr] ||= self.class.item_default
+      init_opts[:expr] ||= self.class.item_default
 
       super( name, opts )
 
@@ -174,7 +174,7 @@ module Crow
     end
 
     def size_expr_c from: parent_struct.short_name, init_context: false
-      # p [from, self.name, self.init_expr, self.init.init_expr]
+      # p [from, self.name, self.expr, self.init.expr]
 
       use_size_expr = init.size_expr
 
@@ -499,7 +499,7 @@ module Crow
 
     def initialize name, opts = {}
       init_opts = (opts[:init] ||= {})
-      init_opts[:init_expr] ||= self.class.item_default
+      init_opts[:expr] ||= self.class.item_default
       super( name, opts )
 
       @rank_expr = opts[:rank_expr] || '1'

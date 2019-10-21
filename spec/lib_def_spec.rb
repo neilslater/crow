@@ -23,15 +23,15 @@ describe Crow::LibDef do
         {
           name: 'bar',
           attributes: [
-            { name: 'hi', ctype: :int, ruby_write: true, init: {init_expr: '.'} },
+            { name: 'hi', ctype: :int, ruby_write: true, init: { expr: '.' } },
           ],
           init_params: [ {name: 'hi', ctype: :int} ]
         },
         {
           name: 'baz',
           attributes: [
-            { name: 'num_things', ctype: :int, init: {init_expr: '.'}  },
-            { name: 'things', ctype: :int, pointer: true, :ruby_read => false, init: {size_expr: '.num_things', :init_expr => '0'} },
+            { name: 'num_things', ctype: :int, init: { expr: '.' }  },
+            { name: 'things', ctype: :int, pointer: true, :ruby_read => false, init: { size_expr: '.num_things', :expr => '0' } },
           ],
           init_params: [ {name: 'num_things', ctype: :int} ]
         },
