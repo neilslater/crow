@@ -32,9 +32,13 @@ module Crow
         raise ArgumentError, "parent_struct must be a Crow::StructClass"
       end
       @parent_struct = parent_struct
-      @init = Crow::TypeInit.new( init.merge(parent_typemap: self) )
+      @init = init_class.new( init.merge(parent_typemap: self) )
       @ruby_read = !! ruby_read
       @ruby_write = !! ruby_write
+    end
+
+    def init_class
+      Crow::TypeInit
     end
 
     def self.create opts = {}
@@ -162,9 +166,12 @@ module Crow
       true
     end
 
+    def init_class
+      Crow::TypeInit::Pointer
+    end
+
     def initialize opts = {}
       super( opts )
-      init.pointer_post_init
 
       @ruby_read = opts[:ruby_read].nil? ? true : opts[:ruby_read]
       @ruby_write = opts[:ruby_write].nil? ? false : opts[:ruby_write]

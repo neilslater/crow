@@ -45,8 +45,14 @@ module Crow
 
       Expression.new( shape_expr, allowed_attributes, struct.init_params ).as_c_code( container_name )
     end
+  end
 
-    # TODO: This should be a subclass thing . . . for Pointer
+  class TypeInit::Pointer < TypeInit
+    def initialize(opts = {})
+      super(opts)
+      @expr ||= parent_typemap.class.item_default
+    end
+
     def size_expr_c from: parent_typemap.parent_struct.short_name, init_context: false
       use_size_expr = size_expr
 
@@ -61,11 +67,6 @@ module Crow
       struct = parent_typemap.parent_struct
       e = Expression.new( use_size_expr, struct.attributes, struct.init_params )
       e.as_c_code( from )
-    end
-
-    # TODO: This should be a subclass thing . . . for NARRAY
-    def pointer_post_init
-      @expr ||= parent_typemap.class.item_default
     end
   end
 end
