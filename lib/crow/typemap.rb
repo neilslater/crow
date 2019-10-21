@@ -165,9 +165,7 @@ module Crow
       true
     end
 
-    ROLES = Set[ :array, :narray_cache, :itemised ]
-
-    attr_reader :size_expr, :init_expr # , :pointer_role
+    attr_reader :size_expr, :init_expr
 
     def initialize name, opts = {}
       init_opts = (opts[:init] ||= {})
@@ -176,23 +174,8 @@ module Crow
       super( name, opts )
       @size_expr = opts[:size_expr] || [@parent_struct.short_name,@name.upcase,'SIZE'].join('_')
 
-      @pointer_role = opts[:pointer_role] || :array
-      unless ROLES.include?( @pointer_role )
-        raise ArgumentError, "Bad pointer role #{@pointer_role}, should be one of #{ROLES.to_a.join(', ')}"
-      end
-
-      # Over-ride other defaults depending on role
-      case @pointer_role
-      when :array
-        @ruby_read = opts[:ruby_read].nil? ? true : opts[:ruby_read]
-        @ruby_write  = opts[:ruby_write].nil? ? false : opts[:ruby_write]
-      when :narray_cache
-        @ruby_read = opts[:ruby_read].nil? ? false : opts[:ruby_read]
-        @ruby_write  = opts[:ruby_write].nil? ? false : opts[:ruby_write]
-      when :itemised
-        @ruby_read = opts[:ruby_read].nil? ? true : opts[:ruby_read]
-        @ruby_write = opts[:ruby_write].nil? ? false : opts[:ruby_write]
-      end
+      @ruby_read = opts[:ruby_read].nil? ? true : opts[:ruby_read]
+      @ruby_write = opts[:ruby_write].nil? ? false : opts[:ruby_write]
     end
 
     def size_expr_c from: parent_struct.short_name, init_context: false
