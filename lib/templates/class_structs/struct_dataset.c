@@ -48,13 +48,13 @@ void <%= short_name %>__init( <%= struct_name %> *<%= short_name %><% unless ini
 <% if attribute.shape_var || attribute.shape_tmp_var -%>
 <% if attribute.shape_var -%>
   <%= short_name %>-><%= attribute.shape_var %> = ALLOC_N( int, <%= attribute.init.rank_expr %> );
-<% attribute.shape_exprs.each_with_index do |expr,n| -%>
+<% attribute.init.shape_exprs.each_with_index do |expr,n| -%>
   <%= short_name %>-><%= attribute.shape_var %>[<%= n %>] = <%= Crow::Expression.new( expr, attribute.parent_struct.attributes, attribute.parent_struct.init_params ).as_c_code( short_name ) %>;
 <% end -%>
 <% end -%>
 <% if attribute.shape_tmp_var -%>
   <%= attribute.shape_tmp_var %> = ALLOC_N( int, <%= attribute.init.rank_expr %> );
-<% attribute.shape_exprs.each_with_index do |expr,n| -%>
+<% attribute.init.shape_exprs.each_with_index do |expr,n| -%>
   <%= attribute.shape_tmp_var %>[<%= n %>] = <%= Crow::Expression.new( expr, attribute.parent_struct.attributes, attribute.parent_struct.init_params ).as_c_code( short_name ) %>;
 <% end -%>
 <% end -%>

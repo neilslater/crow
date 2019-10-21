@@ -22,7 +22,7 @@ module Crow
 
     def initialize(n, name: n, ruby_name: name, default: self.class.default, pointer: false, ctype:,
                    init: {}, parent_struct:, ruby_read: true, ruby_write: false,
-                   shape_expr: nil, shape_exprs: nil, shape_var: nil, ptr_cache: nil)
+                   shape_var: nil, ptr_cache: nil)
       raise "Variable name '#{name}' cannot be used" if name !~ /\A[a-zA-Z0-9_]+\z/
       @name = name
       @ruby_name = ruby_name
@@ -495,28 +495,24 @@ module Crow
     include NotA_C_Pointer
     self.default = 'Qnil'
 
-    attr_reader :shape_expr, :shape_exprs, :shape_tmp_var
+    attr_reader :shape_tmp_var
 
     def initialize name, opts = {}
-      init_opts = (opts[:init] ||= {})
-      init_opts[:expr] ||= self.class.item_default
       super( name, opts )
+      init.narray_post_init(opts[:shape_var])
 
       if ( opts[:shape_var] )
         @shape_var = opts[:shape_var]
-        @shape_expr = "%#{@shape_var}"
-        @shape_exprs =  opts[:shape_exprs] || [1] * init.rank_expr.to_i
       else
-        if opts[:shape_expr]
-          @shape_expr = opts[:shape_expr]
-        elsif opts[:shape_exprs]
-          @shape_exprs =  opts[:shape_exprs]
+        if opts[:init] && opts[:init][:shape_expr]
+          # Do nothing
+        elsif opts[:init] && opts[:init][:shape_exprs]
           @shape_tmp_var = @parent_struct.short_name + '_'  + @name + '_shape'
-          @shape_expr = @shape_tmp_var
         else
-          @shape_expr = "{ #{([1] * init.rank_expr.to_i).join(', ')} }"
+          # Do nothing
         end
       end
+
       @ptr_cache = opts[:ptr_cache]
     end
 
@@ -554,7 +550,7 @@ module Crow
         allowed_attributes << TypeMap::P_Int.new( shape_var, parent_struct: @parent_struct, ctype: :int )
       end
 
-      Expression.new( shape_expr, allowed_attributes, @parent_struct.init_params ).as_c_code( container_name )
+      Expression.new( init.shape_expr, allowed_attributes, @parent_struct.init_params ).as_c_code( container_name )
     end
   end
 
