@@ -21,7 +21,7 @@ module Crow
     attr_reader :init_expr, :ruby_read, :ruby_write, :ptr_cache, :shape_var
 
     def initialize(n, name: n, ruby_name: name, default: self.class.default, pointer: false, ctype:,
-                   init: {}, parent_struct:, ruby_read: true, ruby_write: false, size_expr: nil,
+                   init: {}, parent_struct:, ruby_read: true, ruby_write: false,
                    shape_expr: nil, shape_exprs: nil, rank_expr: nil, shape_var: nil, ptr_cache: nil)
       raise "Variable name '#{name}' cannot be used" if name !~ /\A[a-zA-Z0-9_]+\z/
       @name = name
@@ -113,8 +113,6 @@ module Crow
     end
 
     def init_expr_c from: parent_struct.short_name, init_context: false
-      # p [from, self.name, self.init_expr, self.init.init_expr]
-
       use_init_expr = init.init_expr
 
       if init.init_expr == '.'
@@ -165,27 +163,26 @@ module Crow
       true
     end
 
-    attr_reader :size_expr, :init_expr
-
     def initialize name, opts = {}
       init_opts = (opts[:init] ||= {})
       init_opts[:init_expr] ||= self.class.item_default
 
       super( name, opts )
-      @size_expr = opts[:size_expr] || [@parent_struct.short_name,@name.upcase,'SIZE'].join('_')
 
       @ruby_read = opts[:ruby_read].nil? ? true : opts[:ruby_read]
       @ruby_write = opts[:ruby_write].nil? ? false : opts[:ruby_write]
     end
 
     def size_expr_c from: parent_struct.short_name, init_context: false
-      use_size_expr = size_expr
+      # p [from, self.name, self.init_expr, self.init.init_expr]
 
-      if size_expr.start_with?( '.' )
+      use_size_expr = init.size_expr
+
+      if init.size_expr.start_with?( '.' )
         if init_context
-          use_size_expr = size_expr.sub( '.', '$' )
+          use_size_expr = init.size_expr.sub( '.', '$' )
         else
-          use_size_expr = size_expr.sub( '.', '%' )
+          use_size_expr = init.size_expr.sub( '.', '%' )
         end
       end
 
@@ -498,13 +495,13 @@ module Crow
     include NotA_C_Pointer
     self.default = 'Qnil'
 
-    attr_reader :rank_expr, :shape_expr, :shape_exprs, :init_expr, :shape_tmp_var
+    attr_reader :rank_expr, :shape_expr, :shape_exprs, :shape_tmp_var
 
     def initialize name, opts = {}
       init_opts = (opts[:init] ||= {})
       init_opts[:init_expr] ||= self.class.item_default
-
       super( name, opts )
+
       @rank_expr = opts[:rank_expr] || '1'
       if ( opts[:shape_var] )
         @shape_var = opts[:shape_var]

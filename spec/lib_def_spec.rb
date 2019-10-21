@@ -31,7 +31,7 @@ describe Crow::LibDef do
           name: 'baz',
           attributes: [
             { name: 'num_things', ctype: :int, init: {init_expr: '.'}  },
-            { name: 'things', ctype: :int, pointer: true, :ruby_read => false, size_expr: '.num_things', init: {size_expr: '.num_things', :init_expr => '0'} },
+            { name: 'things', ctype: :int, pointer: true, :ruby_read => false, init: {size_expr: '.num_things', :init_expr => '0'} },
           ],
           init_params: [ {name: 'num_things', ctype: :int} ]
         },
