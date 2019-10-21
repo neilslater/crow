@@ -23,25 +23,25 @@ describe Crow::LibDef do
         {
           name: 'bar',
           attributes: [
-            { name: 'hi', ctype: :int, ruby_write: true, init_expr: '.' },
+            { name: 'hi', ctype: :int, ruby_write: true, init_expr: '.', init: {init_expr: '.'} },
           ],
-          init_params: [ {name: 'hello', ctype: :int} ]
+          init_params: [ {name: 'hi', ctype: :int} ]
         },
         {
           name: 'baz',
           attributes: [
-            { name: 'num_things', ctype: :int, init_expr: '.' },
-            { name: 'things', ctype: :int, pointer: true, size_expr: '.num_things', :init_expr => '0', :ruby_read => false },
+            { name: 'num_things', ctype: :int, init_expr: '.', init: {init_expr: '.'}  },
+            { name: 'things', ctype: :int, pointer: true, :ruby_read => false, size_expr: '.num_things', :init_expr => '0', init: {size_expr: '.num_things', :init_expr => '0'} },
           ],
           init_params: [ {name: 'num_things', ctype: :int} ]
         },
         {
           name: 'table',
           attributes: [
-            { name: 'narr_data', ruby_name: 'data', ctype: :NARRAY_DOUBLE, rank_expr: '2', shape_exprs: [ '$width', '$height' ] },
-            { name: 'narr_summary', ruby_name: 'summary', ctype: :NARRAY_DOUBLE, rank_expr: '1', shape_exprs: [ '$width' ], shape_var: 'summary_shape' },
-            { name: 'narr_counts', ruby_name: 'counts', ctype: :NARRAY_INT_32, rank_expr: '1', shape_exprs: [ '$height' ], ptr_cache: 'counts' },
-            { name: 'narr_inverse', ruby_name: 'inverse', ctype: :NARRAY_FLOAT, rank_expr: '2', shape_exprs: [ '$height', '$width' ], ptr_cache: 'inverse', shape_var: 'inverse_shape' },
+            { name: 'narr_data', ruby_name: 'data', ctype: :NARRAY_DOUBLE, rank_expr: '2', shape_exprs: [ '$width', '$height' ], init: {rank_expr: '2', shape_exprs: [ '$width', '$height' ]} },
+            { name: 'narr_summary', ruby_name: 'summary', ctype: :NARRAY_DOUBLE, rank_expr: '1', shape_exprs: [ '$width' ], shape_var: 'summary_shape', init: {rank_expr: '1', shape_exprs: [ '$width' ]} },
+            { name: 'narr_counts', ruby_name: 'counts', ctype: :NARRAY_INT_32, rank_expr: '1', shape_exprs: [ '$height' ], ptr_cache: 'counts', init: {rank_expr: '1', shape_exprs: [ '$height' ]} },
+            { name: 'narr_inverse', ruby_name: 'inverse', ctype: :NARRAY_FLOAT, rank_expr: '2', shape_exprs: [ '$height', '$width' ], ptr_cache: 'inverse', shape_var: 'inverse_shape', init: {rank_expr: '2', shape_exprs: [ '$height', '$width' ]} },
           ],
           init_params: [{name: 'width', ctype: :int}, {name: 'height', ctype: :int}]
         }

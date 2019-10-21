@@ -2,6 +2,15 @@ TODO:
 
 Crow follow ups:
 
+  * Break down structures in TypeMap: Initialisor & Support Vars (Implied additional TypeMaps on the struct)
+
+      Core attr: name:, ruby_name:, pointer:, ctype:,  parent_struct:, ruby_read:, ruby_write:
+
+      Init attr: default:, init_expr:, size_expr:, shape_expr:, shape_exprs:, rank_expr:, parent_typemap
+
+      Support attr: shape_var:, ptr_cache:, parent_typemap
+
+
   * Specs - How to do test at all?
     * libdef - moderate complexity build
 
@@ -20,6 +29,8 @@ Crow follow ups:
   * Factor end C code into generated and "user" parts
 
   * bool vars - add <stdbool.h>
+
+  * enum vars - map C enum to set of Ruby Symbols?
 
   * Template pointers as read/write from Ruby (requires associated shape)
 

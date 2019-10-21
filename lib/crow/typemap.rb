@@ -17,10 +17,10 @@ module Crow
       :NARRAY_INT_32 => [ 'NArrayLInt', 'NArrayLInt' ],
     ]
 
-    attr_reader :name, :ruby_name, :ctype, :pointer, :default, :parent_struct
+    attr_reader :name, :ruby_name, :ctype, :pointer, :default, :parent_struct, :init
     attr_reader :init_expr, :ruby_read, :ruby_write, :ptr_cache, :shape_var
 
-    def initialize(n, name: n, ruby_name: name, default: self.class.default, pointer: false, ctype:,
+    def initialize(n, name: n, ruby_name: name, default: self.class.default, pointer: false, ctype:, init: {},
                    parent_struct:, init_expr: nil, ruby_read: true, ruby_write: false, size_expr: nil,
                    shape_expr: nil, shape_exprs: nil, rank_expr: nil, shape_var: nil, ptr_cache: nil)
       raise "Variable name '#{name}' cannot be used" if name !~ /\A[a-zA-Z0-9_]+\z/
@@ -33,6 +33,7 @@ module Crow
         raise ArgumentError, "parent_struct must be a Crow::StructClass"
       end
       @parent_struct = parent_struct
+      @init = Crow::TypeInit.new( init.merge(parent_typemap: self) )
       @init_expr ||= init_expr
       @ruby_read = !! ruby_read
       @ruby_write = !! ruby_write
@@ -113,9 +114,11 @@ module Crow
     end
 
     def init_expr_c from: parent_struct.short_name, init_context: false
-      use_init_expr = init_expr
+      # p [from, self.name, self.init_expr, self.init.init_expr]
 
-      if init_expr == '.'
+      use_init_expr = init.init_expr
+
+      if init.init_expr == '.'
         if init_context
           use_init_expr = "$#{self.name}"
         else
@@ -128,7 +131,7 @@ module Crow
     end
 
     def needs_init?
-      !! init_expr
+      !! init.init_expr
     end
 
     def needs_simple_init?
@@ -165,12 +168,16 @@ module Crow
 
     ROLES = Set[ :array, :narray_cache, :itemised ]
 
-    attr_reader :size_expr, :init_expr, :pointer_role
+    attr_reader :size_expr, :init_expr # , :pointer_role
 
     def initialize name, opts = {}
+      init_opts = (opts[:init] ||= {})
+      init_opts[:init_expr] ||= self.class.item_default
+
       super( name, opts )
       @size_expr = opts[:size_expr] || [@parent_struct.short_name,@name.upcase,'SIZE'].join('_')
       @init_expr = opts[:init_expr] || self.class.item_default
+
       @pointer_role = opts[:pointer_role] || :array
       unless ROLES.include?( @pointer_role )
         raise ArgumentError, "Bad pointer role #{@pointer_role}, should be one of #{ROLES.to_a.join(', ')}"
@@ -513,6 +520,9 @@ module Crow
     attr_reader :rank_expr, :shape_expr, :shape_exprs, :init_expr, :shape_tmp_var
 
     def initialize name, opts = {}
+      init_opts = (opts[:init] ||= {})
+      init_opts[:init_expr] ||= self.class.item_default
+
       super( name, opts )
       @rank_expr = opts[:rank_expr] || '1'
       if ( opts[:shape_var] )
