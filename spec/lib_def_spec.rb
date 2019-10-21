@@ -38,10 +38,10 @@ describe Crow::LibDef do
         {
           name: 'table',
           attributes: [
-            { name: 'narr_data', ruby_name: 'data', ctype: :NARRAY_DOUBLE, rank_expr: '2', shape_exprs: [ '$width', '$height' ], init: {rank_expr: '2', shape_exprs: [ '$width', '$height' ]} },
-            { name: 'narr_summary', ruby_name: 'summary', ctype: :NARRAY_DOUBLE, rank_expr: '1', shape_exprs: [ '$width' ], shape_var: 'summary_shape', init: {rank_expr: '1', shape_exprs: [ '$width' ]} },
-            { name: 'narr_counts', ruby_name: 'counts', ctype: :NARRAY_INT_32, rank_expr: '1', shape_exprs: [ '$height' ], ptr_cache: 'counts', init: {rank_expr: '1', shape_exprs: [ '$height' ]} },
-            { name: 'narr_inverse', ruby_name: 'inverse', ctype: :NARRAY_FLOAT, rank_expr: '2', shape_exprs: [ '$height', '$width' ], ptr_cache: 'inverse', shape_var: 'inverse_shape', init: {rank_expr: '2', shape_exprs: [ '$height', '$width' ]} },
+            { name: 'narr_data', ruby_name: 'data', ctype: :NARRAY_DOUBLE, shape_exprs: [ '$width', '$height' ], init: {rank_expr: '2', shape_exprs: [ '$width', '$height' ]} },
+            { name: 'narr_summary', ruby_name: 'summary', ctype: :NARRAY_DOUBLE, shape_exprs: [ '$width' ], shape_var: 'summary_shape', init: {rank_expr: '1', shape_exprs: [ '$width' ]} },
+            { name: 'narr_counts', ruby_name: 'counts', ctype: :NARRAY_INT_32, shape_exprs: [ '$height' ], ptr_cache: 'counts', init: {rank_expr: '1', shape_exprs: [ '$height' ]} },
+            { name: 'narr_inverse', ruby_name: 'inverse', ctype: :NARRAY_FLOAT, shape_exprs: [ '$height', '$width' ], ptr_cache: 'inverse', shape_var: 'inverse_shape', init: {rank_expr: '2', shape_exprs: [ '$height', '$width' ]} },
           ],
           init_params: [{name: 'width', ctype: :int}, {name: 'height', ctype: :int}]
         }
