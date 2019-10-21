@@ -115,7 +115,7 @@ VALUE <%= short_name %>_rbobject__get_<%= attribute.name %>( VALUE self ) {
   volatile VALUE rv_ary_<%= attribute.name %>;
   <%= struct_name %> *<%= short_name %> = get_<%= short_name %>_struct( self );
 
-  s = <%= attribute.size_expr_c %>;
+  s = <%= attribute.init.size_expr_c %>;
   rv_ary_<%= attribute.name %> = rb_ary_new2( s );
   for( i = 0; i < s; i++ ) {
     rb_ary_store( rv_ary_<%= attribute.name %>, i,  <%= attribute.array_item_to_ruby_converter %>( <%= short_name %>-><%= attribute.name %>[i] ) );

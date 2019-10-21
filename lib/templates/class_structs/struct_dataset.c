@@ -38,8 +38,8 @@ void <%= short_name %>__init( <%= struct_name %> *<%= short_name %><% unless ini
 
 <% end -%>
 <% alloc_attributes.each do |attribute| -%>
-  <%= short_name %>-><%= attribute.name %> = ALLOC_N( <%= attribute.cbase %>, <%= attribute.size_expr_c(init_context: true) %> );
-  for( i = 0; i < <%= attribute.size_expr_c(init_context: true) %>; i++ ) {
+  <%= short_name %>-><%= attribute.name %> = ALLOC_N( <%= attribute.cbase %>, <%= attribute.init.size_expr_c(init_context: true) %> );
+  for( i = 0; i < <%= attribute.init.size_expr_c(init_context: true) %>; i++ ) {
     <%= short_name %>-><%= attribute.name %>[i] = <%= attribute.init_expr_c %>;
   }
 
@@ -59,7 +59,7 @@ void <%= short_name %>__init( <%= struct_name %> *<%= short_name %><% unless ini
 <% end -%>
 <% end -%>
 <% end -%>
-  <%= short_name %>-><%= attribute.name %> = na_make_object( <%= attribute.narray_enum_type %>, <%= attribute.init.rank_expr %>, <%= attribute.shape_expr_c %>, cNArray );
+  <%= short_name %>-><%= attribute.name %> = na_make_object( <%= attribute.narray_enum_type %>, <%= attribute.init.rank_expr %>, <%= attribute.init.shape_expr_c %>, cNArray );
   GetNArray( <%= short_name %>-><%= attribute.name %>, narr );
   <%= attribute.name %>_ptr = (<%= attribute.item_ctype %>*) narr->ptr;
   for( i = 0; i < narr->total; i++ ) {
@@ -119,8 +119,8 @@ void <%= short_name %>__deep_copy( <%= struct_name %> *<%= short_name %>_copy, <
 
 <% end -%>
 <% alloc_attributes.each do |attribute| -%>
-  <%= short_name %>_copy-><%= attribute.name %> = ALLOC_N( <%= attribute.cbase %>, <%= attribute.size_expr_c( from: short_name + "_copy" ) %> );
-  memcpy( <%= short_name %>_copy-><%= attribute.name %>, <%= short_name %>_orig-><%= attribute.name %>, ( <%= attribute.size_expr_c( from: short_name + "_copy" ) %> ) * sizeof(<%= attribute.cbase %>) );
+  <%= short_name %>_copy-><%= attribute.name %> = ALLOC_N( <%= attribute.cbase %>, <%= attribute.init.size_expr_c( from: short_name + "_copy" ) %> );
+  memcpy( <%= short_name %>_copy-><%= attribute.name %>, <%= short_name %>_orig-><%= attribute.name %>, ( <%= attribute.init.size_expr_c( from: short_name + "_copy" ) %> ) * sizeof(<%= attribute.cbase %>) );
 
 <% end -%>
   return;

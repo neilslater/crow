@@ -164,30 +164,11 @@ module Crow
     end
 
     def initialize name, opts = {}
-      init_opts = (opts[:init] ||= {})
-      init_opts[:expr] ||= self.class.item_default
-
       super( name, opts )
+      init.pointer_post_init
 
       @ruby_read = opts[:ruby_read].nil? ? true : opts[:ruby_read]
       @ruby_write = opts[:ruby_write].nil? ? false : opts[:ruby_write]
-    end
-
-    def size_expr_c from: parent_struct.short_name, init_context: false
-      # p [from, self.name, self.expr, self.init.expr]
-
-      use_size_expr = init.size_expr
-
-      if init.size_expr.start_with?( '.' )
-        if init_context
-          use_size_expr = init.size_expr.sub( '.', '$' )
-        else
-          use_size_expr = init.size_expr.sub( '.', '%' )
-        end
-      end
-
-      e = Expression.new( use_size_expr, @parent_struct.attributes, @parent_struct.init_params )
-      e.as_c_code( from )
     end
   end
 
@@ -542,15 +523,6 @@ module Crow
 
     def init_shape_var struct_name = parent_struct.short_name
       "#{struct_name}->#{shape_var} = NULL"
-    end
-
-    def shape_expr_c container_name = parent_struct.short_name
-      allowed_attributes = @parent_struct.attributes.clone
-      if shape_var
-        allowed_attributes << TypeMap::P_Int.new( shape_var, parent_struct: @parent_struct, ctype: :int )
-      end
-
-      Expression.new( init.shape_expr, allowed_attributes, @parent_struct.init_params ).as_c_code( container_name )
     end
   end
 

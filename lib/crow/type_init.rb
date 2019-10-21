@@ -17,7 +17,7 @@ module Crow
       @rank_expr ||= rank_expr
     end
 
-    # TODO: This should be a subclass thing . . .
+    # TODO: This should be a subclass thing . . . for NARRAY
     def narray_post_init shape_var = nil
       @expr ||= parent_typemap.class.item_default
       if ( shape_var )
@@ -32,6 +32,40 @@ module Crow
           @shape_expr = "{ #{([1] * rank_expr.to_i).join(', ')} }"
         end
       end
+    end
+
+    # TODO: This should be a subclass thing . . . for NARRAY
+    def shape_expr_c container_name = parent_typemap.parent_struct.short_name
+      struct = parent_typemap.parent_struct
+
+      allowed_attributes = struct.attributes.clone
+      if parent_typemap.shape_var
+        allowed_attributes << TypeMap::P_Int.new( parent_typemap.shape_var, parent_struct: struct, ctype: :int )
+      end
+
+      Expression.new( shape_expr, allowed_attributes, struct.init_params ).as_c_code( container_name )
+    end
+
+    # TODO: This should be a subclass thing . . . for Pointer
+    def size_expr_c from: parent_typemap.parent_struct.short_name, init_context: false
+      use_size_expr = size_expr
+
+      if size_expr.start_with?( '.' )
+        if init_context
+          use_size_expr = size_expr.sub( '.', '$' )
+        else
+          use_size_expr = size_expr.sub( '.', '%' )
+        end
+      end
+
+      struct = parent_typemap.parent_struct
+      e = Expression.new( use_size_expr, struct.attributes, struct.init_params )
+      e.as_c_code( from )
+    end
+
+    # TODO: This should be a subclass thing . . . for NARRAY
+    def pointer_post_init
+      @expr ||= parent_typemap.class.item_default
     end
   end
 end
