@@ -62,9 +62,8 @@ class Crow::StructClass
     if opts[:attributes]
       @attributes = opts[:attributes].map do | attr_opts |
         use_opts = attr_opts.clone
-        attr_name = use_opts[:name]
         use_opts[:parent_struct] = self
-        Crow::TypeMap.create( attr_name, use_opts )
+        Crow::TypeMap.create( use_opts )
       end
     else
       @attributes = []
@@ -72,9 +71,8 @@ class Crow::StructClass
     if opts[:init_params]
       @init_params = opts[:init_params].map do | init_param_opts |
         use_opts = init_param_opts.clone
-        param_name = use_opts[:name]
         use_opts[:parent_struct] = self
-        Crow::TypeMap.create( param_name, use_opts )
+        Crow::TypeMap.create( use_opts )
       end
     else
       @init_params = []
@@ -113,8 +111,8 @@ class Crow::StructClass
   # @param [String] name identifier used for the attribute in C and Ruby references
   # @param [Hash] opts passed to Crow::TypeMap constructor
   # @return [Crow::TypeMap] the new attribute definition
-  def add_attribute name, opts = {}
-    @attributes << Crow::TypeMap.create( name, opts.merge( parent_struct: self ) )
+  def add_attribute opts = {}
+    @attributes << Crow::TypeMap.create( opts.merge( parent_struct: self ) )
   end
 
   # Whether any of the attributes are NArray objects.

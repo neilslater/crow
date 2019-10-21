@@ -20,9 +20,8 @@ module Crow
     attr_reader :name, :ruby_name, :ctype, :pointer, :default, :parent_struct, :init
     attr_reader :ruby_read, :ruby_write, :ptr_cache, :shape_var
 
-    def initialize(n, name: n, ruby_name: name, default: self.class.default, pointer: false, ctype:,
-                   init: {}, parent_struct:, ruby_read: true, ruby_write: false,
-                   shape_var: nil, ptr_cache: nil)
+    def initialize(name:, ruby_name: name, default: self.class.default, pointer: false, ctype:,
+                   init: {}, parent_struct:, ruby_read: true, ruby_write: false, shape_var: nil, ptr_cache: nil)
       raise "Variable name '#{name}' cannot be used" if name !~ /\A[a-zA-Z0-9_]+\z/
       @name = name
       @ruby_name = ruby_name
@@ -38,7 +37,7 @@ module Crow
       @ruby_write = !! ruby_write
     end
 
-    def self.create name, opts = {}
+    def self.create opts = {}
       unless class_lookup = CTYPES[ opts[:ctype] ]
         raise ArgumentError, "Type '#{opts[:ctype]}' not supported. Allowed types #{CTYPES.keys.join(', ')}"
       end
@@ -49,7 +48,7 @@ module Crow
           class_lookup.first
       end
 
-      self.const_get( attribute_class ).new( name, opts )
+      self.const_get( attribute_class ).new( opts )
     end
 
     def self.default
@@ -163,8 +162,8 @@ module Crow
       true
     end
 
-    def initialize name, opts = {}
-      super( name, opts )
+    def initialize opts = {}
+      super( opts )
       init.pointer_post_init
 
       @ruby_read = opts[:ruby_read].nil? ? true : opts[:ruby_read]
@@ -478,8 +477,8 @@ module Crow
 
     attr_reader :shape_tmp_var
 
-    def initialize name, opts = {}
-      super( name, opts )
+    def initialize opts = {}
+      super( opts )
       init.narray_post_init(opts[:shape_var])
 
       if ( opts[:shape_var] )

@@ -40,7 +40,7 @@ module Crow
 
       allowed_attributes = struct.attributes.clone
       if parent_typemap.shape_var
-        allowed_attributes << TypeMap::P_Int.new( parent_typemap.shape_var, parent_struct: struct, ctype: :int )
+        allowed_attributes << TypeMap::P_Int.new( name: parent_typemap.shape_var, parent_struct: struct, ctype: :int )
       end
 
       Expression.new( shape_expr, allowed_attributes, struct.init_params ).as_c_code( container_name )
