@@ -20,8 +20,8 @@ module Crow
     attr_reader :name, :ruby_name, :ctype, :pointer, :default, :parent_struct, :init
     attr_reader :init_expr, :ruby_read, :ruby_write, :ptr_cache, :shape_var
 
-    def initialize(n, name: n, ruby_name: name, default: self.class.default, pointer: false, ctype:, init: {},
-                   parent_struct:, init_expr: nil, ruby_read: true, ruby_write: false, size_expr: nil,
+    def initialize(n, name: n, ruby_name: name, default: self.class.default, pointer: false, ctype:,
+                   init: {}, parent_struct:, ruby_read: true, ruby_write: false, size_expr: nil,
                    shape_expr: nil, shape_exprs: nil, rank_expr: nil, shape_var: nil, ptr_cache: nil)
       raise "Variable name '#{name}' cannot be used" if name !~ /\A[a-zA-Z0-9_]+\z/
       @name = name
@@ -34,7 +34,6 @@ module Crow
       end
       @parent_struct = parent_struct
       @init = Crow::TypeInit.new( init.merge(parent_typemap: self) )
-      @init_expr ||= init_expr
       @ruby_read = !! ruby_read
       @ruby_write = !! ruby_write
     end
@@ -176,7 +175,6 @@ module Crow
 
       super( name, opts )
       @size_expr = opts[:size_expr] || [@parent_struct.short_name,@name.upcase,'SIZE'].join('_')
-      @init_expr = opts[:init_expr] || self.class.item_default
 
       @pointer_role = opts[:pointer_role] || :array
       unless ROLES.include?( @pointer_role )
@@ -540,7 +538,6 @@ module Crow
           @shape_expr = "{ #{([1] * @rank_expr.to_i).join(', ')} }"
         end
       end
-      @init_expr = opts[:init_expr] || self.class.item_default
       @ptr_cache = opts[:ptr_cache]
     end
 
