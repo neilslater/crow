@@ -488,6 +488,7 @@ module Crow
       if ( opts[:shape_var] )
         @shape_var = opts[:shape_var]
       end
+
       super( opts )
 
       if ! @shape_var && opts[:init] && ! opts[:init][:shape_expr] && opts[:init][:shape_exprs]

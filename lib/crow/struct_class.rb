@@ -5,8 +5,6 @@ require 'fileutils'
 #
 # An object of the class describes a C struct, and its Ruby representation.
 #
-# NB There are limits to flexibility in the descriptions.
-#
 # @example Define a basic C struct with two attributes and write its files to a folder
 #  structdef = Crow::StructClass.new( 'the_class',
 #    :attributes => [{:name=>'number',:ctype=>:int}, {:name=>'values',:ctype=>:double,:pointer=>true}] } ] )

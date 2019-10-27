@@ -27,6 +27,18 @@ typedef struct _<%= short_name %>_raw {
 void <%= short_name %>__init( <%= struct_name %> *<%= short_name %><% unless init_params.empty? %>, <%= init_params.map(&:as_param).join(', ') %><% end %> );
 
 <% end -%>
+<% narray_attributes.each do |attribute| -%>
+struct NARRAY * <%= short_name %>__get_<%= attribute.name %>( <%= struct_name %> *<%= short_name %> );
+
+int * <%= short_name %>__get_<%= attribute.name %>_shape( <%= struct_name %> *<%= short_name %> );
+
+<%= attribute.item_ctype %> * <%= short_name %>__get_<%= attribute.name %>_ptr( <%= struct_name %> *<%= short_name %> );
+
+int <%= short_name %>__get_<%= attribute.name %>_size( <%= struct_name %> *<%= short_name %> );
+
+int <%= short_name %>__get_<%= attribute.name %>_rank( <%= struct_name %> *<%= short_name %> );
+
+<% end -%>
 void <%= short_name %>__destroy( <%= struct_name %> *<%= short_name %> );
 
 void <%= short_name %>__gc_mark( <%= struct_name %> *<%= short_name %> );

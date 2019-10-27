@@ -2,6 +2,11 @@ TODO:
 
 Crow follow ups:
 
+  * Standardise NArray code to always use references to narray structs, not additional caches
+    * Add (inline+general) helper functions to get shape, ptr
+    * Standard temp var names when narray, shape or ptr values needed
+    * Remove shape_var, ptr_cache etc
+
   * Break down structures in TypeMap: Initialisor & Support Vars (Implied additional TypeMaps on the struct)
 
       Core attr: name:, ruby_name:, pointer:, ctype:,  parent_struct:, ruby_read:, ruby_write:
@@ -10,6 +15,7 @@ Crow follow ups:
 
       Support attr: shape_var:, ptr_cache:, parent_typemap
 
+  * Struct class using strictly hash-based initialiser
 
   * Specs - How to do test at all?
     * libdef - moderate complexity build
@@ -19,12 +25,6 @@ Crow follow ups:
     * Instantiate using parameters (done)
 
   * Add validation rules for parameters, and use to generate minimal test instantiations
-
-  * Factor templates into partials and functions
-    * Add concept of "needs" to cover requirement to declare and populate temp vars for shapes, pointers etc
-    * Allow for difference between pre-initialisation and needs and instantiated needs
-    * Allow for getting data from NArrays or caching it in named var
-    * Have explicit shape/size var for pointers?
 
   * Factor end C code into generated and "user" parts
 

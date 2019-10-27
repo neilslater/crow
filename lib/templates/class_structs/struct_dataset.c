@@ -7,6 +7,37 @@
 //  Definitions for <%= struct_name %> memory management
 //
 
+<% narray_attributes.each do |attribute| -%>
+struct NARRAY * <%= short_name %>__get_<%= attribute.name %>( <%= struct_name %> *<%= short_name %> ) {
+  struct NARRAY *narr;
+  GetNArray( <%= short_name %>-><%= attribute.name %>, narr );
+  return narr;
+}
+
+int * <%= short_name %>__get_<%= attribute.name %>_shape( <%= struct_name %> *<%= short_name %> ) {
+  struct NARRAY *narr;
+  GetNArray( <%= short_name %>-><%= attribute.name %>, narr );
+  return narr->shape;
+}
+
+<%= attribute.item_ctype %> * <%= short_name %>__get_<%= attribute.name %>_ptr( <%= struct_name %> *<%= short_name %> ) {
+  struct NARRAY *narr;
+  GetNArray( <%= short_name %>-><%= attribute.name %>, narr );
+  return (<%= attribute.item_ctype %> * ) narr->ptr;
+}
+
+int <%= short_name %>__get_<%= attribute.name %>_size( <%= struct_name %> *<%= short_name %> ) {
+  struct NARRAY *narr;
+  GetNArray( <%= short_name %>-><%= attribute.name %>, narr );
+  return narr->total;
+}
+
+int <%= short_name %>__get_<%= attribute.name %>_rank( <%= struct_name %> *<%= short_name %> ) {
+  struct NARRAY *narr;
+  GetNArray( <%= short_name %>-><%= attribute.name %>, narr );
+  return narr->rank;
+}
+<% end -%>
 <%= struct_name %> *<%= short_name %>__create() {
   <%= struct_name %> *<%= short_name %>;
   <%= short_name %> = xmalloc( sizeof(<%= struct_name %>) );
