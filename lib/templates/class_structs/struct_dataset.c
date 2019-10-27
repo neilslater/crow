@@ -37,6 +37,7 @@ int <%= short_name %>__get_<%= attribute.name %>_rank( <%= struct_name %> *<%= s
   GetNArray( <%= short_name %>-><%= attribute.name %>, narr );
   return narr->rank;
 }
+
 <% end -%>
 <%= struct_name %> *<%= short_name %>__create() {
   <%= struct_name %> *<%= short_name %>;
