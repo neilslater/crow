@@ -3,20 +3,13 @@ module Crow
     include NotA_C_Pointer
     self.default = 'Qnil'
 
-    attr_reader :shape_tmp_var
+    attr_reader :shape_tmp_var, :ptr_tmp_var
 
     def initialize opts = {}
-      if ( opts[:shape_var] )
-        @shape_var = opts[:shape_var]
-      end
-
       super( opts )
 
-      if ! @shape_var && opts[:init] && ! opts[:init][:shape_expr] && opts[:init][:shape_exprs]
-        @shape_tmp_var = @parent_struct.short_name + '_'  + @name + '_shape'
-      end
-
-      @ptr_cache = opts[:ptr_cache]
+      @shape_tmp_var = @parent_struct.short_name + '_'  + @name + '_shape'
+      @ptr_tmp_var = @parent_struct.short_name + '_'  + @name + '_ptr'
     end
 
     def init_class
@@ -32,23 +25,39 @@ module Crow
     end
 
     def declare_ptr_cache
-      "#{item_ctype} *#{ptr_cache};"
-    end
-
-    def init_ptr_cache struct_name = parent_struct.short_name
-      "#{struct_name}->#{ptr_cache} = NULL"
-    end
-
-    def set_ptr_cache struct_name = parent_struct.short_name, narray_var = 'narr'
-      "#{struct_name}->#{ptr_cache} = (#{item_ctype} *) #{narray_var}->ptr"
+      "#{item_ctype} *#{ptr_tmp_var};"
     end
 
     def declare_shape_var
-      "int *#{shape_var};"
+      "int *#{shape_tmp_var};"
     end
 
-    def init_shape_var struct_name = parent_struct.short_name
-      "#{struct_name}->#{shape_var} = NULL"
+    def set_ptr_cache
+      "#{ptr_tmp_var} = #{ptr_fn_name}( #{@parent_struct.short_name} );"
+    end
+
+    def set_shape_var
+      "#{shape_tmp_var} = #{shape_fn_name}( #{@parent_struct.short_name} );"
+    end
+
+    def narray_fn_name
+      "#{@parent_struct.short_name}__get_#{name}_NARRAY"
+    end
+
+    def size_fn_name
+      "#{@parent_struct.short_name}__get_#{name}_size"
+    end
+
+    def rank_fn_name
+      "#{@parent_struct.short_name}__get_#{name}_rank"
+    end
+
+    def ptr_fn_name
+      "#{@parent_struct.short_name}__get_#{name}_ptr"
+    end
+
+    def shape_fn_name
+      "#{@parent_struct.short_name}__get_#{name}_shape"
     end
   end
 

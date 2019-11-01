@@ -13,11 +13,7 @@
 
 typedef struct _<%= short_name %>_raw {
 <% attributes.each do |attribute| -%>
-<% if attribute.shape_var %>  <%= attribute.declare_shape_var %>
-<% end -%>
   <%= attribute.declare %>
-<% if attribute.ptr_cache %>  <%= attribute.declare_ptr_cache %>
-<% end -%>
 <% end -%>
   } <%= struct_name %>;
 
@@ -28,15 +24,15 @@ void <%= short_name %>__init( <%= struct_name %> *<%= short_name %><% unless ini
 
 <% end -%>
 <% narray_attributes.each do |attribute| -%>
-struct NARRAY * <%= short_name %>__get_<%= attribute.name %>( <%= struct_name %> *<%= short_name %> );
+struct NARRAY * <%= attribute.narray_fn_name %>( <%= struct_name %> *<%= short_name %> );
 
-int * <%= short_name %>__get_<%= attribute.name %>_shape( <%= struct_name %> *<%= short_name %> );
+int * <%= attribute.shape_fn_name %>( <%= struct_name %> *<%= short_name %> );
 
-<%= attribute.item_ctype %> * <%= short_name %>__get_<%= attribute.name %>_ptr( <%= struct_name %> *<%= short_name %> );
+<%= attribute.item_ctype %> * <%= attribute.ptr_fn_name %>( <%= struct_name %> *<%= short_name %> );
 
-int <%= short_name %>__get_<%= attribute.name %>_size( <%= struct_name %> *<%= short_name %> );
+int <%= attribute.size_fn_name %>( <%= struct_name %> *<%= short_name %> );
 
-int <%= short_name %>__get_<%= attribute.name %>_rank( <%= struct_name %> *<%= short_name %> );
+int <%= attribute.rank_fn_name %>( <%= struct_name %> *<%= short_name %> );
 
 <% end -%>
 void <%= short_name %>__destroy( <%= struct_name %> *<%= short_name %> );
