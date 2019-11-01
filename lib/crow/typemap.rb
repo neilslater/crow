@@ -18,10 +18,10 @@ module Crow
     ]
 
     attr_reader :name, :ruby_name, :ctype, :pointer, :default, :parent_struct, :init
-    attr_reader :ruby_read, :ruby_write, :ptr_cache, :shape_var
+    attr_reader :ruby_read, :ruby_write
 
     def initialize(name:, ruby_name: name, default: self.class.default, pointer: false, ctype:,
-                   init: {}, parent_struct:, ruby_read: true, ruby_write: false, shape_var: nil, ptr_cache: nil)
+                   init: {}, parent_struct:, ruby_read: true, ruby_write: false)
       raise "Variable name '#{name}' cannot be used" if name !~ /\A[a-zA-Z0-9_]+\z/
       @name = name
       @ruby_name = ruby_name
@@ -140,18 +140,6 @@ module Crow
 
     def read_only?
       ruby_read && ! ruby_write
-    end
-
-    def declare_ptr_cache struct_name = parent_struct.short_name
-      "#{item_ctype} *#{ptr_cache};"
-    end
-
-    def init_ptr_cache struct_name = parent_struct.short_name
-      "#{struct_name}->#{ptr_cache} = NULL"
-    end
-
-    def set_ptr_cache struct_name = parent_struct.short_name
-      "#{struct_name}->#{ptr_cache} = (#{item_ctype} *) #{struct_name}->#{name}->ptr"
     end
   end
 

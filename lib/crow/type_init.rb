@@ -45,17 +45,12 @@ module Crow
     def initialize(opts = {})
       super(opts)
       @expr ||= parent_typemap.class.item_default
-      if ( shape_var = parent_typemap.shape_var )
-        @shape_expr = "%#{shape_var}"
-        @shape_exprs ||= [1] * rank_expr.to_i
+      if @shape_expr
+        # Do nothing
+      elsif @shape_exprs
+        @shape_expr = parent_typemap.shape_tmp_var
       else
-        if @shape_expr
-          # Do nothing
-        elsif @shape_exprs
-          @shape_expr = parent_typemap.parent_struct.short_name + '_'  + parent_typemap.name + '_shape'
-        else
-          @shape_expr = "{ #{([1] * rank_expr.to_i).join(', ')} }"
-        end
+        @shape_expr = "{ #{([1] * rank_expr.to_i).join(', ')} }"
       end
     end
 
@@ -63,9 +58,6 @@ module Crow
       struct = parent_typemap.parent_struct
 
       allowed_attributes = struct.attributes.clone
-      if parent_typemap.shape_var
-        allowed_attributes << TypeMap::P_Int.new( name: parent_typemap.shape_var, parent_struct: struct, ctype: :int )
-      end
 
       Expression.new( shape_expr, allowed_attributes, struct.init_params ).as_c_code( container_name )
     end
