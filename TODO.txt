@@ -2,7 +2,7 @@ TODO:
 
 Crow follow ups:
 
-  * Struct class using strictly hash-based initialiser?
+  * Add validation rules for parameters, and use to generate minimal test instantiations
 
   * Specs - How to do test at all?
     * libdef - moderate complexity build
@@ -11,8 +11,6 @@ Crow follow ups:
     * Start with assertions that classes exist (done)
     * Instantiate using parameters (done)
 
-  * Add validation rules for parameters, and use to generate minimal test instantiations
-
   * Factor end C code into generated and "user" parts
 
   * bool vars - add <stdbool.h>
@@ -20,6 +18,8 @@ Crow follow ups:
   * enum vars - map C enum to set of Ruby Symbols?
 
   * Template pointers as read/write from Ruby (requires associated shape)
+
+  * Struct class using strictly hash-based initialiser?
 
   * Automated support for Marshal
 

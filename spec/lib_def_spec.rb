@@ -77,9 +77,8 @@ describe Crow::LibDef do
 
   def compile_project lib_name, dir
     result =  build_and_run_rake lib_name, dir, 'compile'
-    # TODO: Check for compiler warnings and fail if any
     expect(result).to include "compiling"
-    expect(result).to_not include "warning"
+    expect(result).to_not include("warning"), result
     expect(result).to include "linking shared-object #{lib_name}/#{lib_name}"
   end
 
