@@ -52,8 +52,8 @@ int <%= attribute.rank_fn_name %>( <%= struct_name %> *<%= short_name %> ) {
 void <%= short_name %>__init( <%= struct_name %> *<%= short_name %><% unless init_params.empty? %>, <%= init_params.map(&:as_param).join(', ') %><% end %> ) {
   int i;
 <% narray_attributes.each do |attribute| -%>
-  <%= attribute.declare_ptr_cache %>;
-  <%= attribute.declare_shape_var %>;
+  <%= attribute.declare_ptr_cache %>
+  <%= attribute.declare_shape_var %>
 <% end -%>
 
 <% simple_attributes_with_init.each do |attribute| -%>
