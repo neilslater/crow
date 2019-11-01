@@ -3,10 +3,6 @@ module Crow
     include NotA_C_Pointer
     self.default = 'Qnil'
 
-    def initialize opts = {}
-      super( opts )
-    end
-
     def shape_tmp_var
       @shape_tmp_var ||= @parent_struct.short_name + '_'  + @name + '_shape'
     end
