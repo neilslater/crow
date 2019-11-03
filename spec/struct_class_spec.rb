@@ -15,6 +15,35 @@ describe Crow::StructClass do
         end
       end
     end
+
+    describe '#write_user' do
+      it 'creates two suitably-named "ruby" files' do
+        Dir.mktmpdir do |dir|
+          subject.write_user(dir)
+          expect( File.exists?( File.join(dir, "ruby", "class_#{expected_name}.h")) ).to be true
+          expect( File.exists?( File.join(dir, "ruby", "class_#{expected_name}.c")) ).to be true
+        end
+      end
+
+      it 'does not over-write existing "ruby" files' do
+        Dir.mktmpdir do |dir|
+          FileUtils.mkdir_p File.join(dir, "ruby")
+          target_files = [?h, ?c].map { |e| File.join(dir, "ruby", "class_#{expected_name}.#{e}") }
+          target_files.each do |target_file|
+            File.open(target_file, 'wb') do |f|
+              f.puts "Leave me alone!"
+            end
+          end
+
+          subject.write_user(dir)
+
+          target_files.each do |target_file|
+            lines = File.readlines(target_file)
+            expect(lines).to eql ["Leave me alone!\n"]
+          end
+        end
+      end
+    end
   end
 
   describe 'minimal struct' do

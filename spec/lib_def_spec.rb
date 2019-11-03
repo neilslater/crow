@@ -244,11 +244,38 @@ describe Crow::LibDef do
         end
       end
     end
+
+    it 'allows user source code to be added in "ruby" dir' do
+      c_source = <<~CENDS
+        #include "ruby/class_bar.h"
+
+        VALUE bar_rbobject__doubled( VALUE self ) {
+          Bar *bar = get_bar_struct( self );
+          return INT2NUM( bar->hi * 2 );
+        }
+
+        void init_class_bar_ext() {
+          rb_define_method( Foo_Bar, "doubled", bar_rbobject__doubled, 0 );
+          return;
+        }
+      CENDS
+
+      Dir.mktmpdir do |dir|
+        subject.create_project(dir)
+        File.open( File.join( dir, 'ext', 'foo', 'ruby', 'class_bar.c' ), 'w' ) do |f|
+          f.puts c_source
+        end
+        compile_project('foo', dir)
+
+        result = run_ruby_in_project( 'foo', dir, %Q{f = Foo::Bar.new; f.hi = -17; p f.doubled} )
+        expect(result.chomp).to end_with "-34"
+      end
+    end
   end
 
   describe 'libdef with C array and NArray' do
     subject { libdef_b }
 
-    it_behaves_like 'a source code generator', 'foo', ['bar', 'baz'] # , 'table']
+    it_behaves_like 'a source code generator', 'foo', ['bar', 'baz', 'table']
   end
 end

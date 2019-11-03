@@ -25,4 +25,5 @@
 void Init_kaggle_skeleton() {
   init_base_module_kaggle_skeleton();
   init_srand_by_time();
+  init_classes_kaggle_skeleton();
 }

@@ -21,4 +21,6 @@
 
 void init_base_module_kaggle_skeleton();
 
+void init_classes_kaggle_skeleton();
+
 #endif

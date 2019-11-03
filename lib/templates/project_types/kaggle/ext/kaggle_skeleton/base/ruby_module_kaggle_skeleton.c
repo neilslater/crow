@@ -63,4 +63,12 @@ void init_base_module_kaggle_skeleton() {
 <% structs.each do |s| -%>
   init_<%= s.short_name %>_class();
 <% end -%>
+  return;
+}
+
+void init_classes_kaggle_skeleton() {
+<% structs.each do |s| -%>
+  init_class_<%= s.short_name %>_ext();
+<% end -%>
+  return;
 }
