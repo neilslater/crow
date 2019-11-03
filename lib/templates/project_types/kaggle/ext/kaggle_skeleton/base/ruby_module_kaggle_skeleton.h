@@ -1,23 +1,23 @@
-// ext/kaggle_skeleton/ruby_module_ru_ne_ne.h
+// ext/kaggle_skeleton/base/ruby_module_kaggle_skeleton.h
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 //
-//  Declarations of narray helper functions
+//  Combines all base generated Ruby bindings
 //
 
-#ifndef RUBY_MODULE_FACTORY_ELF_H
-#define RUBY_MODULE_FACTORY_ELF_H
+#ifndef BASE_RUBY_MODULE_H
+#define BASE_RUBY_MODULE_H
 
 #include <ruby.h>
 #include "narray.h"
 #include "util/narray_helper.h"
-#include "shared_vars.h"
-#include "shared_helpers.h"
+#include "util/ruby_helpers.h"
 #include "util/mt.h"
+#include "base/shared_vars.h"
 <% structs.each do |s| -%>
 #include "base/ruby_class_<%= s.short_name %>.h"
 <% end -%>
 
-void init_module_kaggle_skeleton();
+void init_base_module_kaggle_skeleton();
 
 #endif

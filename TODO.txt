@@ -51,6 +51,10 @@ Crow follow ups:
 
   * Init params automatically generated from any item with init_expr='*'
 
+  * Optional utils
+
+  * Utils should have own classes/modules for any tests/representation
+
   * More pre-built utilities:
     * Sorting, shuffling, random numbers
     *

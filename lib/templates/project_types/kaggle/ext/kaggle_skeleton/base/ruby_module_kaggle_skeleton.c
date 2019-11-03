@@ -1,6 +1,6 @@
-// ext/kaggle_skeleton/rub_module_kaggle_skeleton.c
+// ext/kaggle_skeleton/base/ruby_module_kaggle_skeleton.c
 
-#include "ruby_module_kaggle_skeleton.h"
+#include "base/ruby_module_kaggle_skeleton.h"
 
 /* @overload srand( seed )
  * Seed the random number generator used inside KaggleSkeleton.
@@ -50,7 +50,7 @@ VALUE KaggleSkeleton = Qnil;
 VALUE <%= s.full_class_name %> = Qnil;
 <% end -%>
 
-void init_module_kaggle_skeleton() {
+void init_base_module_kaggle_skeleton() {
   KaggleSkeleton = rb_define_module( "KaggleSkeleton" );
 <% structs.each do |s| -%>
   <%= s.full_class_name %> = rb_define_class_under( KaggleSkeleton, "<%= s.rb_class_name %>", rb_cObject );
@@ -63,5 +63,4 @@ void init_module_kaggle_skeleton() {
 <% structs.each do |s| -%>
   init_<%= s.short_name %>_class();
 <% end -%>
-  init_srand_by_time();
 }

@@ -1,7 +1,7 @@
-// ext/kaggle_skeleton/shared_helpers.h
+// ext/kaggle_skeleton/util/ruby_helpers.h
 
-#ifndef SHARED_HELPERS_H
-#define SHARED_HELPERS_H
+#ifndef UTIL_RUBY_HELPERS_H
+#define UTIL_RUBY_HELPERS_H
 
 #include "ruby.h"
 

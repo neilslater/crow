@@ -1,6 +1,6 @@
-// ext/kaggle_skeleton/shared_helpers.c
+// ext/kaggle_skeleton/util/ruby_helpers.c
 
-#include "shared_helpers.h"
+#include "util/ruby_helpers.h"
 
 // Hash lookup helper
 VALUE ValAtSymbol(VALUE hash, const char* key) {

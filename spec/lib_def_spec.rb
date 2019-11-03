@@ -104,8 +104,8 @@ describe Crow::LibDef do
           subject.create_project(dir)
 
           c_path = File.join( dir, 'ext', lib_name )
-          expect( File.exists?( File.join(c_path, "ruby_module_#{lib_name}.h")) ).to be true
-          expect( File.exists?( File.join(c_path, "ruby_module_#{lib_name}.c")) ).to be true
+          expect( File.exists?( File.join(c_path, "base", "ruby_module_#{lib_name}.h")) ).to be true
+          expect( File.exists?( File.join(c_path, "base", "ruby_module_#{lib_name}.c")) ).to be true
           expect( File.exists?( File.join(c_path, "#{lib_name}.c")) ).to be true
         end
       end
@@ -159,9 +159,9 @@ describe Crow::LibDef do
           expect( File.exists?( File.join(c_path, "extconf.rb")) ).to be true
           expect( File.exists?( File.join(c_path, "util", "mt.c")) ).to be true
           expect( File.exists?( File.join(c_path, "util", "mt.h")) ).to be true
-          expect( File.exists?( File.join(c_path, "shared_helpers.c")) ).to be true
-          expect( File.exists?( File.join(c_path, "shared_helpers.h")) ).to be true
-          expect( File.exists?( File.join(c_path, "shared_vars.h")) ).to be true
+          expect( File.exists?( File.join(c_path, "util", "ruby_helpers.c")) ).to be true
+          expect( File.exists?( File.join(c_path, "util", "ruby_helpers.h")) ).to be true
+          expect( File.exists?( File.join(c_path, "base", "shared_vars.h")) ).to be true
         end
       end
 
