@@ -272,6 +272,63 @@ describe Crow::LibDef do
         expect(result.chomp).to end_with "-34"
       end
     end
+
+    it 'allows user source code to be added in "lib" dir' do
+      c_libh_source = <<~CLIBHENDS
+        #ifndef LIB_STRUCT_BAR_H
+        #define LIB_STRUCT_BAR_H
+
+        #include "base/all_structs.h"
+
+        int bar__count( Bar *bar );
+
+        #endif
+      CLIBHENDS
+
+      c_lib_source = <<~CLIBENDS
+        #include "lib/bar.h"
+
+        int bar__count( Bar *bar ) {
+          return bar->hi * 7;
+        }
+      CLIBENDS
+
+      c_rb_source = <<~CRBENDS
+        #include "ruby/class_bar.h"
+
+        VALUE bar_rbobject__hi_user( VALUE self ) {
+          Bar *bar = get_bar_struct( self );
+          return DBL2NUM( bar__count( bar ) * 0.25 );
+        }
+
+        void init_class_bar_ext() {
+          rb_define_method( Foo_Bar, "hi_user", bar_rbobject__hi_user, 0 );
+          return;
+        }
+      CRBENDS
+
+      Dir.mktmpdir do |dir|
+        subject.create_project(dir)
+
+        File.open( File.join( dir, 'ext', 'foo', 'lib', 'bar.h' ), 'w' ) do |f|
+          f.puts c_libh_source
+        end
+
+        File.open( File.join( dir, 'ext', 'foo', 'lib', 'bar.c' ), 'w' ) do |f|
+          f.puts c_lib_source
+        end
+
+        File.open( File.join( dir, 'ext', 'foo', 'ruby', 'class_bar.c' ), 'w' ) do |f|
+          f.puts c_rb_source
+        end
+
+        compile_project('foo', dir)
+
+        result = run_ruby_in_project( 'foo', dir, %Q{f = Foo::Bar.new; f.hi = -3; p f.hi_user} )
+        expect(result.chomp).to end_with "-5.25"
+      end
+    end
+
   end
 
   describe 'libdef with C array and NArray' do

@@ -10,6 +10,6 @@
 /*
  Example
 int <%= short_name %>__count( <%= struct_name %> *<%= short_name %> ) {
-  return short_name->foo * 5;
+  return <%= short_name %>->foo * 5;
 }
 */
