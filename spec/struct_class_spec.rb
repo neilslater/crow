@@ -5,13 +5,13 @@ describe Crow::StructClass do
 
   shared_examples 'a C source creator' do |expected_name|
     describe '#write' do
-      it 'creates four suitably-named files' do
+      it 'creates four suitably-named "base" files' do
         Dir.mktmpdir do |dir|
           subject.write(dir)
-          expect( File.exists?( File.join(dir, "struct_#{expected_name}.h")) ).to be true
-          expect( File.exists?( File.join(dir, "struct_#{expected_name}.c")) ).to be true
-          expect( File.exists?( File.join(dir, "ruby_class_#{expected_name}.h")) ).to be true
-          expect( File.exists?( File.join(dir, "ruby_class_#{expected_name}.c")) ).to be true
+          expect( File.exists?( File.join(dir, "base", "struct_#{expected_name}.h")) ).to be true
+          expect( File.exists?( File.join(dir, "base", "struct_#{expected_name}.c")) ).to be true
+          expect( File.exists?( File.join(dir, "base", "ruby_class_#{expected_name}.h")) ).to be true
+          expect( File.exists?( File.join(dir, "base", "ruby_class_#{expected_name}.c")) ).to be true
         end
       end
     end

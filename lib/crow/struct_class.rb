@@ -39,6 +39,9 @@ class Crow::StructClass
   TEMPLATE_DIR = File.realdirpath( File.join( __dir__, '../../lib/templates/class_structs' ) )
   TEMPLATES = [ 'struct_dataset.h', 'struct_dataset.c', 'ruby_class_dataset.h', 'ruby_class_dataset.c' ]
 
+  USER_CLASS_TEMPLATE_DIR = File.realdirpath( File.join( __dir__, '../../lib/templates/class_structs' ) )
+  USER_CLASS_TEMPLATES = [ 'class_dataset.h', 'class_dataset.c' ]
+
   SPEC_TEMPLATE_DIR = File.realdirpath( File.join( __dir__, '../../lib/templates/spec' ) )
   SPEC_TEMPLATES = [ 'dataset_spec.rb' ]
 
@@ -84,9 +87,34 @@ class Crow::StructClass
   # @param [String] path directory to write files to.
   # @return [true]
   def write path
+    ext_base_dir = File.join( path, 'base' )
+    unless File.directory?( ext_base_dir )
+      FileUtils.mkdir_p ext_base_dir
+    end
+
     TEMPLATES.each do |template|
-      File.open( File.join( path, template.sub( /dataset/, short_name ) ), 'w' ) do |file|
+      File.open( File.join( path, 'base', template.sub( /dataset/, short_name ) ), 'w' ) do |file|
         file.puts render( File.join( TEMPLATE_DIR, template ) )
+      end
+    end
+    true
+  end
+
+  # Writes user C files that go in ext/lib/ruby and ext/lib/struct for developer to extend with the
+  # main C-based functionality of the library.
+  # @param [String] path directory to write files to.
+  # @return [true]
+  def write_user path
+    ext_ruby_dir = File.join( path, 'ruby' )
+    unless File.directory?( ext_ruby_dir )
+      FileUtils.mkdir_p ext_ruby_dir
+    end
+
+    USER_CLASS_TEMPLATES.each do |template|
+      target = File.join( path, 'ruby', template.sub( /dataset/, short_name ) )
+      next if File.exist?(target)
+      File.open( target, 'w' ) do |file|
+        file.puts render( File.join( USER_CLASS_TEMPLATE_DIR, template ) )
       end
     end
     true

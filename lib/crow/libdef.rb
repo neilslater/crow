@@ -71,7 +71,7 @@ class Crow::LibDef
       FileUtils.mkdir_p spec_dir
     end
 
-    ext_dir = File.join( target_dir, 'ext', short_name, 'base' )
+    ext_dir = File.join( target_dir, 'ext', short_name )
     unless File.directory?( ext_dir )
       FileUtils.mkdir_p ext_dir
     end
@@ -79,6 +79,7 @@ class Crow::LibDef
     structs.each do |struct_class|
       # NB the _class refers to class inside target project, not in current process
       struct_class.write ext_dir
+      struct_class.write_user ext_dir
       struct_class.write_specs spec_dir
     end
 

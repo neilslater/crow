@@ -16,6 +16,7 @@
 #include "base/shared_vars.h"
 <% structs.each do |s| -%>
 #include "base/ruby_class_<%= s.short_name %>.h"
+#include "ruby/class_<%= s.short_name %>.h"
 <% end -%>
 
 void init_base_module_kaggle_skeleton();

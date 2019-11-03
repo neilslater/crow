@@ -110,7 +110,7 @@ describe Crow::LibDef do
         end
       end
 
-      it 'creates four C files for each struct' do
+      it 'creates four base C files for each struct' do
         Dir.mktmpdir do |dir|
           subject.create_project(dir)
 
@@ -121,6 +121,19 @@ describe Crow::LibDef do
             expect( File.exists?( File.join(c_path, "base", "struct_#{expected_name}.c")) ).to be true
             expect( File.exists?( File.join(c_path, "base", "ruby_class_#{expected_name}.h")) ).to be true
             expect( File.exists?( File.join(c_path, "base", "ruby_class_#{expected_name}.c")) ).to be true
+          end
+        end
+      end
+
+      it 'creates two "ruby" C files for each struct' do
+        Dir.mktmpdir do |dir|
+          subject.create_project(dir)
+
+          c_path = File.join( dir, 'ext', lib_name )
+
+          struct_names.each do |expected_name|
+            expect( File.exists?( File.join(c_path, "ruby", "class_#{expected_name}.h")) ).to be true
+            expect( File.exists?( File.join(c_path, "ruby", "class_#{expected_name}.c")) ).to be true
           end
         end
       end
