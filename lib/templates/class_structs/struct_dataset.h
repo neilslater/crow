@@ -1,12 +1,12 @@
-// ext/<%= lib_short_name %>/struct_<%= short_name %>.h
+// ext/<%= lib_short_name %>/base/struct_<%= short_name %>.h
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //
 //  Definition for <%= struct_name %> and declarations for its memory management
 //
 
-#ifndef STRUCT_<%= short_name.upcase %>_H
-#define STRUCT_<%= short_name.upcase %>_H
+#ifndef BASE_STRUCT_<%= short_name.upcase %>_H
+#define BASE_STRUCT_<%= short_name.upcase %>_H
 
 #include <ruby.h>
 #include "narray.h"

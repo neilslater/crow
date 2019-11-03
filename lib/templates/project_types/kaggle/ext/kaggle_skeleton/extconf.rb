@@ -23,4 +23,16 @@ if /cygwin|mingw/ =~ RUBY_PLATFORM
    have_library("narray") || raise("ERROR: narray library is not found")
 end
 
+# Manipulations of $srcs, $INCFLAGS and $VPATH allow source files to be organised
+SUBDIRS = ['base']
+
+Dir.chdir(__dir__) do
+   $srcs = Dir.glob('*.c') + SUBDIRS.flat_map { |sd| Dir.glob("#{sd}/*.c") }
+end
+
+SUBDIRS.each do |sd|
+   $INCFLAGS << " -I$(srcdir)/#{sd}"
+   $VPATH << "$(srcdir)/#{sd}"
+end
+
 create_makefile( 'kaggle_skeleton/kaggle_skeleton' )

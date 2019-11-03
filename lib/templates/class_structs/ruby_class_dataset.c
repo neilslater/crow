@@ -1,6 +1,6 @@
-// ext/<%= lib_short_name %>/ruby_class_<%= short_name %>.c
+// ext/<%= lib_short_name %>/base/ruby_class_<%= short_name %>.c
 
-#include "ruby_class_<%= short_name %>.h"
+#include "base/ruby_class_<%= short_name %>.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //

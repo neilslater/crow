@@ -1,6 +1,6 @@
-// ext/<%= lib_short_name %>/struct_<%= short_name %>.c
+// ext/<%= lib_short_name %>/base/struct_<%= short_name %>.c
 
-#include "struct_<%= short_name %>.h"
+#include "base/struct_<%= short_name %>.h"
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //

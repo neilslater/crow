@@ -15,7 +15,7 @@
 #include "shared_helpers.h"
 #include "mt.h"
 <% structs.each do |s| -%>
-#include "ruby_class_<%= s.short_name %>.h"
+#include "base/ruby_class_<%= s.short_name %>.h"
 <% end -%>
 
 void init_module_kaggle_skeleton();

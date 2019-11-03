@@ -2,6 +2,8 @@ TODO:
 
 Crow follow ups:
 
+  * Factor end C code into generated and "user" parts
+
   * Add validation rules for parameters, and use to generate minimal test instantiations
 
   * Specs - How to do test at all?
@@ -10,8 +12,6 @@ Crow follow ups:
   * Templates for spec files of target system
     * Start with assertions that classes exist (done)
     * Instantiate using parameters (done)
-
-  * Factor end C code into generated and "user" parts
 
   * bool vars - add <stdbool.h>
 

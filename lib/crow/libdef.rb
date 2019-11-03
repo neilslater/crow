@@ -66,10 +66,14 @@ class Crow::LibDef
     source_names = { :source_short_name => 'kaggle_skeleton', :source_module_name => 'KaggleSkeleton' }
     copy_project( source_dir, target_dir, source_names )
 
-    ext_dir = File.join( target_dir, 'ext', short_name )
     spec_dir = File.join( target_dir, 'spec' )
     unless File.directory?( spec_dir )
       FileUtils.mkdir_p spec_dir
+    end
+
+    ext_dir = File.join( target_dir, 'ext', short_name, 'base' )
+    unless File.directory?( ext_dir )
+      FileUtils.mkdir_p ext_dir
     end
 
     structs.each do |struct_class|

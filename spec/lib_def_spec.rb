@@ -117,10 +117,10 @@ describe Crow::LibDef do
           c_path = File.join( dir, 'ext', lib_name )
 
           struct_names.each do |expected_name|
-            expect( File.exists?( File.join(c_path, "struct_#{expected_name}.h")) ).to be true
-            expect( File.exists?( File.join(c_path, "struct_#{expected_name}.c")) ).to be true
-            expect( File.exists?( File.join(c_path, "ruby_class_#{expected_name}.h")) ).to be true
-            expect( File.exists?( File.join(c_path, "ruby_class_#{expected_name}.c")) ).to be true
+            expect( File.exists?( File.join(c_path, "base", "struct_#{expected_name}.h")) ).to be true
+            expect( File.exists?( File.join(c_path, "base", "struct_#{expected_name}.c")) ).to be true
+            expect( File.exists?( File.join(c_path, "base", "ruby_class_#{expected_name}.h")) ).to be true
+            expect( File.exists?( File.join(c_path, "base", "ruby_class_#{expected_name}.c")) ).to be true
           end
         end
       end
