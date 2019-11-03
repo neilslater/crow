@@ -154,11 +154,11 @@ describe Crow::LibDef do
           subject.create_project(dir)
 
           c_path = File.join( dir, 'ext', lib_name )
-          expect( File.exists?( File.join(c_path, "core_narray.c")) ).to be true
-          expect( File.exists?( File.join(c_path, "core_narray.h")) ).to be true
+          expect( File.exists?( File.join(c_path, "util", "narray_helper.c")) ).to be true
+          expect( File.exists?( File.join(c_path, "util", "narray_helper.h")) ).to be true
           expect( File.exists?( File.join(c_path, "extconf.rb")) ).to be true
-          expect( File.exists?( File.join(c_path, "mt.c")) ).to be true
-          expect( File.exists?( File.join(c_path, "mt.h")) ).to be true
+          expect( File.exists?( File.join(c_path, "util", "mt.c")) ).to be true
+          expect( File.exists?( File.join(c_path, "util", "mt.h")) ).to be true
           expect( File.exists?( File.join(c_path, "shared_helpers.c")) ).to be true
           expect( File.exists?( File.join(c_path, "shared_helpers.h")) ).to be true
           expect( File.exists?( File.join(c_path, "shared_vars.h")) ).to be true

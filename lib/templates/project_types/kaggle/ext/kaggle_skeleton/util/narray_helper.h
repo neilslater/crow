@@ -1,12 +1,12 @@
-// ext/kaggle_skeleton/core_narray.h
+// ext/kaggle_skeleton/util/narray_helper.h
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // Declarations of narray helper functions
 //
 
-#ifndef CORE_NARRAY_H
-#define CORE_NARRAY_H
+#ifndef UTIL_NARRAY_HELPER_H
+#define UTIL_NARRAY_HELPER_H
 
 #include <ruby.h>
 #include "narray.h"

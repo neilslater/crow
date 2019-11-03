@@ -10,10 +10,10 @@
 
 #include <ruby.h>
 #include "narray.h"
-#include "core_narray.h"
+#include "util/narray_helper.h"
 #include "shared_vars.h"
 #include "shared_helpers.h"
-#include "mt.h"
+#include "util/mt.h"
 <% structs.each do |s| -%>
 #include "base/ruby_class_<%= s.short_name %>.h"
 <% end -%>

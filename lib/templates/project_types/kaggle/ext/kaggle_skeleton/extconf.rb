@@ -24,7 +24,7 @@ if /cygwin|mingw/ =~ RUBY_PLATFORM
 end
 
 # Manipulations of $srcs, $INCFLAGS and $VPATH allow source files to be organised
-SUBDIRS = ['base']
+SUBDIRS = ['base', 'util']
 
 Dir.chdir(__dir__) do
    $srcs = Dir.glob('*.c') + SUBDIRS.flat_map { |sd| Dir.glob("#{sd}/*.c") }
