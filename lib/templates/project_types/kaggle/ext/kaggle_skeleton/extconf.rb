@@ -23,7 +23,7 @@ if /cygwin|mingw/ =~ RUBY_PLATFORM
    have_library("narray") || raise("ERROR: narray library is not found")
 end
 
-# Manipulations of $srcs, $INCFLAGS and $VPATH allow source files to be organised
+# Manipulations of $srcs and $VPATH allow source files to be organised
 SUBDIRS = ['base', 'util']
 
 Dir.chdir(__dir__) do
@@ -31,7 +31,6 @@ Dir.chdir(__dir__) do
 end
 
 SUBDIRS.each do |sd|
-   $INCFLAGS << " -I$(srcdir)/#{sd}"
    $VPATH << "$(srcdir)/#{sd}"
 end
 
