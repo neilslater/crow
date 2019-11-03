@@ -175,6 +175,7 @@ describe Crow::LibDef do
           expect( File.exists?( File.join(c_path, "util", "ruby_helpers.c")) ).to be true
           expect( File.exists?( File.join(c_path, "util", "ruby_helpers.h")) ).to be true
           expect( File.exists?( File.join(c_path, "base", "shared_vars.h")) ).to be true
+          expect( File.exists?( File.join(c_path, "base", "all_structs.h")) ).to be true
         end
       end
 
@@ -249,13 +250,13 @@ describe Crow::LibDef do
       c_source = <<~CENDS
         #include "ruby/class_bar.h"
 
-        VALUE bar_rbobject__doubled( VALUE self ) {
+        VALUE bar_rbobject__hi_doubled( VALUE self ) {
           Bar *bar = get_bar_struct( self );
           return INT2NUM( bar->hi * 2 );
         }
 
         void init_class_bar_ext() {
-          rb_define_method( Foo_Bar, "doubled", bar_rbobject__doubled, 0 );
+          rb_define_method( Foo_Bar, "hi_doubled", bar_rbobject__hi_doubled, 0 );
           return;
         }
       CENDS
@@ -267,7 +268,7 @@ describe Crow::LibDef do
         end
         compile_project('foo', dir)
 
-        result = run_ruby_in_project( 'foo', dir, %Q{f = Foo::Bar.new; f.hi = -17; p f.doubled} )
+        result = run_ruby_in_project( 'foo', dir, %Q{f = Foo::Bar.new; f.hi = -17; p f.hi_doubled} )
         expect(result.chomp).to end_with "-34"
       end
     end

@@ -116,7 +116,7 @@ class Crow::LibDef
 
     target_file = File.join( target_dir, rel_target_file )
 
-    return if File.exists?( target_file )
+    return if File.exists?( target_file ) && contains_user_code?( target_file )
 
     unless File.directory?( File.dirname( target_file ) )
       FileUtils.mkdir_p File.dirname( target_file )
@@ -149,6 +149,12 @@ class Crow::LibDef
   def change_names? rel_source_file
     rel_ext = File.extname( rel_source_file )
     return true if rel_ext =~ /\A\.(?:c|h|txt|rb|gemspec|md)\z/ || rel_ext == ''
+    false
+  end
+
+  def contains_user_code? rel_source_file
+    # There may be a few mixed user/generated files in future, but for now everything is one or other
+    return true if rel_source_file =~ /\A(?:ruby|lib)\//
     false
   end
 
