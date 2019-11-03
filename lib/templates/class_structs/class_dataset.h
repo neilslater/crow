@@ -13,6 +13,7 @@
 #include "ruby/class_<%= s.short_name %>.h"
 <% end -%>
 <% end -%>
+#include "lib/<%= short_name %>.h"
 
 void init_class_<%= short_name %>_ext();
 

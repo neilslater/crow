@@ -5,7 +5,7 @@
 /* Example method
 VALUE <%= short_name %>_rbobject__foo( VALUE self ) {
   <%= struct_name %> *<%= short_name %> = get_<%= short_name %>_struct( self );
-  return INT2NUM( <%= short_name %>->foo() );
+  return INT2NUM( <%= short_name %>__count( <%= short_name %> ) );
 }
 */
 
