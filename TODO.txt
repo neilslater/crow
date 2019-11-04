@@ -2,9 +2,9 @@ TODO:
 
 Crow follow ups:
 
-  * Factor end C code into generated and "user" parts
-
   * Add validation rules for parameters, and use to generate minimal test instantiations
+
+  * Fix problem with no compilation when subdir files are edited
 
   * Specs - How to do test at all?
     * libdef - moderate complexity build

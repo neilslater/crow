@@ -2,6 +2,7 @@ require 'set'
 
 module Crow
   class TypeMap
+    # Key is supported type name, value is array with subclass and pointer subclass names
     CTYPES = Hash[
       :int => [ 'Int', 'P_Int' ],
       :float => [ 'Float', 'P_Float' ],
@@ -17,8 +18,42 @@ module Crow
       :NARRAY_INT_32 => [ 'NArrayLInt', 'NArrayLInt' ],
     ]
 
-    attr_reader :name, :ruby_name, :ctype, :pointer, :default, :parent_struct, :init
-    attr_reader :ruby_read, :ruby_write
+    # The name of the variable within the struct
+    # @return [String]
+    attr_reader :name
+
+    # The name of the variable exposed to Ruby
+    # @return [String]
+    attr_reader :ruby_name
+
+    # Whether this variable is readable from Ruby (if it is a struct atribute)
+    # @return [Boolean]
+    attr_reader :ruby_read
+
+    # Whether this variable is writable from Ruby (if it is a struct atribute)
+    # @return [Boolean]
+    attr_reader :ruby_write
+
+    # The C data type of the variable
+    # @return [Symbol]
+    attr_reader :ctype
+
+    # Whether this variable is a C pointer
+    # @return [Boolean]
+    attr_reader :pointer
+
+    # The default value to use when initialised without any overrides or input (e.g. when reserving
+    # memory for the struct)
+    # @return [String]
+    attr_reader :default
+
+    # The containing structure for this variable
+    # @return [Crow::StructClass]
+    attr_reader :parent_struct
+
+    # Initialisation rules
+    # @return [Crow::TypeInit]
+    attr_reader :init
 
     def initialize(name:, ruby_name: name, default: self.class.default, pointer: false, ctype:,
                    init: {}, parent_struct:, ruby_read: true, ruby_write: false)
