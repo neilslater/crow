@@ -55,6 +55,17 @@ module Crow
     # @return [Crow::TypeInit]
     attr_reader :init
 
+    # Creates a new type mapping description.
+    # @param [Hash] opts
+    # @option opts [String] :name (required) base name, used as C name inside parent struct
+    # @option opts [Crow::StructClass] :parent_struct (required), definition for the containing C struct
+    # @option opts [String] :ruby_name if provided then allows for different Ruby name from C name
+    # @option opts [String] :default if provided then over-rides default based on class
+    # @option opts [Boolean] :pointer false by default, if true augments the type to a C pointer
+    # @option opts [Boolean] :ruby_read true by default, if true exposes the field as property of Ruby class wrapper
+    # @option opts [Boolean] :ruby_write false by default, if true exposes the field as writable from Ruby class wrapper
+    # @option opts [Hash] :init, constructor params for a Crow::TypeInit description for how the value should be set
+    # @return [Crow::TypeMap]
     def initialize(name:, ruby_name: name, default: self.class.default, pointer: false, ctype:,
                    init: {}, parent_struct:, ruby_read: true, ruby_write: false)
       raise "Variable name '#{name}' cannot be used" if name !~ /\A[a-zA-Z0-9_]+\z/
