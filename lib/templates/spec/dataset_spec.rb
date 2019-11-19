@@ -7,7 +7,25 @@ describe <%= full_class_name_ruby %> do
 
   describe "#new" do
     it "instantiates a <%= full_class_name_ruby %>" do
-      expect( <%= full_class_name_ruby %>.new( <%= init_params.map{ '1' }.join(', ') %> ) ).to be_a <%= full_class_name_ruby %>
+      expect( <%= full_class_name_ruby %>.new( <%= init_params.map{ |ip| ip.min_valid.to_s }.join(', ') %> ) ).to be_a <%= full_class_name_ruby %>
     end
+<% init_params.select(&:validate?).each do |iparam| -%>
+<% if iparam.init.validate_min -%>
+
+    it "raises when <%= iparam.name %> = <%= iparam.init.validate_min-1 %> (too low)" do
+      expect {
+        <%= full_class_name_ruby %>.new( <%= init_params.map{ |ip| iparam.name == ip.name ? iparam.init.validate_min-1 : ip.min_valid.to_s }.join(', ') %> )
+      }.to raise_error ArgumentError, /<%= iparam.name %>/
+    end
+<% end -%>
+<% if iparam.init.validate_max -%>
+
+    it "raises when <%= iparam.name %> = <%= iparam.init.validate_max+1 %> (too high)" do
+      expect {
+        <%= full_class_name_ruby %>.new( <%= init_params.map{ |ip| iparam.name == ip.name ? iparam.init.validate_max+1 : ip.min_valid.to_s }.join(', ') %> )
+      }.to raise_error ArgumentError, /<%= iparam.name %>/
+    end
+<% end -%>
+<% end -%>
   end
 end

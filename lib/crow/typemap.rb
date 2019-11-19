@@ -199,6 +199,10 @@ module Crow
     def read_only?
       ruby_read && ! ruby_write
     end
+
+    def min_valid
+      init.validate_min || 1
+    end
   end
 
   module NotA_C_Pointer
