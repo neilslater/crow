@@ -2,11 +2,11 @@ TODO:
 
 Crow follow ups:
 
+  * Support for Marshal serialise via hash
+
   * Add validation rules for parameters, and use to generate minimal test instantiations
 
   * Check validity of struct by comparing shapes with shape-controlling variables
-
-  * Support for Marshal serialise via hash
 
   * Fix problem with no compilation when subdir files are edited
 

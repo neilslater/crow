@@ -50,6 +50,7 @@ VALUE <%= short_name %>_rbobject__initialize( VALUE self<% unless init_params.em
 <% init_params.each do |init_param| -%>
   <%= init_param.declare %>
 <% end -%>
+  <%= struct_name %> *<%= short_name %> = get_<%= short_name %>_struct( self );
 <% init_params.each do |init_param| -%>
   <%= init_param.name %> = <%= init_param.param_item_to_c %>;
 <% if init_param.validate? -%>
@@ -58,7 +59,6 @@ VALUE <%= short_name %>_rbobject__initialize( VALUE self<% unless init_params.em
   }
 <% end -%>
 <% end -%>
-  <%= struct_name %> *<%= short_name %> = get_<%= short_name %>_struct( self );
 
   <%= short_name %>__init( <%= short_name %><% unless init_params.empty? %>, <%= init_params.map(&:name).join(', ') %><% end %> );
 
@@ -82,6 +82,23 @@ VALUE <%= short_name %>_rbobject__initialize_copy( VALUE copy, VALUE orig ) {
 
   return copy;
 }
+
+/* @overload from_h
+ * Creates a new object from supplied hash
+ * @return [<%= full_class_name_ruby %>] new object
+ */
+VALUE <%= short_name %>_rbclass__from_h(int argc, VALUE* argv, VALUE self) {
+  VALUE named_args;
+  rb_scan_args(argc, argv, ":", &named_args);
+  if (NIL_P(named_args)) {
+    rb_raise( rb_eArgError, "No arguments provided to from_h" );
+  }
+
+  // TODO: Unpack hash and use it to populate new object in the class
+
+  return self;
+}
+
 
 <% simple_attributes.each do |attribute| -%>
 <% if attribute.ruby_read -%>
@@ -152,6 +169,7 @@ void init_<%= short_name %>_class( ) {
   rb_define_alloc_func( <%= full_class_name %>, <%= short_name %>_alloc );
   rb_define_method( <%= full_class_name %>, "initialize", <%= short_name %>_rbobject__initialize, <%= init_params.count %> );
   rb_define_method( <%= full_class_name %>, "initialize_copy", <%= short_name %>_rbobject__initialize_copy, 1 );
+  rb_define_singleton_method( <%= full_class_name %>, "from_h", <%= short_name %>_rbclass__from_h, -1 );
 
   // <%= struct_name %> attributes
 <% attributes.each do |attribute| -%>
