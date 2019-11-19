@@ -4,6 +4,10 @@ Crow follow ups:
 
   * Add validation rules for parameters, and use to generate minimal test instantiations
 
+  * Check validity of struct by comparing shapes with shape-controlling variables
+
+  * Support for Marshal serialise via hash
+
   * Fix problem with no compilation when subdir files are edited
 
   * Specs - How to do test at all?
@@ -43,8 +47,6 @@ Crow follow ups:
 
   * Validating/casting NArray inputs on Ruby class level
 
-  * Support for Marshal serialise via hash
-
   * Taking named hash params for Ruby init
 
   * Build from a YAML definition
@@ -54,6 +56,8 @@ Crow follow ups:
   * Optional utils
 
   * Utils should have own classes/modules for any tests/representation
+
+  * Validation errors should show provided values
 
   * More pre-built utilities:
     * Sorting, shuffling, random numbers

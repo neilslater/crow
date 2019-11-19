@@ -180,6 +180,18 @@ module Crow
       !! init.expr
     end
 
+    def validate?
+      init.validate?
+    end
+
+    def validate_condition_c var_c = struct_item
+      init.validate_condition_c var_c
+    end
+
+    def validate_fail_condition_c var_c = struct_item
+      init.validate_fail_condition_c var_c
+    end
+
     def needs_simple_init?
       needs_init? && ! is_narray? && ! pointer
     end

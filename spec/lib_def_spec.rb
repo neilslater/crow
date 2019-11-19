@@ -43,7 +43,10 @@ describe Crow::LibDef do
             { name: 'narr_counts', ruby_name: 'counts', ctype: :NARRAY_INT_32, init: {rank_expr: '1', shape_exprs: [ '$height' ]} },
             { name: 'narr_inverse', ruby_name: 'inverse', ctype: :NARRAY_FLOAT, init: {rank_expr: '2', shape_exprs: [ '$height', '$width' ]} },
           ],
-          init_params: [{name: 'width', ctype: :int}, {name: 'height', ctype: :int}]
+          init_params: [
+            {name: 'width', ctype: :int, init: {validate_min: 1, validate_max: 10}},
+            {name: 'height', ctype: :int, init: {validate_min: 1, validate_max: 20}}
+          ]
         }
       ]
     )

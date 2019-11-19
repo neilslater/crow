@@ -2,9 +2,27 @@ require 'set'
 
 module Crow
   class TypeInit
-    attr_reader :default, :parent_typemap, :expr, :size_expr, :shape_expr, :shape_exprs, :rank_expr
+    attr_reader :default
 
-    def initialize(parent_typemap:, default: parent_typemap.class.default, size_expr: nil, shape_expr: nil, shape_exprs: nil, rank_expr: nil, expr: nil)
+    attr_reader :parent_typemap
+
+    attr_reader :expr
+
+    attr_reader :size_expr
+
+    attr_reader :shape_expr
+
+    attr_reader :shape_exprs
+
+    attr_reader :rank_expr
+
+    attr_reader :validate_min
+
+    attr_reader :validate_max
+
+    def initialize(parent_typemap:, default: parent_typemap.class.default, size_expr: nil,
+                   shape_expr: nil, shape_exprs: nil, rank_expr: nil, expr: nil, validate_min: nil,
+                   validate_max: nil)
       @default = default
       unless parent_typemap.is_a? Crow::TypeMap
         raise ArgumentError, "parent_typemap must be a Crow::TypeMap"
@@ -15,6 +33,34 @@ module Crow
       @shape_expr ||= shape_expr
       @shape_exprs ||= shape_exprs
       @rank_expr ||= rank_expr
+      @validate_min ||= validate_min
+      @validate_max ||= validate_max
+    end
+
+    def validate?
+      validate_min || validate_max
+    end
+
+    def validate_condition_c var_c = parent_typemap.struct_item
+      return '( 1 )' unless validate?
+      if validate_min && validate_max
+        "( #{var_c} >= #{validate_min} && #{var_c} <= #{validate_max} )"
+      elsif validate_min
+        "( #{var_c} >= #{validate_min} )"
+      else
+        "( #{var_c} <= #{validate_max} )"
+      end
+    end
+
+    def validate_fail_condition_c var_c = parent_typemap.struct_item
+      return '( 0 )' unless validate?
+      if validate_min && validate_max
+        "( #{var_c} < #{validate_min} || #{var_c} > #{validate_max} )"
+      elsif validate_min
+        "( #{var_c} < #{validate_min} )"
+      else
+        "( #{var_c} > #{validate_max} )"
+      end
     end
   end
 

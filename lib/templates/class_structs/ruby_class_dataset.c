@@ -47,9 +47,20 @@ void assert_value_wraps_<%= short_name %>( VALUE obj ) {
  */
 VALUE <%= short_name %>_rbobject__initialize( VALUE self<% unless init_params.empty? %>, <%= init_params.map(&:as_rv_param).join(', ') %><% end %> ) {
 <% if needs_init? -%>
+<% init_params.each do |init_param| -%>
+  <%= init_param.declare %>
+<% end -%>
+<% init_params.each do |init_param| -%>
+  <%= init_param.name %> = <%= init_param.param_item_to_c %>;
+<% if init_param.validate? -%>
+  if <%= init_param.validate_fail_condition_c(init_param.name) %> {
+    rb_raise( rb_eArgError, "Bad value for <%= init_param.name %>" );
+  }
+<% end -%>
+<% end -%>
   <%= struct_name %> *<%= short_name %> = get_<%= short_name %>_struct( self );
 
-  <%= short_name %>__init( <%= short_name %><% unless init_params.empty? %>, <%= init_params.map(&:param_item_to_c).join(', ') %><% end %> );
+  <%= short_name %>__init( <%= short_name %><% unless init_params.empty? %>, <%= init_params.map(&:name).join(', ') %><% end %> );
 
 <% end -%>
   return self;
