@@ -83,20 +83,49 @@ VALUE <%= short_name %>_rbobject__initialize_copy( VALUE copy, VALUE orig ) {
   return copy;
 }
 
+/* @overload to_h
+ * Copies object to hash
+ * @return [Hash] hash representation of <%= full_class_name_ruby %>
+ */
+VALUE <%= short_name %>_rbobject__to_h( VALUE self ) {
+  VALUE hash;
+  <%= struct_name %> *<%= short_name %> = get_<%= short_name %>_struct( self );
+  hash = rb_hash_new();
+<% stored_attributes.each do |attribute| -%>
+  rb_hash_aset(hash, ID2SYM(rb_intern("<%= attribute.name %>")), <%= attribute.struct_item_to_ruby %>);
+<% end -%>
+  return hash;
+}
+
 /* @overload from_h
  * Creates a new object from supplied hash
  * @return [<%= full_class_name_ruby %>] new object
  */
-VALUE <%= short_name %>_rbclass__from_h(int argc, VALUE* argv, VALUE self) {
+VALUE <%= short_name %>_rbclass__from_h( int argc, VALUE* argv, VALUE self ) {
+  <%= struct_name %> *<%= short_name %>;
   VALUE named_args;
+  VALUE v;
+
   rb_scan_args(argc, argv, ":", &named_args);
   if (NIL_P(named_args)) {
     rb_raise( rb_eArgError, "No arguments provided to from_h" );
   }
+<% stored_attributes.each do |attribute| -%>
+  v = rb_hash_aref( named_args, ID2SYM( rb_intern( "<%= attribute.name %>" ) ) );
+  if (NIL_P(v)) { rb_raise( rb_eArgError, "Missing key :<%= attribute.name %> in hash" ); }
+<% end -%>
 
-  // TODO: Unpack hash and use it to populate new object in the class
+  <%= short_name %> = <%= short_name %>__create();
+<% stored_attributes.each do |attribute| -%>
+  v = rb_hash_aref( named_args, ID2SYM( rb_intern( "<%= attribute.name %>" ) ) );
+  <%= short_name %>-><%= attribute.name %> = <%= attribute.class.ruby_to_c( 'v' ) %>;
+<% end -%>
 
-  return self;
+  // TODO: This leaves any pointers as NULL and non-store items as default from create . . .
+
+  // TODO: This is not validated and could be very broken
+
+  return <%= short_name %>_as_ruby_class( <%= short_name %>, <%= full_class_name %> );
 }
 
 
@@ -169,6 +198,7 @@ void init_<%= short_name %>_class( ) {
   rb_define_alloc_func( <%= full_class_name %>, <%= short_name %>_alloc );
   rb_define_method( <%= full_class_name %>, "initialize", <%= short_name %>_rbobject__initialize, <%= init_params.count %> );
   rb_define_method( <%= full_class_name %>, "initialize_copy", <%= short_name %>_rbobject__initialize_copy, 1 );
+  rb_define_method( <%= full_class_name %>, "to_h", <%= short_name %>_rbobject__to_h, 0 );
   rb_define_singleton_method( <%= full_class_name %>, "from_h", <%= short_name %>_rbclass__from_h, -1 );
 
   // <%= struct_name %> attributes

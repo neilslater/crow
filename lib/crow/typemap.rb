@@ -55,6 +55,10 @@ module Crow
     # @return [Crow::TypeInit]
     attr_reader :init
 
+    # Whether or not to store/restore the value when using save
+    # @return [Boolean]
+    attr_reader :store
+
     # Creates a new type mapping description.
     # @param [Hash] opts
     # @option opts [String] :name (required) base name, used as C name inside parent struct
@@ -67,7 +71,7 @@ module Crow
     # @option opts [Hash] :init, constructor params for a Crow::TypeInit description for how the value should be set
     # @return [Crow::TypeMap]
     def initialize(name:, ruby_name: name, default: self.class.default, pointer: false, ctype:,
-                   init: {}, parent_struct:, ruby_read: true, ruby_write: false)
+                   init: {}, parent_struct:, ruby_read: true, ruby_write: false, store: self.class.store_default)
       raise "Variable name '#{name}' cannot be used" if name !~ /\A[a-zA-Z0-9_]+\z/
       @name = name
       @ruby_name = ruby_name
@@ -81,6 +85,7 @@ module Crow
       @init = init_class.new( init.merge(parent_typemap: self) )
       @ruby_read = !! ruby_read
       @ruby_write = !! ruby_write
+      @store = !! store
     end
 
     def init_class
@@ -115,6 +120,10 @@ module Crow
 
     def self.item_default= new_default
       @class_item_default = new_default
+    end
+
+    def self.store_default
+      true
     end
 
     def needs_gc_mark?

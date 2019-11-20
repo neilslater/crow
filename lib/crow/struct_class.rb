@@ -170,6 +170,12 @@ class Crow::StructClass
     @attributes.select { |a| a.is_narray? }
   end
 
+  # List of attributes which should be handled by to_h and from_h.
+  # @return [Array<Crow::TypeMap>]
+  def stored_attributes
+    @attributes.select { |a| a.store }
+  end
+
   def any_alloc?
     @attributes.any? { |a| a.needs_alloc? }
   end

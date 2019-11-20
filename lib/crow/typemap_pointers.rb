@@ -15,6 +15,10 @@ module Crow
     def array_item_to_ruby_converter
       'INT2NUM'
     end
+
+    def self.store_default
+      false
+    end
   end
 
   class TypeMap::P_UInt < TypeMap
@@ -32,6 +36,10 @@ module Crow
 
     def array_item_to_ruby_converter
       'UINT2NUM'
+    end
+
+    def self.store_default
+      false
     end
   end
 
@@ -51,6 +59,10 @@ module Crow
     def array_item_to_ruby_converter
       'LONG2NUM'
     end
+
+    def self.store_default
+      false
+    end
   end
 
   class TypeMap::P_ULong < TypeMap
@@ -68,6 +80,10 @@ module Crow
 
     def array_item_to_ruby_converter
       'ULONG2NUM'
+    end
+
+    def self.store_default
+      false
     end
   end
 
@@ -87,6 +103,10 @@ module Crow
     def array_item_to_ruby_converter
       'FLT2NUM'
     end
+
+    def self.store_default
+      false
+    end
   end
 
   class TypeMap::P_Double < TypeMap
@@ -105,6 +125,10 @@ module Crow
     def array_item_to_ruby_converter
       'DBL2NUM'
     end
+
+    def self.store_default
+      false
+    end
   end
 
   class TypeMap::P_Char < TypeMap
@@ -118,6 +142,10 @@ module Crow
 
     def rdoc_type
       'String'
+    end
+
+    def self.store_default
+      false
     end
   end
 end
