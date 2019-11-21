@@ -181,7 +181,11 @@ class Crow::StructClass
   end
 
   def needs_init?
-    any_narray? || any_alloc?
+    !! (any_narray? || any_alloc? || init_params.any?)
+  end
+
+  def needs_init_iterators?
+    !! (any_narray? || any_alloc?)
   end
 
   def alloc_attributes
@@ -194,6 +198,11 @@ class Crow::StructClass
 
   def simple_attributes_with_init
     @attributes.reject { |a| a.needs_alloc? || a.is_narray? }.select(&:needs_init?)
+  end
+
+  def testable_attributes
+    @attributes.select { |a| false }
+    simple_attributes
   end
 
   def lib_short_name

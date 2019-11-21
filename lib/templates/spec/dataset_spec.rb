@@ -27,5 +27,17 @@ describe <%= full_class_name_ruby %> do
     end
 <% end -%>
 <% end -%>
+
+    describe "default attribute values" do
+      subject { <%= full_class_name_ruby %>.new( <%= init_params.map{ |ip| ip.min_valid.to_s }.join(', ') %> ) }
+
+<% testable_attributes.each do |attribute| -%>
+      describe "<%= attribute.name %>" do
+        it "has value of <%= attribute.test_value %>" do
+          expect(subject.<%= attribute.name %>).to eql <%= attribute.test_value %>
+        end
+      end
+<% end -%>
+    end
   end
 end

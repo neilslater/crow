@@ -30,5 +30,30 @@ module Crow
         "#{struct_var}->#{attr_name}"
       end
     end
+
+    def as_ruby_test_value
+      # Substitute named params
+      code = text.gsub( /\$[a-zA-Z0-9_]+/ ) do |matched|
+        param_name = matched[1,100]
+        allowed_names = params.map(&:name)
+        unless param = params.find { |x| x.name == param_name }
+          raise "Param #{param_name} not found (#{text}), must be one of #{allowed_names.join(', ')}"
+        end
+        [param.default.to_i, param.min_valid].max.to_s
+      end
+
+      # Substitute attributes
+      code.gsub( /\%[a-zA-Z0-9_]+/ ) do |matched|
+        attr_name = matched[1,100]
+        allowed_names = attributes.map(&:name)
+        unless attr = attributes.find { |x| x.name == attr_name }
+          raise "Attribute #{attr_name} not found (#{text}), must be one of #{allowed_names.join(', ')}"
+        end
+        [attr.default.to_i, attr.min_valid].max.to_s
+      end
+
+      # Evil
+      eval code
+    end
   end
 end

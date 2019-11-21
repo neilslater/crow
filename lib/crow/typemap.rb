@@ -212,6 +212,25 @@ module Crow
     def min_valid
       init.validate_min || 1
     end
+
+    def test_value init_context: true
+      if init.expr.nil?
+        return self.default
+      end
+
+      use_expr = init.expr
+
+      if init.expr == '.'
+        if init_context
+          use_expr = "$#{self.name}"
+        else
+          use_expr = "%#{self.name}"
+        end
+      end
+
+      e = Expression.new( use_expr, @parent_struct.attributes, @parent_struct.init_params )
+      e.as_ruby_test_value
+    end
   end
 
   module NotA_C_Pointer
