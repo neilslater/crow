@@ -176,6 +176,10 @@ class Crow::StructClass
     @attributes.select { |a| a.store }
   end
 
+  def non_stored_attributes
+    @attributes.reject { |a| a.store }
+  end
+
   def any_alloc?
     @attributes.any? { |a| a.needs_alloc? }
   end

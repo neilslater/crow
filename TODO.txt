@@ -3,6 +3,8 @@ TODO:
 Crow follow ups:
 
   * Support for Marshal serialise via hash
+    * Create a residual_init() function following load to initialise non-stored values
+    * Make it call a user function foo__on_load()
 
   * Add validation rules for parameters, and use to generate minimal test instantiations
 
