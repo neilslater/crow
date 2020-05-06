@@ -1,5 +1,6 @@
 before_install:
  - gem install bundler
+
 language: ruby
 
 os:
@@ -7,8 +8,8 @@ os:
   - osx
 
 rvm:
-  - "2.3.8"
   - "2.4.5"
   - "2.5.5"
   - "2.6.3"
-
+  - "2.7.1"
+ 
