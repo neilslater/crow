@@ -19,7 +19,7 @@ describe Crow::TypeMap do
     it 'does not create a TypeMap without a parent_struct' do
       expect {
         Crow::TypeMap.create(name: 'x', ctype: :int)
-      }.to raise_error ArgumentError, /missing keyword: parent_struct/
+      }.to raise_error ArgumentError, /missing keyword: :?parent_struct/
     end
 
     it 'does not create a TypeMap with a bad parent_struct' do
