@@ -1,0 +1,13 @@
+AllCops:
+  TargetRubyVersion: 2.5
+  NewCops: enable
+
+Layout/LineLength:
+  Max: 120
+  
+Metrics/BlockLength:
+  ExcludedMethods:
+    - context
+    - describe
+    - shared_examples
+

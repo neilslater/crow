@@ -2,6 +2,19 @@ require "bundler/gem_tasks"
 require "rspec/core/rake_task"
 require "fileutils"
 
+
+require 'bundler/audit/task'
+require 'bundler/gem_tasks'
+require 'rspec/core/rake_task'
+require 'rubocop/rake_task'
+require 'yard'
+
+desc 'Run Rubocop'
+RuboCop::RakeTask.new
+
+desc 'Update and run bundle audit'
+Bundler::Audit::Task.new
+
 desc "Crow unit tests"
 RSpec::Core::RakeTask.new(:test) do |t|
   t.pattern = "spec/*_spec.rb"
@@ -60,3 +73,10 @@ task :demo, :out_path do |t, args|
 end
 
 task :default => [:test]
+
+desc 'Run full set of QC tools'
+task qc: %i[bundle:audit rubocop spec]
+
+task default: :qc
+
+
