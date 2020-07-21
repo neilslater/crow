@@ -1,21 +1,23 @@
+# frozen_string_literal: true
+
 require 'set'
 
 module Crow
   class TypeMap
     # Key is supported type name, value is array with subclass and pointer subclass names
     CTYPES = Hash[
-      :int => [ 'Int', 'P_Int' ],
-      :float => [ 'Float', 'P_Float' ],
-      :double => [ 'Double', 'P_Double' ],
-      :char => [ 'Char', 'P_Char' ],
-      :long => [ 'Long', 'P_Long' ],
-      :uint => [ 'UInt', 'P_UInt' ],
-      :ulong => [ 'ULong', 'P_ULong' ],
-      :VALUE => [ 'Value', 'Value' ],
-      :NARRAY_FLOAT => [ 'NArrayFloat', 'NArrayFloat' ],
-      :NARRAY_DOUBLE => [ 'NArrayDouble', 'NArrayDouble' ],
-      :NARRAY_INT_16 => [ 'NArraySInt', 'NArraySInt' ],
-      :NARRAY_INT_32 => [ 'NArrayLInt', 'NArrayLInt' ],
+      int: %w[Int P_Int],
+      float: %w[Float P_Float],
+      double: %w[Double P_Double],
+      char: %w[Char P_Char],
+      long: %w[Long P_Long],
+      uint: %w[UInt P_UInt],
+      ulong: %w[ULong P_ULong],
+      VALUE: %w[Value Value],
+      NARRAY_FLOAT: %w[NArrayFloat NArrayFloat],
+      NARRAY_DOUBLE: %w[NArrayDouble NArrayDouble],
+      NARRAY_INT_16: %w[NArraySInt NArraySInt],
+      NARRAY_INT_32: %w[NArrayLInt NArrayLInt],
     ]
 
     # The name of the variable within the struct
@@ -73,44 +75,44 @@ module Crow
     def initialize(name:, ruby_name: name, default: self.class.default, pointer: false, ctype:,
                    init: {}, parent_struct:, ruby_read: true, ruby_write: false, store: self.class.store_default)
       raise "Variable name '#{name}' cannot be used" if name !~ /\A[a-zA-Z0-9_]+\z/
+
       @name = name
       @ruby_name = ruby_name
       @default = default
-      @pointer = !! pointer
+      @pointer = !!pointer
       @ctype = ctype
-      unless parent_struct.is_a? Crow::StructClass
-        raise ArgumentError, "parent_struct must be a Crow::StructClass"
-      end
+      raise ArgumentError, 'parent_struct must be a Crow::StructClass' unless parent_struct.is_a? Crow::StructClass
+
       @parent_struct = parent_struct
-      @init = init_class.new( init.merge(parent_typemap: self) )
-      @ruby_read = !! ruby_read
-      @ruby_write = !! ruby_write
-      @store = !! store
+      @init = init_class.new(init.merge(parent_typemap: self))
+      @ruby_read = !!ruby_read
+      @ruby_write = !!ruby_write
+      @store = !!store
     end
 
     def init_class
       Crow::TypeInit
     end
 
-    def self.create opts = {}
-      unless class_lookup = CTYPES[ opts[:ctype] ]
+    def self.create(opts = {})
+      unless class_lookup = CTYPES[opts[:ctype]]
         raise ArgumentError, "Type '#{opts[:ctype]}' not supported. Allowed types #{CTYPES.keys.join(', ')}"
       end
 
       attribute_class = if opts[:pointer]
-          class_lookup.last
-        else
-          class_lookup.first
+                          class_lookup.last
+                        else
+                          class_lookup.first
       end
 
-      self.const_get( attribute_class ).new( opts )
+      const_get(attribute_class).new(opts)
     end
 
     def self.default
       @class_default
     end
 
-    def self.default= new_default
+    def self.default=(new_default)
       @class_default = new_default
     end
 
@@ -118,7 +120,7 @@ module Crow
       @class_item_default
     end
 
-    def self.item_default= new_default
+    def self.item_default=(new_default)
       @class_item_default = new_default
     end
 
@@ -163,72 +165,70 @@ module Crow
     end
 
     def struct_item_to_ruby
-      self.class.c_to_ruby( struct_item )
+      self.class.c_to_ruby(struct_item)
     end
 
     def param_item_to_c
-      self.class.ruby_to_c( rv_name )
+      self.class.ruby_to_c(rv_name)
     end
 
-    def init_expr_c from: parent_struct.short_name, init_context: false
+    def init_expr_c(from: parent_struct.short_name, init_context: false)
       use_expr = init.expr
 
       if init.expr == '.'
-        if init_context
-          use_expr = "$#{self.name}"
-        else
-          use_expr = "%#{self.name}"
-        end
+        use_expr = if init_context
+                     "$#{name}"
+                   else
+                     "%#{name}"
+                   end
       end
 
-      e = Expression.new( use_expr, @parent_struct.attributes, @parent_struct.init_params )
-      e.as_c_code( from )
+      e = Expression.new(use_expr, @parent_struct.attributes, @parent_struct.init_params)
+      e.as_c_code(from)
     end
 
     def needs_init?
-      !! init.expr
+      !!init.expr
     end
 
     def validate?
       init.validate?
     end
 
-    def validate_condition_c var_c = struct_item
+    def validate_condition_c(var_c = struct_item)
       init.validate_condition_c var_c
     end
 
-    def validate_fail_condition_c var_c = struct_item
+    def validate_fail_condition_c(var_c = struct_item)
       init.validate_fail_condition_c var_c
     end
 
     def needs_simple_init?
-      needs_init? && ! is_narray? && ! pointer
+      needs_init? && !is_narray? && !pointer
     end
 
     def read_only?
-      ruby_read && ! ruby_write
+      ruby_read && !ruby_write
     end
 
     def min_valid
       init.validate_min || 1
     end
 
-    def test_value init_context: true
-      if init.expr.nil?
-        return self.default
-      end
+    def test_value(init_context: true)
+      return default if init.expr.nil?
 
       use_expr = init.expr
 
       if init.expr == '.'
-        if init_context
-          use_expr = "$#{self.name}"
-        else
-          use_expr = "%#{self.name}"
-        end
+        use_expr = if init_context
+                     "$#{name}"
+                   else
+                     "%#{name}"
+                   end
       end
 
-      e = Expression.new( use_expr, @parent_struct.attributes, @parent_struct.init_params )
+      e = Expression.new(use_expr, @parent_struct.attributes, @parent_struct.init_params)
       e.as_ruby_test_value
     end
   end
@@ -248,8 +248,8 @@ module Crow
       Crow::TypeInit::Pointer
     end
 
-    def initialize opts = {}
-      super( opts )
+    def initialize(opts = {})
+      super(opts)
 
       @ruby_read = opts[:ruby_read].nil? ? true : opts[:ruby_read]
       @ruby_write = opts[:ruby_write].nil? ? false : opts[:ruby_write]

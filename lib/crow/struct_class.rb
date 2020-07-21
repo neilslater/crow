@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'erb'
 require 'fileutils'
 
@@ -36,17 +38,17 @@ class Crow::StructClass
   # @return [Array<Crow::TypeMap>]
   attr_accessor :init_params
 
-  TEMPLATE_DIR = File.realdirpath( File.join( __dir__, '../../lib/templates/class_structs' ) )
-  TEMPLATES = [ 'struct_dataset.h', 'struct_dataset.c', 'ruby_class_dataset.h', 'ruby_class_dataset.c' ]
+  TEMPLATE_DIR = File.realdirpath(File.join(__dir__, '../../lib/templates/class_structs'))
+  TEMPLATES = ['struct_dataset.h', 'struct_dataset.c', 'ruby_class_dataset.h', 'ruby_class_dataset.c'].freeze
 
-  USER_CLASS_TEMPLATE_DIR = File.realdirpath( File.join( __dir__, '../../lib/templates/class_structs' ) )
-  USER_CLASS_TEMPLATES = [ 'class_dataset.h', 'class_dataset.c' ]
+  USER_CLASS_TEMPLATE_DIR = File.realdirpath(File.join(__dir__, '../../lib/templates/class_structs'))
+  USER_CLASS_TEMPLATES = ['class_dataset.h', 'class_dataset.c'].freeze
 
-  USER_STRUCT_TEMPLATE_DIR = File.realdirpath( File.join( __dir__, '../../lib/templates/class_structs' ) )
-  USER_STRUCT_TEMPLATES = [ 'dataset.h', 'dataset.c' ]
+  USER_STRUCT_TEMPLATE_DIR = File.realdirpath(File.join(__dir__, '../../lib/templates/class_structs'))
+  USER_STRUCT_TEMPLATES = ['dataset.h', 'dataset.c'].freeze
 
-  SPEC_TEMPLATE_DIR = File.realdirpath( File.join( __dir__, '../../lib/templates/spec' ) )
-  SPEC_TEMPLATES = [ 'dataset_spec.rb' ]
+  SPEC_TEMPLATE_DIR = File.realdirpath(File.join(__dir__, '../../lib/templates/spec'))
+  SPEC_TEMPLATES = ['dataset_spec.rb'].freeze
 
   # Creates a new struct description.
   # @param [String] short_name identifying name for struct and class
@@ -58,46 +60,45 @@ class Crow::StructClass
   # @option opts [Crow::LibDef] :parent_lib, if provided then sets parent_lib
   # @return [Crow::StructClass]
   #
-  def initialize( short_name, opts = {} )
+  def initialize(short_name, opts = {})
     raise "Short name '#{short_name}' cannot be used" if short_name !~ /\A[a-zA-Z0-9_]+\z/
-    @short_name = short_name
-    @struct_name = opts[:struct_name] || struct_name_from_short_name( @short_name )
-    @rb_class_name = opts[:rb_class_name] || @struct_name
-    if opts[:attributes]
-      @attributes = opts[:attributes].map do | attr_opts |
-        use_opts = attr_opts.clone
-        use_opts[:parent_struct] = self
-        Crow::TypeMap.create( use_opts )
-      end
-    else
-      @attributes = []
-    end
-    if opts[:init_params]
-      @init_params = opts[:init_params].map do | init_param_opts |
-        use_opts = init_param_opts.clone
-        use_opts[:parent_struct] = self
-        Crow::TypeMap.create( use_opts )
-      end
-    else
-      @init_params = []
-    end
 
-    @parent_lib = opts[:parent_lib] || Crow::LibDef.new( 'module' )
+    @short_name = short_name
+    @struct_name = opts[:struct_name] || struct_name_from_short_name(@short_name)
+    @rb_class_name = opts[:rb_class_name] || @struct_name
+    @attributes = if opts[:attributes]
+                    opts[:attributes].map do |attr_opts|
+                      use_opts = attr_opts.clone
+                      use_opts[:parent_struct] = self
+                      Crow::TypeMap.create(use_opts)
+                    end
+                  else
+                    []
+                  end
+    @init_params = if opts[:init_params]
+                     opts[:init_params].map do |init_param_opts|
+                       use_opts = init_param_opts.clone
+                       use_opts[:parent_struct] = self
+                       Crow::TypeMap.create(use_opts)
+                     end
+                   else
+                     []
+                   end
+
+    @parent_lib = opts[:parent_lib] || Crow::LibDef.new('module')
   end
 
   # Writes four C source files that implement a basic Ruby native extension for the class. The files
   # are split into a Ruby class binding and a struct definition, each of which has a .c and .h file.
   # @param [String] path directory to write files to.
   # @return [true]
-  def write path
-    ext_base_dir = File.join( path, 'base' )
-    unless File.directory?( ext_base_dir )
-      FileUtils.mkdir_p ext_base_dir
-    end
+  def write(path)
+    ext_base_dir = File.join(path, 'base')
+    FileUtils.mkdir_p ext_base_dir unless File.directory?(ext_base_dir)
 
     TEMPLATES.each do |template|
-      File.open( File.join( path, 'base', template.sub( /dataset/, short_name ) ), 'w' ) do |file|
-        file.puts render( File.join( TEMPLATE_DIR, template ) )
+      File.open(File.join(path, 'base', template.sub(/dataset/, short_name)), 'w') do |file|
+        file.puts render(File.join(TEMPLATE_DIR, template))
       end
     end
     true
@@ -107,30 +108,28 @@ class Crow::StructClass
   # main C-based functionality of the library.
   # @param [String] path directory to write files to.
   # @return [true]
-  def write_user path
-    ext_ruby_dir = File.join( path, 'ruby' )
-    unless File.directory?( ext_ruby_dir )
-      FileUtils.mkdir_p ext_ruby_dir
-    end
+  def write_user(path)
+    ext_ruby_dir = File.join(path, 'ruby')
+    FileUtils.mkdir_p ext_ruby_dir unless File.directory?(ext_ruby_dir)
 
     USER_CLASS_TEMPLATES.each do |template|
-      target = File.join( path, 'ruby', template.sub( /dataset/, short_name ) )
+      target = File.join(path, 'ruby', template.sub(/dataset/, short_name))
       next if File.exist?(target)
-      File.open( target, 'w' ) do |file|
-        file.puts render( File.join( USER_CLASS_TEMPLATE_DIR, template ) )
+
+      File.open(target, 'w') do |file|
+        file.puts render(File.join(USER_CLASS_TEMPLATE_DIR, template))
       end
     end
 
-    ext_lib_dir = File.join( path, 'lib' )
-    unless File.directory?( ext_lib_dir )
-      FileUtils.mkdir_p ext_lib_dir
-    end
+    ext_lib_dir = File.join(path, 'lib')
+    FileUtils.mkdir_p ext_lib_dir unless File.directory?(ext_lib_dir)
 
     USER_STRUCT_TEMPLATES.each do |template|
-      target = File.join( path, 'lib', template.sub( /dataset/, short_name ) )
+      target = File.join(path, 'lib', template.sub(/dataset/, short_name))
       next if File.exist?(target)
-      File.open( target, 'w' ) do |file|
-        file.puts render( File.join( USER_STRUCT_TEMPLATE_DIR, template ) )
+
+      File.open(target, 'w') do |file|
+        file.puts render(File.join(USER_STRUCT_TEMPLATE_DIR, template))
       end
     end
 
@@ -141,10 +140,10 @@ class Crow::StructClass
   # the structure as defined.
   # @param [String] path directory to write spec files to.
   # @return [true]
-  def write_specs path
+  def write_specs(path)
     SPEC_TEMPLATES.each do |template|
-      File.open( File.join( path, template.sub( /dataset/, short_name ) ), 'w' ) do |file|
-        file.puts render( File.join( SPEC_TEMPLATE_DIR, template ) )
+      File.open(File.join(path, template.sub(/dataset/, short_name)), 'w') do |file|
+        file.puts render(File.join(SPEC_TEMPLATE_DIR, template))
       end
     end
     true
@@ -154,8 +153,8 @@ class Crow::StructClass
   # @param [String] name identifier used for the attribute in C and Ruby references
   # @param [Hash] opts passed to Crow::TypeMap constructor
   # @return [Crow::TypeMap] the new attribute definition
-  def add_attribute opts = {}
-    @attributes << Crow::TypeMap.create( opts.merge( parent_struct: self ) )
+  def add_attribute(opts = {})
+    @attributes << Crow::TypeMap.create(opts.merge(parent_struct: self))
   end
 
   # Whether any of the attributes are NArray objects.
@@ -185,11 +184,11 @@ class Crow::StructClass
   end
 
   def needs_init?
-    !! (any_narray? || any_alloc? || init_params.any?)
+    !!(any_narray? || any_alloc? || init_params.any?)
   end
 
   def needs_init_iterators?
-    !! (any_narray? || any_alloc?)
+    !!(any_narray? || any_alloc?)
   end
 
   def alloc_attributes
@@ -205,7 +204,7 @@ class Crow::StructClass
   end
 
   def testable_attributes
-    @attributes.select { |a| false }
+    @attributes.select { |_a| false }
     simple_attributes
   end
 
@@ -222,18 +221,18 @@ class Crow::StructClass
   end
 
   def full_class_name_ruby
-    parent_lib.module_name + '::' + rb_class_name.gsub(/_/,'::')
+    parent_lib.module_name + '::' + rb_class_name.gsub(/_/, '::')
   end
 
   private
 
-  def render template_file
-    erb = ERB.new( File.read( template_file ), 0, '-' )
-    erb.result( binding )
+  def render(template_file)
+    erb = ERB.new(File.read(template_file), 0, '-')
+    erb.result(binding)
   end
 
-  def struct_name_from_short_name sname
+  def struct_name_from_short_name(sname)
     parts = sname.split('_')
-    parts.map { |part| part[0].upcase + part[1,30] }.join
+    parts.map { |part| part[0].upcase + part[1, 30] }.join
   end
 end

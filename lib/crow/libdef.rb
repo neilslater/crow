@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'erb'
 require 'fileutils'
 
@@ -16,8 +18,8 @@ require 'fileutils'
 #  libdef.create_project( '/path/to/target_project' )
 #
 class Crow::LibDef
-  TEMPLATE_DIR = File.realdirpath( File.join( __dir__, '../../lib/templates/project_types' ) )
-  TEMPLATES = [ 'kaggle' ]
+  TEMPLATE_DIR = File.realdirpath(File.join(__dir__, '../../lib/templates/project_types'))
+  TEMPLATES = ['kaggle'].freeze
 
   # The label used for file names relating to the whole project. E.g. the lib folder will contain /lib/<short_name>/<short_name>.rb
   # @return [String]
@@ -38,20 +40,21 @@ class Crow::LibDef
   # @option opts [Array<Hash>] :structs, if provided these are used to create new Crow::StructClass objects
   # @return [Crow::LibDef]
   #
-  def initialize( short_name, opts = {} )
+  def initialize(short_name, opts = {})
     raise "Short name '#{short_name}' cannot be used" if short_name !~ /\A[a-zA-Z0-9_]+\z/
+
     @short_name = short_name
-    @module_name = opts[:module_name] || module_name_from_short_name( @short_name )
-    if opts[:structs]
-      @structs = opts[:structs].map do | struct_opts |
-        use_opts = struct_opts.clone
-        struct_name = use_opts[:name]
-        use_opts[:parent_lib] = self
-        Crow::StructClass.new( struct_name, use_opts )
-      end
-    else
-      @structs = []
-    end
+    @module_name = opts[:module_name] || module_name_from_short_name(@short_name)
+    @structs = if opts[:structs]
+                 opts[:structs].map do |struct_opts|
+                   use_opts = struct_opts.clone
+                   struct_name = use_opts[:name]
+                   use_opts[:parent_lib] = self
+                   Crow::StructClass.new(struct_name, use_opts)
+                 end
+               else
+                 []
+               end
   end
 
   # Writes project files from a standard Crow template.
@@ -59,22 +62,22 @@ class Crow::LibDef
   # @param [String] target_dir folder where files will be copied to. New files will be written, existing files are skipped.
   # @return [true]
   #
-  def create_project target_dir, project_type = 'kaggle'
-    raise "Unknown project type '#{project_type}" unless TEMPLATES.include?( project_type )
-    source_dir = File.join( TEMPLATE_DIR, project_type )
-    raise "No source project in #{source_dir}" unless File.directory?( source_dir ) && File.exists?( File.join( source_dir, 'Gemfile' ) )
-    source_names = { :source_short_name => 'kaggle_skeleton', :source_module_name => 'KaggleSkeleton' }
-    copy_project( source_dir, target_dir, source_names )
+  def create_project(target_dir, project_type = 'kaggle')
+    raise "Unknown project type '#{project_type}" unless TEMPLATES.include?(project_type)
 
-    spec_dir = File.join( target_dir, 'spec' )
-    unless File.directory?( spec_dir )
-      FileUtils.mkdir_p spec_dir
+    source_dir = File.join(TEMPLATE_DIR, project_type)
+    unless File.directory?(source_dir) && File.exist?(File.join(source_dir, 'Gemfile'))
+      raise "No source project in #{source_dir}"
     end
 
-    ext_dir = File.join( target_dir, 'ext', short_name )
-    unless File.directory?( ext_dir )
-      FileUtils.mkdir_p ext_dir
-    end
+    source_names = { source_short_name: 'kaggle_skeleton', source_module_name: 'KaggleSkeleton' }
+    copy_project(source_dir, target_dir, source_names)
+
+    spec_dir = File.join(target_dir, 'spec')
+    FileUtils.mkdir_p spec_dir unless File.directory?(spec_dir)
+
+    ext_dir = File.join(target_dir, 'ext', short_name)
+    FileUtils.mkdir_p ext_dir unless File.directory?(ext_dir)
 
     structs.each do |struct_class|
       # NB the _class refers to class inside target project, not in current process
@@ -95,83 +98,82 @@ class Crow::LibDef
   # @option source_names [String] :source_module_name, namespace used in template project content, will be globally replaced
   # @return [true]
   #
-  def copy_project source_dir, target_dir, source_names = { source_short_name: 'kaggle_skeleton', source_module_name: 'KaggleSkeleton' }
-    raise "No source project in #{source_dir}" unless File.directory?( source_dir ) && File.exists?( File.join( source_dir, 'Gemfile' ) )
+  def copy_project(source_dir, target_dir, source_names = { source_short_name: 'kaggle_skeleton', source_module_name: 'KaggleSkeleton' })
+    unless File.directory?(source_dir) && File.exist?(File.join(source_dir, 'Gemfile'))
+      raise "No source project in #{source_dir}"
+    end
+
     FileUtils.mkdir_p target_dir
-    Dir.glob( File.join( source_dir, '**', '*' ) ) do |source_file|
+    Dir.glob(File.join(source_dir, '**', '*')) do |source_file|
       copy_project_file source_file, source_dir, target_dir, source_names
     end
     true
   end
 
-  def copy_project_file source_file, source_dir, target_dir, source_names
-    rel_source_file = source_file.sub( File.join(source_dir,'/'), '' )
-    return if skip_project_file?( rel_source_file ) || File.directory?( source_file )
+  def copy_project_file(source_file, source_dir, target_dir, source_names)
+    rel_source_file = source_file.sub(File.join(source_dir, '/'), '')
+    return if skip_project_file?(rel_source_file) || File.directory?(source_file)
 
     rel_target_file = rel_source_file
 
-    if change_names?( rel_target_file )
-      rel_target_file.gsub!( source_names[:source_short_name], self.short_name )
-    end
+    rel_target_file.gsub!(source_names[:source_short_name], short_name) if change_names?(rel_target_file)
 
-    target_file = File.join( target_dir, rel_target_file )
+    target_file = File.join(target_dir, rel_target_file)
 
-    return if File.exists?( target_file ) && contains_user_code?( target_file )
+    return if File.exist?(target_file) && contains_user_code?(target_file)
 
-    unless File.directory?( File.dirname( target_file ) )
-      FileUtils.mkdir_p File.dirname( target_file )
-    end
+    FileUtils.mkdir_p File.dirname(target_file) unless File.directory?(File.dirname(target_file))
 
-    FileUtils.cp( source_file, target_file )
+    FileUtils.cp(source_file, target_file)
 
-    if change_names?( rel_target_file )
-      change_names_in_file( target_file, source_names )
-    end
+    change_names_in_file(target_file, source_names) if change_names?(rel_target_file)
 
-    if run_template?( rel_target_file )
-      render_and_overwrite_template( target_file )
-    end
+    render_and_overwrite_template(target_file) if run_template?(rel_target_file)
   end
 
-  def change_names_in_file target_file, source_names
-    contents = File.read( target_file )
-    contents.gsub!( source_names[:source_short_name], self.short_name )
-    contents.gsub!( source_names[:source_module_name], self.module_name )
-    File.open( target_file, 'w' ) { |file| file.puts contents }
+  def change_names_in_file(target_file, source_names)
+    contents = File.read(target_file)
+    contents.gsub!(source_names[:source_short_name], short_name)
+    contents.gsub!(source_names[:source_module_name], module_name)
+    File.open(target_file, 'w') { |file| file.puts contents }
   end
 
-  def skip_project_file? rel_source_file
+  def skip_project_file?(rel_source_file)
     return true if rel_source_file =~ /\Atmp/
     return true if rel_source_file =~ /\.DS_Store\z/
+
     false
   end
 
-  def change_names? rel_source_file
-    rel_ext = File.extname( rel_source_file )
+  def change_names?(rel_source_file)
+    rel_ext = File.extname(rel_source_file)
     return true if rel_ext =~ /\A\.(?:c|h|txt|rb|gemspec|md)\z/ || rel_ext == ''
+
     false
   end
 
-  def contains_user_code? rel_source_file
+  def contains_user_code?(rel_source_file)
     # There may be a few mixed user/generated files in future, but for now everything is one or other
-    return true if rel_source_file =~ /\A(?:ruby|lib)\//
+    return true if rel_source_file =~ %r{\A(?:ruby|lib)/}
+
     false
   end
 
-  def run_template? rel_source_file
-    rel_ext = File.extname( rel_source_file )
+  def run_template?(rel_source_file)
+    rel_ext = File.extname(rel_source_file)
     return true if rel_ext =~ /\A\.(?:c|h|rb)\z/
+
     false
   end
 
-  def module_name_from_short_name sname
+  def module_name_from_short_name(sname)
     parts = sname.split('_')
-    parts.map { |part| part[0].upcase + part[1,30] }.join
+    parts.map { |part| part[0].upcase + part[1, 30] }.join
   end
 
-  def render_and_overwrite_template target_file
-    erb = ERB.new( File.read( target_file ), 0, '-' )
-    rendering = erb.result( binding )
-    File.open( target_file, 'w' ) { |file| file.puts rendering }
+  def render_and_overwrite_template(target_file)
+    erb = ERB.new(File.read(target_file), 0, '-')
+    rendering = erb.result(binding)
+    File.open(target_file, 'w') { |file| file.puts rendering }
   end
 end

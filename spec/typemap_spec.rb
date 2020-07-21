@@ -5,27 +5,27 @@ describe Crow::TypeMap do
 
   describe 'create' do
     it 'does not create a TypeMap without a ctype' do
-      expect {
+      expect do
         Crow::TypeMap.create(name: 'x', parent_struct: container)
-      }.to raise_error ArgumentError, /Type '' not supported\./
+      end.to raise_error ArgumentError, /Type '' not supported\./
     end
 
     it 'does not create a TypeMap with a bad ctype' do
-      expect {
+      expect do
         Crow::TypeMap.create(name: 'x', ctype: 'fish', parent_struct: container)
-      }.to raise_error ArgumentError, /Type 'fish' not supported\./
+      end.to raise_error ArgumentError, /Type 'fish' not supported\./
     end
 
     it 'does not create a TypeMap without a parent_struct' do
-      expect {
+      expect do
         Crow::TypeMap.create(name: 'x', ctype: :int)
-      }.to raise_error ArgumentError, /missing keyword: :?parent_struct/
+      end.to raise_error ArgumentError, /missing keyword: :?parent_struct/
     end
 
     it 'does not create a TypeMap with a bad parent_struct' do
-      expect {
+      expect do
         Crow::TypeMap.create(name: 'x', ctype: :int, parent_struct: 'Foo')
-      }.to raise_error ArgumentError, 'parent_struct must be a Crow::StructClass'
+      end.to raise_error ArgumentError, 'parent_struct must be a Crow::StructClass'
     end
 
     it 'creates a Ruby read-only attribute by default' do
@@ -64,26 +64,26 @@ describe Crow::TypeMap do
       end
 
       it 'can refer other parameters from the same struct using %' do
-        container.add_attribute( name: 'y', ctype: :int )
+        container.add_attribute(name: 'y', ctype: :int)
         typemap = Crow::TypeMap.create(name: 'x', ctype: :int, parent_struct: container, init: { expr: '%y' })
         expect(typemap.init_expr_c).to eql 'foo->y'
       end
 
       it 'can refer other parameters from a renamed struct using % and optional container name' do
-        container.add_attribute( name: 'y', ctype: :int )
+        container.add_attribute(name: 'y', ctype: :int)
         typemap = Crow::TypeMap.create(name: 'x', ctype: :int, parent_struct: container, init: { expr: '%y' })
         expect(typemap.init_expr_c(from: 'alt_foo')).to eql 'alt_foo->y'
       end
 
       it 'can accept self-referential init param "."' do
-        container.add_attribute( name: 'y', ctype: :int )
-        container.init_params << Crow::TypeMap.create(name:  'y', ctype: :int, parent_struct: container )
+        container.add_attribute(name: 'y', ctype: :int)
+        container.init_params << Crow::TypeMap.create(name: 'y', ctype: :int, parent_struct: container)
         typemap = Crow::TypeMap.create(name: 'y', ctype: :int, parent_struct: container, init: { expr: '.' })
         expect(typemap.init_expr_c(init_context: true)).to eql 'y'
       end
 
       it 'can accept self-referential init param "." in container context' do
-        container.add_attribute( name: 'y', ctype: :int )
+        container.add_attribute(name: 'y', ctype: :int)
         typemap = Crow::TypeMap.create(name: 'y', ctype: :int, parent_struct: container, init: { expr: '.' })
         expect(typemap.init_expr_c(from: 'alt_foo')).to eql 'alt_foo->y'
       end
@@ -117,7 +117,6 @@ describe Crow::TypeMap do
       expect(subject.param_item_to_c).to eql 'NUM2INT( rv_x )'
     end
   end
-
 
   describe Crow::TypeMap::P_Int do
     subject { Crow::TypeMap.create(name: 'x', ctype: :int, pointer: true, parent_struct: container) }
@@ -291,7 +290,6 @@ describe Crow::TypeMap do
     # No Ruby/C converters for arrays yet . . .
   end
 
-
   describe Crow::TypeMap::Long do
     subject { Crow::TypeMap.create(name: 'x', ctype: :long, parent_struct: container) }
 
@@ -341,7 +339,6 @@ describe Crow::TypeMap do
 
     # No Ruby/C converters for arrays yet . . .
   end
-
 
   describe Crow::TypeMap::UInt do
     subject { Crow::TypeMap.create(name: 'x', ctype: :uint, parent_struct: container) }
@@ -393,8 +390,6 @@ describe Crow::TypeMap do
     # No Ruby/C converters for arrays yet . . .
   end
 
-
-
   describe Crow::TypeMap::ULong do
     subject { Crow::TypeMap.create(name: 'x', ctype: :ulong, parent_struct: container) }
 
@@ -445,7 +440,6 @@ describe Crow::TypeMap do
     # No Ruby/C converters for arrays yet . . .
   end
 
-
   describe Crow::TypeMap::Value do
     subject { Crow::TypeMap.create(name: 'x', ctype: :VALUE, parent_struct: container) }
 
@@ -475,7 +469,6 @@ describe Crow::TypeMap do
       expect(subject.param_item_to_c).to eql 'rv_x'
     end
   end
-
 
   describe Crow::TypeMap::NArrayFloat do
     subject { Crow::TypeMap.create(name: 'x', ctype: :NARRAY_FLOAT, parent_struct: container) }
@@ -519,7 +512,6 @@ describe Crow::TypeMap do
     end
   end
 
-
   describe Crow::TypeMap::NArrayDouble do
     subject { Crow::TypeMap.create(name: 'x', ctype: :NARRAY_DOUBLE, parent_struct: container) }
 
@@ -561,7 +553,6 @@ describe Crow::TypeMap do
       expect(subject.rdoc_type).to eql 'NArray<float>'
     end
   end
-
 
   describe Crow::TypeMap::NArraySInt do
     subject { Crow::TypeMap.create(name: 'x', ctype: :NARRAY_INT_16, parent_struct: container) }

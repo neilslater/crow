@@ -1,27 +1,27 @@
-require "rspec/core/rake_task"
+require 'rspec/core/rake_task'
 require 'rake/extensiontask'
 
 # Insert project local lib folder into library search path
-$: << File.join( File.dirname( __FILE__ ), 'lib' )
+$: << File.join(File.dirname(__FILE__), 'lib')
 
-desc "Unit tests"
+desc 'Unit tests'
 RSpec::Core::RakeTask.new(:test) do |t|
-  t.pattern = "spec/*_spec.rb"
+  t.pattern = 'spec/*_spec.rb'
   t.verbose = true
 end
 
 Rake::ExtensionTask.new do |ext|
   ext.name = 'kaggle_skeleton'
-  ext.source_pattern = "*.{c,h}"
+  ext.source_pattern = '*.{c,h}'
   ext.ext_dir = 'ext/kaggle_skeleton'
   ext.lib_dir = 'lib/kaggle_skeleton'
 end
 
-desc "Import CSV"
+desc 'Import CSV'
 task :import_csv do
   require 'kaggle_skeleton'
   if KaggleSkeleton.ready_to_run?
-    puts "CSV data already imported."
+    puts 'CSV data already imported.'
   elsif KaggleSkeleton.ready_to_import?
     KaggleSkeleton.import_from_csv
   else
@@ -34,19 +34,18 @@ task :import_csv do
   end
 end
 
-desc "Run solver and save submission"
+desc 'Run solver and save submission'
 task :solve do
   require 'kaggle_skeleton'
-  unless KaggleSkeleton.ready_to_run?
-    raise "Not ready, import CSV data first."
-  end
+  raise 'Not ready, import CSV data first.' unless KaggleSkeleton.ready_to_run?
+
   solver = KaggleSkeleton::Solver.new
   solver.run
-  submission_file = File.join( KaggleSkeleton::DATA_PATH, 'submission.csv' )
+  submission_file = File.join(KaggleSkeleton::DATA_PATH, 'submission.csv')
   puts "Writing submission file: #{submission_file}"
-  solver.submission.write_csv( submission_file )
+  solver.submission.write_csv(submission_file)
 end
 
-task :default => [:compile, :test]
+task default: %i[compile test]
 
-task :pipeline => [:compile, :import_csv, :test, :solve]
+task pipeline: %i[compile import_csv test solve]

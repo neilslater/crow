@@ -8,10 +8,10 @@ describe Crow::StructClass do
       it 'creates four suitably-named "base" files' do
         Dir.mktmpdir do |dir|
           subject.write(dir)
-          expect( File.exists?( File.join(dir, "base", "struct_#{expected_name}.h")) ).to be true
-          expect( File.exists?( File.join(dir, "base", "struct_#{expected_name}.c")) ).to be true
-          expect( File.exists?( File.join(dir, "base", "ruby_class_#{expected_name}.h")) ).to be true
-          expect( File.exists?( File.join(dir, "base", "ruby_class_#{expected_name}.c")) ).to be true
+          expect(File.exist?(File.join(dir, 'base', "struct_#{expected_name}.h"))).to be true
+          expect(File.exist?(File.join(dir, 'base', "struct_#{expected_name}.c"))).to be true
+          expect(File.exist?(File.join(dir, 'base', "ruby_class_#{expected_name}.h"))).to be true
+          expect(File.exist?(File.join(dir, 'base', "ruby_class_#{expected_name}.c"))).to be true
         end
       end
     end
@@ -20,18 +20,18 @@ describe Crow::StructClass do
       it 'creates two suitably-named "ruby" files' do
         Dir.mktmpdir do |dir|
           subject.write_user(dir)
-          expect( File.exists?( File.join(dir, "ruby", "class_#{expected_name}.h")) ).to be true
-          expect( File.exists?( File.join(dir, "ruby", "class_#{expected_name}.c")) ).to be true
+          expect(File.exist?(File.join(dir, 'ruby', "class_#{expected_name}.h"))).to be true
+          expect(File.exist?(File.join(dir, 'ruby', "class_#{expected_name}.c"))).to be true
         end
       end
 
       it 'does not over-write existing "ruby" files' do
         Dir.mktmpdir do |dir|
-          FileUtils.mkdir_p File.join(dir, "ruby")
-          target_files = [?h, ?c].map { |e| File.join(dir, "ruby", "class_#{expected_name}.#{e}") }
+          FileUtils.mkdir_p File.join(dir, 'ruby')
+          target_files = %w[h c].map { |e| File.join(dir, 'ruby', "class_#{expected_name}.#{e}") }
           target_files.each do |target_file|
             File.open(target_file, 'wb') do |f|
-              f.puts "Leave me alone!"
+              f.puts 'Leave me alone!'
             end
           end
 

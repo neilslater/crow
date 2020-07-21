@@ -3,20 +3,18 @@ require 'spec_helper'
 describe Crow::Expression do
   let(:libdef) do
     Crow::LibDef.new('foo',
-      structs: [
-        { name: 'bar',
-          struct_name: 'Bar',
-          rb_class_name: 'Foo_Bar',
-          attributes: [
-            { name: 'num', :ctype => :int }
-          ],
-          init_params: [
-            { name: 'x', ctype: :int },
-            { name: 'y', ctype: :char }
-          ]
-        }
-      ]
-    )
+                     structs: [
+                       { name: 'bar',
+                         struct_name: 'Bar',
+                         rb_class_name: 'Foo_Bar',
+                         attributes: [
+                           { name: 'num', ctype: :int }
+                         ],
+                         init_params: [
+                           { name: 'x', ctype: :int },
+                           { name: 'y', ctype: :char }
+                         ] }
+                     ])
   end
 
   context 'template expression' do

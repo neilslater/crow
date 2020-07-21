@@ -1,7 +1,6 @@
 class KaggleSkeleton::Solver
-
-  def initialize opts = {}
-    set_opts( opts )
+  def initialize(opts = {})
+    set_opts(opts)
   end
 
   def run
@@ -10,13 +9,13 @@ class KaggleSkeleton::Solver
 
   def self.default_opts
     Hash[
-      :example => 0
+      example: 0
     ]
   end
 
   private
 
-  def set_opts opts
-    @opts = self.class.default_opts.merge( opts )
+  def set_opts(opts)
+    @opts = self.class.default_opts.merge(opts)
   end
 end

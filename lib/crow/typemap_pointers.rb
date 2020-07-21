@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Crow
   class TypeMap::P_Int < TypeMap
     include IsA_C_Pointer
@@ -5,7 +7,7 @@ module Crow
     self.item_default = '0'
 
     def cbase
-      "int"
+      'int'
     end
 
     def rdoc_type
@@ -27,7 +29,7 @@ module Crow
     self.item_default = '0'
 
     def cbase
-      "unsigned int"
+      'unsigned int'
     end
 
     def rdoc_type
@@ -49,7 +51,7 @@ module Crow
     self.item_default = '0L'
 
     def cbase
-      "long"
+      'long'
     end
 
     def rdoc_type
@@ -71,7 +73,7 @@ module Crow
     self.item_default = '0L'
 
     def cbase
-      "unsigned long"
+      'unsigned long'
     end
 
     def rdoc_type
@@ -93,7 +95,7 @@ module Crow
     self.item_default = '0.0'
 
     def cbase
-      "float"
+      'float'
     end
 
     def rdoc_type
@@ -115,7 +117,7 @@ module Crow
     self.item_default = '0.0'
 
     def cbase
-      "double"
+      'double'
     end
 
     def rdoc_type
@@ -137,7 +139,7 @@ module Crow
     self.item_default = '0'
 
     def cbase
-      "char"
+      'char'
     end
 
     def rdoc_type

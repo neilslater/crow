@@ -1,14 +1,16 @@
+# frozen_string_literal: true
+
 module Crow
   class TypeMap::NArray < TypeMap::Value
     include NotA_C_Pointer
     self.default = 'Qnil'
 
     def shape_tmp_var
-      @shape_tmp_var ||= @parent_struct.short_name + '_'  + @name + '_shape'
+      @shape_tmp_var ||= @parent_struct.short_name + '_' + @name + '_shape'
     end
 
     def ptr_tmp_var
-      @ptr_tmp_var ||= @parent_struct.short_name + '_'  + @name + '_ptr'
+      @ptr_tmp_var ||= @parent_struct.short_name + '_' + @name + '_ptr'
     end
 
     def init_class

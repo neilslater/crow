@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
-require "bundler/setup"
-require "crow"
+require 'bundler/setup'
+require 'crow'
 
-require "irb"
+require 'irb'
 IRB.start
