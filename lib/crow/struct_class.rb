@@ -126,13 +126,13 @@ module Crow
     # Whether any of the attributes are NArray objects.
     # @return [Boolean]
     def any_narray?
-      @attributes.any?(&:is_narray?)
+      @attributes.any?(&:narray?)
     end
 
     # List of attributes which contain NArray objects.
     # @return [Array<Crow::TypeMap>]
     def narray_attributes
-      @attributes.select(&:is_narray?)
+      @attributes.select(&:narray?)
     end
 
     # List of attributes which should be handled by to_h and from_h.
@@ -162,11 +162,11 @@ module Crow
     end
 
     def simple_attributes
-      @attributes.reject { |a| a.needs_alloc? || a.is_narray? }
+      @attributes.reject { |a| a.needs_alloc? || a.narray? }
     end
 
     def simple_attributes_with_init
-      @attributes.reject { |a| a.needs_alloc? || a.is_narray? }.select(&:needs_init?)
+      @attributes.reject { |a| a.needs_alloc? || a.narray? }.select(&:needs_init?)
     end
 
     def testable_attributes

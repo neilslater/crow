@@ -77,14 +77,8 @@ module Crow
     # @return [Crow::TypeMap]
     def initialize(name:, ruby_name: name, default: self.class.default, pointer: false, ctype:,
                    init: {}, parent_struct:, ruby_read: true, ruby_write: false, store: self.class.store_default)
-      raise "Variable name '#{name}' cannot be used" if name !~ /\A[a-zA-Z0-9_]+\z/
-
-      @name = name
-      @ruby_name = ruby_name
-      @default = default
-      @pointer = pointer
-      @ctype = ctype
-      raise ArgumentError, 'parent_struct must be a Crow::StructClass' unless parent_struct.is_a? Crow::StructClass
+      check_init_args(name, parent_struct)
+      basic_attributes(name: name, ruby_name: ruby_name, default: default, pointer: pointer, ctype: ctype)
 
       @parent_struct = parent_struct
       @init = init_class.new(init.merge(parent_typemap: self))
@@ -106,7 +100,7 @@ module Crow
                           class_lookup.last
                         else
                           class_lookup.first
-      end
+                        end
 
       const_get(attribute_class).new(opts)
     end
@@ -151,7 +145,7 @@ module Crow
       "(#{cbase}#{pointer_star})"
     end
 
-    def is_narray?
+    def narray?
       false
     end
 
@@ -207,7 +201,7 @@ module Crow
     end
 
     def needs_simple_init?
-      needs_init? && !is_narray? && !pointer
+      needs_init? && !narray? && !pointer
     end
 
     def read_only?
@@ -221,6 +215,27 @@ module Crow
     def test_value(init_context: true)
       return default if init.expr.nil?
 
+      e = Expression.new(use_expr(init_context), @parent_struct.attributes, @parent_struct.init_params)
+      e.as_ruby_test_value
+    end
+
+    private
+
+    def basic_attributes(name:, ruby_name:, default:, pointer:, ctype:)
+      @name = name
+      @ruby_name = ruby_name
+      @default = default
+      @pointer = pointer
+      @ctype = ctype
+    end
+
+    def check_init_args(name, parent_struct)
+      raise "Variable name '#{name}' cannot be used" if name !~ /\A[a-zA-Z0-9_]+\z/
+
+      raise ArgumentError, 'parent_struct must be a Crow::StructClass' unless parent_struct.is_a? Crow::StructClass
+    end
+
+    def use_expr(init_context)
       use_expr = init.expr
 
       if init.expr == '.'
@@ -231,8 +246,7 @@ module Crow
                    end
       end
 
-      e = Expression.new(use_expr, @parent_struct.attributes, @parent_struct.init_params)
-      e.as_ruby_test_value
+      use_expr
     end
   end
 

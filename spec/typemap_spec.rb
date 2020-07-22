@@ -108,7 +108,7 @@ describe Crow::TypeMap do
     end
 
     it 'is not a NArray' do
-      expect(subject.is_narray?).to be false
+      expect(subject.narray?).to be false
     end
 
     it 'has correct to Ruby converter for template' do
@@ -136,7 +136,7 @@ describe Crow::TypeMap do
     end
 
     it 'is not a NArray' do
-      expect(subject.is_narray?).to be false
+      expect(subject.narray?).to be false
     end
 
     # No Ruby/C converters for arrays yet . . .
@@ -158,7 +158,7 @@ describe Crow::TypeMap do
     end
 
     it 'is not a NArray' do
-      expect(subject.is_narray?).to be false
+      expect(subject.narray?).to be false
     end
 
     it 'has correct to Ruby converter for template' do
@@ -186,7 +186,7 @@ describe Crow::TypeMap do
     end
 
     it 'is not a NArray' do
-      expect(subject.is_narray?).to be false
+      expect(subject.narray?).to be false
     end
 
     # No Ruby/C converters for arrays yet . . .
@@ -208,7 +208,7 @@ describe Crow::TypeMap do
     end
 
     it 'is not a NArray' do
-      expect(subject.is_narray?).to be false
+      expect(subject.narray?).to be false
     end
 
     it 'has correct to Ruby converter for template' do
@@ -236,7 +236,7 @@ describe Crow::TypeMap do
     end
 
     it 'is not a NArray' do
-      expect(subject.is_narray?).to be false
+      expect(subject.narray?).to be false
     end
 
     # No Ruby/C converters for arrays yet . . .
@@ -258,7 +258,7 @@ describe Crow::TypeMap do
     end
 
     it 'is not a NArray' do
-      expect(subject.is_narray?).to be false
+      expect(subject.narray?).to be false
     end
 
     it 'has correct to Ruby converter for template' do
@@ -286,7 +286,7 @@ describe Crow::TypeMap do
     end
 
     it 'is not a NArray' do
-      expect(subject.is_narray?).to be false
+      expect(subject.narray?).to be false
     end
 
     # No Ruby/C converters for arrays yet . . .
@@ -308,7 +308,7 @@ describe Crow::TypeMap do
     end
 
     it 'is not a NArray' do
-      expect(subject.is_narray?).to be false
+      expect(subject.narray?).to be false
     end
 
     it 'has correct to Ruby converter for template' do
@@ -336,7 +336,7 @@ describe Crow::TypeMap do
     end
 
     it 'is not a NArray' do
-      expect(subject.is_narray?).to be false
+      expect(subject.narray?).to be false
     end
 
     # No Ruby/C converters for arrays yet . . .
@@ -358,7 +358,7 @@ describe Crow::TypeMap do
     end
 
     it 'is not a NArray' do
-      expect(subject.is_narray?).to be false
+      expect(subject.narray?).to be false
     end
 
     it 'has correct to Ruby converter for template' do
@@ -386,7 +386,7 @@ describe Crow::TypeMap do
     end
 
     it 'is not a NArray' do
-      expect(subject.is_narray?).to be false
+      expect(subject.narray?).to be false
     end
 
     # No Ruby/C converters for arrays yet . . .
@@ -408,7 +408,7 @@ describe Crow::TypeMap do
     end
 
     it 'is not a NArray' do
-      expect(subject.is_narray?).to be false
+      expect(subject.narray?).to be false
     end
 
     it 'has correct to Ruby converter for template' do
@@ -436,7 +436,7 @@ describe Crow::TypeMap do
     end
 
     it 'is not a NArray' do
-      expect(subject.is_narray?).to be false
+      expect(subject.narray?).to be false
     end
 
     # No Ruby/C converters for arrays yet . . .
@@ -459,7 +459,7 @@ describe Crow::TypeMap do
     end
 
     it 'is not a NArray' do
-      expect(subject.is_narray?).to be false
+      expect(subject.narray?).to be false
     end
 
     it 'has correct to Ruby converter for template' do
@@ -489,7 +489,7 @@ describe Crow::TypeMap do
     end
 
     it 'is a NArray' do
-      expect(subject.is_narray?).to be true
+      expect(subject.narray?).to be true
     end
 
     it 'has correct to Ruby converter for template' do
@@ -531,7 +531,7 @@ describe Crow::TypeMap do
     end
 
     it 'is a NArray' do
-      expect(subject.is_narray?).to be true
+      expect(subject.narray?).to be true
     end
 
     it 'has correct to Ruby converter for template' do
@@ -573,7 +573,7 @@ describe Crow::TypeMap do
     end
 
     it 'is a NArray' do
-      expect(subject.is_narray?).to be true
+      expect(subject.narray?).to be true
     end
 
     it 'has correct to Ruby converter for template' do
@@ -615,7 +615,7 @@ describe Crow::TypeMap do
     end
 
     it 'is a NArray' do
-      expect(subject.is_narray?).to be true
+      expect(subject.narray?).to be true
     end
 
     it 'has correct to Ruby converter for template' do

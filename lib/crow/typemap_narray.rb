@@ -17,7 +17,7 @@ module Crow
       Crow::TypeInit::NArray
     end
 
-    def is_narray?
+    def narray?
       true
     end
 
