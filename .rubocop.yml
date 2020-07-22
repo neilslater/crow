@@ -11,3 +11,6 @@ Metrics/BlockLength:
     - describe
     - shared_examples
 
+Metrics/ParameterLists:
+  Max: 4
+  CountKeywordArgs: false

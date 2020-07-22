@@ -3,6 +3,9 @@
 require 'set'
 
 module Crow
+  # This class represents information about data elements that can be used to create C and Ruby
+  # code for that element.
+  #
   class TypeMap
     # Key is supported type name, value is array with subclass and pointer subclass names
     CTYPES = Hash[
@@ -255,8 +258,9 @@ module Crow
       @ruby_write = opts[:ruby_write].nil? ? false : opts[:ruby_write]
     end
   end
-
-  require_relative 'typemap_basic_types'
-  require_relative 'typemap_pointers'
-  require_relative 'typemap_narray'
 end
+
+# These need to be at end to refer the mixins above, and are not part of
+require_relative 'typemap_basic_types'
+require_relative 'typemap_pointers'
+require_relative 'typemap_narray'

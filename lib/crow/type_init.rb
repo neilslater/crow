@@ -50,12 +50,11 @@ module Crow
       @default = default
       raise ArgumentError, 'parent_typemap must be a Crow::TypeMap' unless parent_typemap.is_a? Crow::TypeMap
 
+      init_expressions(
+        size_expr: size_expr, shape_expr: shape_expr, shape_exprs: shape_exprs, rank_expr: rank_expr, expr: expr
+      )
+
       @parent_typemap = parent_typemap
-      @expr ||= expr
-      @size_expr ||= size_expr
-      @shape_expr ||= shape_expr
-      @shape_exprs ||= shape_exprs
-      @rank_expr ||= rank_expr
       @validate_min ||= validate_min
       @validate_max ||= validate_max
     end
@@ -88,6 +87,10 @@ module Crow
       end
     end
 
+    # This class describes initialisation properties for pointer data elements within a
+    # struct container. An instance of this class describes specific initialisation options that
+    # can then be rendered into C code for validationa or setting values in project files.
+    #
     class Pointer < TypeInit
       def initialize(opts = {})
         super(opts)
@@ -95,6 +98,14 @@ module Crow
       end
 
       def size_expr_c(from: parent_typemap.parent_struct.short_name, init_context: false)
+        struct = parent_typemap.parent_struct
+        e = Expression.new(use_size_expr(init_context), struct.attributes, struct.init_params)
+        e.as_c_code(from)
+      end
+
+      private
+
+      def use_size_expr(init_context)
         use_size_expr = size_expr
 
         if size_expr.start_with?('.')
@@ -105,12 +116,14 @@ module Crow
                           end
         end
 
-        struct = parent_typemap.parent_struct
-        e = Expression.new(use_size_expr, struct.attributes, struct.init_params)
-        e.as_c_code(from)
+        use_size_expr
       end
     end
 
+    # This class describes initialisation properties for narray data elements within a
+    # struct container. An instance of this class describes specific initialisation options that
+    # can then be rendered into C code for validationa or setting values in project files.
+    #
     class NArray < TypeInit
       def initialize(opts = {})
         super(opts)
@@ -131,6 +144,17 @@ module Crow
 
         Expression.new(shape_expr, allowed_attributes, struct.init_params).as_c_code(container_name)
       end
+    end
+
+    private
+
+    def init_expressions(size_expr:, shape_expr:, shape_exprs:, rank_expr:, expr:)
+      @expr ||= expr
+      @size_expr ||= size_expr
+      @shape_expr ||= shape_expr
+      @shape_exprs ||= shape_exprs
+      @rank_expr ||= rank_expr
+      nil
     end
   end
 end
