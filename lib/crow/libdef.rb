@@ -5,6 +5,7 @@ require 'fileutils'
 
 module Crow
   # Implements rules for how template files should be processed
+  #
   module LibTemplateRules
     private
 
