@@ -82,15 +82,15 @@ module Crow
       @name = name
       @ruby_name = ruby_name
       @default = default
-      @pointer = !!pointer
+      @pointer = pointer
       @ctype = ctype
       raise ArgumentError, 'parent_struct must be a Crow::StructClass' unless parent_struct.is_a? Crow::StructClass
 
       @parent_struct = parent_struct
       @init = init_class.new(init.merge(parent_typemap: self))
-      @ruby_read = !!ruby_read
-      @ruby_write = !!ruby_write
-      @store = !!store
+      @ruby_read = ruby_read
+      @ruby_write = ruby_write
+      @store = store
     end
 
     def init_class
@@ -98,7 +98,7 @@ module Crow
     end
 
     def self.create(opts = {})
-      unless class_lookup = CTYPES[opts[:ctype]]
+      unless (class_lookup = CTYPES[opts[:ctype]])
         raise ArgumentError, "Type '#{opts[:ctype]}' not supported. Allowed types #{CTYPES.keys.join(', ')}"
       end
 
@@ -236,13 +236,17 @@ module Crow
     end
   end
 
-  module NotA_C_Pointer
+  # Mixin for classes that represent non-pointer data types.
+  #
+  module NotACPointer
     def needs_alloc?
       false
     end
   end
 
-  module IsA_C_Pointer
+  # Mixin for classes that represent pointer data types.
+  #
+  module IsACPointer
     def needs_alloc?
       true
     end

@@ -2,7 +2,7 @@
 
 module Crow
   class TypeMap::P_Int < TypeMap
-    include IsA_C_Pointer
+    include IsACPointer
     self.default = 'NULL'
     self.item_default = '0'
 
@@ -24,7 +24,7 @@ module Crow
   end
 
   class TypeMap::P_UInt < TypeMap
-    include IsA_C_Pointer
+    include IsACPointer
     self.default = 'NULL'
     self.item_default = '0'
 
@@ -46,7 +46,7 @@ module Crow
   end
 
   class TypeMap::P_Long < TypeMap
-    include IsA_C_Pointer
+    include IsACPointer
     self.default = 'NULL'
     self.item_default = '0L'
 
@@ -68,7 +68,7 @@ module Crow
   end
 
   class TypeMap::P_ULong < TypeMap
-    include IsA_C_Pointer
+    include IsACPointer
     self.default = 'NULL'
     self.item_default = '0L'
 
@@ -90,7 +90,7 @@ module Crow
   end
 
   class TypeMap::P_Float < TypeMap
-    include IsA_C_Pointer
+    include IsACPointer
     self.default = 'NULL'
     self.item_default = '0.0'
 
@@ -112,7 +112,7 @@ module Crow
   end
 
   class TypeMap::P_Double < TypeMap
-    include IsA_C_Pointer
+    include IsACPointer
     self.default = 'NULL'
     self.item_default = '0.0'
 
@@ -134,7 +134,7 @@ module Crow
   end
 
   class TypeMap::P_Char < TypeMap
-    include IsA_C_Pointer
+    include IsACPointer
     self.default = 'NULL'
     self.item_default = '0'
 

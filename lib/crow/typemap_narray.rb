@@ -2,7 +2,7 @@
 
 module Crow
   class TypeMap::NArray < TypeMap::Value
-    include NotA_C_Pointer
+    include NotACPointer
     self.default = 'Qnil'
 
     def shape_tmp_var
@@ -63,7 +63,7 @@ module Crow
   end
 
   class TypeMap::NArrayFloat < TypeMap::NArray
-    include NotA_C_Pointer
+    include NotACPointer
     self.default = 'Qnil'
     self.item_default = '0.0'
 
@@ -81,7 +81,7 @@ module Crow
   end
 
   class TypeMap::NArrayDouble < TypeMap::NArray
-    include NotA_C_Pointer
+    include NotACPointer
     self.default = 'Qnil'
     self.item_default = '0.0'
 
@@ -99,7 +99,7 @@ module Crow
   end
 
   class TypeMap::NArraySInt < TypeMap::NArray
-    include NotA_C_Pointer
+    include NotACPointer
     self.default = 'Qnil'
     self.item_default = '0'
 
@@ -117,7 +117,7 @@ module Crow
   end
 
   class TypeMap::NArrayLInt < TypeMap::NArray
-    include NotA_C_Pointer
+    include NotACPointer
     self.default = 'Qnil'
     self.item_default = '0'
 

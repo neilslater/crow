@@ -2,7 +2,7 @@
 
 module Crow
   class TypeMap::Int < TypeMap
-    include NotA_C_Pointer
+    include NotACPointer
     self.default = '0'
 
     def cbase
@@ -23,7 +23,7 @@ module Crow
   end
 
   class TypeMap::UInt < TypeMap::Int
-    include NotA_C_Pointer
+    include NotACPointer
 
     self.default = '0'
 
@@ -45,7 +45,7 @@ module Crow
   end
 
   class TypeMap::Long < TypeMap
-    include NotA_C_Pointer
+    include NotACPointer
 
     self.default = '0L'
 
@@ -67,7 +67,7 @@ module Crow
   end
 
   class TypeMap::ULong < TypeMap::Long
-    include NotA_C_Pointer
+    include NotACPointer
     self.default = '0L'
 
     def cbase
@@ -88,7 +88,7 @@ module Crow
   end
 
   class TypeMap::Float < TypeMap
-    include NotA_C_Pointer
+    include NotACPointer
     self.default = '0.0'
 
     def cbase
@@ -109,7 +109,7 @@ module Crow
   end
 
   class TypeMap::Double < TypeMap
-    include NotA_C_Pointer
+    include NotACPointer
     self.default = '0.0'
 
     def cbase
@@ -130,7 +130,7 @@ module Crow
   end
 
   class TypeMap::Char < TypeMap
-    include NotA_C_Pointer
+    include NotACPointer
     self.default = '0'
 
     def cbase
@@ -151,7 +151,7 @@ module Crow
   end
 
   class TypeMap::Value < TypeMap
-    include NotA_C_Pointer
+    include NotACPointer
     self.default = 'Qnil'
 
     def cbase
