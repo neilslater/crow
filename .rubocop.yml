@@ -1,7 +1,9 @@
 AllCops:
   TargetRubyVersion: 2.6
   NewCops: enable
-
+  Exclude:
+    - 'lib/templates/**/*'
+    
 Layout/LineLength:
   Max: 120
   
