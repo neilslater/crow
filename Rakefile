@@ -98,7 +98,10 @@ task :demo, :out_path do |_t, args|
   puts "Wrote demo project to #{out_path}"
 end
 
-task default: [:test]
+desc 'Generate YARD documentation'
+YARD::Rake::YardocTask.new do |doc_task|
+  doc_task.files = ['lib/crow.rb', 'lib/crow/*.rb']
+end
 
 desc 'Run full set of QC tools'
 task qc: %i[bundle:audit rubocop spec]

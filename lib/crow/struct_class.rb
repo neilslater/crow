@@ -116,7 +116,6 @@ module Crow
     end
 
     # Adds an attribute definition to the struct/class description.
-    # @param [String] name identifier used for the attribute in C and Ruby references
     # @param [Hash] opts passed to Crow::TypeMap constructor
     # @return [Crow::TypeMap] the new attribute definition
     def add_attribute(opts = {})
