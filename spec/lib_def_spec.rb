@@ -79,6 +79,61 @@ describe Crow::LibDef do
     )
   end
 
+  let(:c_source) do
+    <<~CENDS
+      #include "ruby/class_bar.h"
+
+      VALUE bar_rbobject__hi_doubled( VALUE self ) {
+        Bar *bar = get_bar_struct( self );
+        return INT2NUM( bar->hi * 2 );
+      }
+
+      void init_class_bar_ext() {
+        rb_define_method( Foo_Bar, "hi_doubled", bar_rbobject__hi_doubled, 0 );
+        return;
+      }
+    CENDS
+  end
+
+  let(:c_libh_source) do
+    <<~CLIBHENDS
+      #ifndef LIB_STRUCT_BAR_H
+      #define LIB_STRUCT_BAR_H
+
+      #include "base/all_structs.h"
+
+      int bar__count( Bar *bar );
+
+      #endif
+    CLIBHENDS
+  end
+
+  let(:c_lib_source) do
+    <<~CLIBENDS
+      #include "lib/bar.h"
+
+      int bar__count( Bar *bar ) {
+        return bar->hi * 7;
+      }
+    CLIBENDS
+  end
+
+  let(:c_rb_source) do
+    <<~CRBENDS
+      #include "ruby/class_bar.h"
+
+      VALUE bar_rbobject__hi_user( VALUE self ) {
+        Bar *bar = get_bar_struct( self );
+        return DBL2NUM( bar__count( bar ) * 0.25 );
+      }
+
+      void init_class_bar_ext() {
+        rb_define_method( Foo_Bar, "hi_user", bar_rbobject__hi_user, 0 );
+        return;
+      }
+    CRBENDS
+  end
+
   def run_command(command)
     output, exit_code = Open3.popen3(command) do |_stdin, stdout, _stderr, wait_thr|
       [stdout.read, wait_thr.value.to_i]
@@ -87,18 +142,25 @@ describe Crow::LibDef do
     [output, exit_code]
   end
 
-  def build_and_run_rake(_lib_name, dir, task = '')
+  def build(_lib_name, dir)
     command = "cd #{dir} && BUNDLE_GEMFILE=#{dir}/Gemfile bundle install"
     output, exit_code = run_command(command)
     puts output if exit_code > 0
     expect(exit_code).to be 0
     expect(output).to include 'Bundle complete!'
+  end
 
+  def run_rake(_lib_name, dir, task)
     command = "cd #{dir} && BUNDLE_GEMFILE=#{dir}/Gemfile bundle exec rake #{task} 2>&1"
     output, exit_code = run_command(command)
     puts output if exit_code > 0
     expect(exit_code).to be 0
     output
+  end
+
+  def build_and_run_rake(lib_name, dir, task = '')
+    build(lib_name, dir)
+    run_rake(lib_name, dir, task)
   end
 
   def compile_project(lib_name, dir)
@@ -271,20 +333,6 @@ describe Crow::LibDef do
     end
 
     it 'allows user source code to be added in "ruby" dir' do
-      c_source = <<~CENDS
-        #include "ruby/class_bar.h"
-
-        VALUE bar_rbobject__hi_doubled( VALUE self ) {
-          Bar *bar = get_bar_struct( self );
-          return INT2NUM( bar->hi * 2 );
-        }
-
-        void init_class_bar_ext() {
-          rb_define_method( Foo_Bar, "hi_doubled", bar_rbobject__hi_doubled, 0 );
-          return;
-        }
-      CENDS
-
       Dir.mktmpdir do |dir|
         subject.create_project(dir)
         File.open(File.join(dir, 'ext', 'foo', 'ruby', 'class_bar.c'), 'w') do |f|
@@ -298,39 +346,6 @@ describe Crow::LibDef do
     end
 
     it 'allows user source code to be added in "lib" dir' do
-      c_libh_source = <<~CLIBHENDS
-        #ifndef LIB_STRUCT_BAR_H
-        #define LIB_STRUCT_BAR_H
-
-        #include "base/all_structs.h"
-
-        int bar__count( Bar *bar );
-
-        #endif
-      CLIBHENDS
-
-      c_lib_source = <<~CLIBENDS
-        #include "lib/bar.h"
-
-        int bar__count( Bar *bar ) {
-          return bar->hi * 7;
-        }
-      CLIBENDS
-
-      c_rb_source = <<~CRBENDS
-        #include "ruby/class_bar.h"
-
-        VALUE bar_rbobject__hi_user( VALUE self ) {
-          Bar *bar = get_bar_struct( self );
-          return DBL2NUM( bar__count( bar ) * 0.25 );
-        }
-
-        void init_class_bar_ext() {
-          rb_define_method( Foo_Bar, "hi_user", bar_rbobject__hi_user, 0 );
-          return;
-        }
-      CRBENDS
-
       Dir.mktmpdir do |dir|
         subject.create_project(dir)
 
