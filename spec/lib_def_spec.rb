@@ -18,39 +18,64 @@ describe Crow::LibDef do
     )
   end
 
+  let(:demo_table_attributes) do
+    [
+      { name: 'narr_data', ruby_name: 'data', ctype: :NARRAY_DOUBLE,
+        init: { rank_expr: '2', shape_exprs: ['$width', '$height'] } },
+      { name: 'narr_summary', ruby_name: 'summary', ctype: :NARRAY_DOUBLE,
+        init: { rank_expr: '1', shape_exprs: ['$width'] } },
+      { name: 'narr_counts', ruby_name: 'counts', ctype: :NARRAY_INT_32,
+        init: { rank_expr: '1', shape_exprs: ['$height'] } },
+      { name: 'narr_inverse', ruby_name: 'inverse', ctype: :NARRAY_FLOAT,
+        init: { rank_expr: '2', shape_exprs: ['$height', '$width'] } }
+    ]
+  end
+
+  let(:demo_table) do
+    {
+      name: 'table',
+      attributes: demo_table_attributes,
+      init_params: [
+        { name: 'width', ctype: :int, init: { validate_min: 1, validate_max: 10 } },
+        { name: 'height', ctype: :int, init: { validate_min: 1, validate_max: 20 } }
+      ]
+    }
+  end
+
+  let(:demo_baz) do
+    {
+      name: 'baz',
+      attributes: [
+        { name: 'num_things', ctype: :int, init: { expr: '.' } },
+        { name: 'things', ctype: :int, pointer: true, ruby_read: false,
+          init: { size_expr: '.num_things', expr: '0' } }
+      ],
+      init_params: [{ name: 'num_things', ctype: :int }]
+    }
+  end
+
+  let(:demo_bar) do
+    {
+      name: 'bar',
+      attributes: [
+        { name: 'hi', ctype: :int, ruby_write: true, init: { expr: '.' } }
+      ],
+      init_params: [{ name: 'hi', ctype: :int }]
+    }
+  end
+
+  let(:demo_structs) do
+    [
+      demo_bar,
+      demo_baz,
+      demo_table
+    ]
+  end
+
   let(:libdef_b) do
     Crow::LibDef.new(
       'foo',
-      structs: [
-        {
-          name: 'bar',
-          attributes: [
-            { name: 'hi', ctype: :int, ruby_write: true, init: { expr: '.' } }
-          ],
-          init_params: [{ name: 'hi', ctype: :int }]
-        },
-        {
-          name: 'baz',
-          attributes: [
-            { name: 'num_things', ctype: :int, init: { expr: '.' } },
-            { name: 'things', ctype: :int, pointer: true, ruby_read: false, init: { size_expr: '.num_things', expr: '0' } }
-          ],
-          init_params: [{ name: 'num_things', ctype: :int }]
-        },
-        {
-          name: 'table',
-          attributes: [
-            { name: 'narr_data', ruby_name: 'data', ctype: :NARRAY_DOUBLE, init: { rank_expr: '2', shape_exprs: ['$width', '$height'] } },
-            { name: 'narr_summary', ruby_name: 'summary', ctype: :NARRAY_DOUBLE, init: { rank_expr: '1', shape_exprs: ['$width'] } },
-            { name: 'narr_counts', ruby_name: 'counts', ctype: :NARRAY_INT_32, init: { rank_expr: '1', shape_exprs: ['$height'] } },
-            { name: 'narr_inverse', ruby_name: 'inverse', ctype: :NARRAY_FLOAT, init: { rank_expr: '2', shape_exprs: ['$height', '$width'] } }
-          ],
-          init_params: [
-            { name: 'width', ctype: :int, init: { validate_min: 1, validate_max: 10 } },
-            { name: 'height', ctype: :int, init: { validate_min: 1, validate_max: 20 } }
-          ]
-        }
-      ]
+      structs: demo_structs
     )
   end
 
