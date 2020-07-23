@@ -2,6 +2,7 @@
 
 module Crow
   class TypeMap
+    # Describes a C `VALUE` data type intended to be used with a NArray.
     class NArray < TypeMap::Value
       include NotACPointer
       self.default = 'Qnil'
@@ -63,6 +64,7 @@ module Crow
       end
     end
 
+    # Describes a C `VALUE` data type intended to be used with a NArray with NA_SFLOAT subtype.
     class NArrayFloat < TypeMap::NArray
       include NotACPointer
       self.default = 'Qnil'
@@ -81,6 +83,7 @@ module Crow
       end
     end
 
+    # Describes a C `VALUE` data type intended to be used with a NArray with NA_DFLOAT subtype.
     class NArrayDouble < TypeMap::NArray
       include NotACPointer
       self.default = 'Qnil'
@@ -99,6 +102,7 @@ module Crow
       end
     end
 
+    # Describes a C `VALUE` data type intended to be used with a NArray with NA_SINT subtype.
     class NArraySInt < TypeMap::NArray
       include NotACPointer
       self.default = 'Qnil'
@@ -117,6 +121,7 @@ module Crow
       end
     end
 
+    # Describes a C `VALUE` data type intended to be used with a NArray with NA_LINT subtype.
     class NArrayLInt < TypeMap::NArray
       include NotACPointer
       self.default = 'Qnil'

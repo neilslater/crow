@@ -9,13 +9,13 @@ module Crow
   class TypeMap
     # Key is supported type name, value is array with subclass and pointer subclass names
     CTYPES = Hash[
-      int: %w[Int P_Int],
-      float: %w[Float P_Float],
-      double: %w[Double P_Double],
-      char: %w[Char P_Char],
-      long: %w[Long P_Long],
-      uint: %w[UInt P_UInt],
-      ulong: %w[ULong P_ULong],
+      int: %w[Int PointerInt],
+      float: %w[Float PointerFloat],
+      double: %w[Double PointerDouble],
+      char: %w[Char PointerChar],
+      long: %w[Long PointerLong],
+      uint: %w[UInt PointerUInt],
+      ulong: %w[ULong PointerULong],
       VALUE: %w[Value Value],
       NARRAY_FLOAT: %w[NArrayFloat NArrayFloat],
       NARRAY_DOUBLE: %w[NArrayDouble NArrayDouble],

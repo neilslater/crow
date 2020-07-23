@@ -120,7 +120,7 @@ describe Crow::TypeMap do
     end
   end
 
-  describe Crow::TypeMap::P_Int do
+  describe Crow::TypeMap::PointerInt do
     subject { Crow::TypeMap.create(name: 'x', ctype: :int, pointer: true, parent_struct: container) }
 
     it 'has correct template declare' do
@@ -170,7 +170,7 @@ describe Crow::TypeMap do
     end
   end
 
-  describe Crow::TypeMap::P_Float do
+  describe Crow::TypeMap::PointerFloat do
     subject { Crow::TypeMap.create(name: 'x', ctype: :float, pointer: true, parent_struct: container) }
 
     it 'has correct template declare' do
@@ -220,7 +220,7 @@ describe Crow::TypeMap do
     end
   end
 
-  describe Crow::TypeMap::P_Double do
+  describe Crow::TypeMap::PointerDouble do
     subject { Crow::TypeMap.create(name: 'x', ctype: :double, pointer: true, parent_struct: container) }
 
     it 'has correct template declare' do
@@ -270,7 +270,7 @@ describe Crow::TypeMap do
     end
   end
 
-  describe Crow::TypeMap::P_Char do
+  describe Crow::TypeMap::PointerChar do
     subject { Crow::TypeMap.create(name: 'x', ctype: :char, pointer: true, parent_struct: container) }
 
     it 'has correct template declare' do
@@ -320,7 +320,7 @@ describe Crow::TypeMap do
     end
   end
 
-  describe Crow::TypeMap::P_Long do
+  describe Crow::TypeMap::PointerLong do
     subject { Crow::TypeMap.create(name: 'x', ctype: :long, pointer: true, parent_struct: container) }
 
     it 'has correct template declare' do
@@ -370,7 +370,7 @@ describe Crow::TypeMap do
     end
   end
 
-  describe Crow::TypeMap::P_UInt do
+  describe Crow::TypeMap::PointerUInt do
     subject { Crow::TypeMap.create(name: 'x', ctype: :uint, pointer: true, parent_struct: container) }
 
     it 'has correct template declare' do
@@ -420,7 +420,7 @@ describe Crow::TypeMap do
     end
   end
 
-  describe Crow::TypeMap::P_ULong do
+  describe Crow::TypeMap::PointerULong do
     subject { Crow::TypeMap.create(name: 'x', ctype: :ulong, pointer: true, parent_struct: container) }
 
     it 'has correct template declare' do
