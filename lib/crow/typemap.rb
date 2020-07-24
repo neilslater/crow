@@ -236,7 +236,7 @@ module Crow
     end
   end
 
-  # This class constructs valid TypeMaps from config
+  # This class constructs valid TypeMaps from hash description.
   #
   class TypeMapFactory
     require_relative 'typemap_basic_types'
