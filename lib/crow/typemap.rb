@@ -3,10 +3,65 @@
 require 'set'
 
 module Crow
+  # This module define the base conversions to C or Ruby code snippets for TypeMap classes.
+  #
+  module TypeMapCodeSnippets
+    def pointer_star
+      pointer ? '*' : ''
+    end
+
+    def declare
+      "#{cbase} #{pointer_star}#{name};"
+    end
+
+    def as_param
+      "#{cbase} #{pointer_star}#{name}"
+    end
+
+    def cast
+      "(#{cbase}#{pointer_star})"
+    end
+
+    def rv_name
+      "rv_#{name}"
+    end
+
+    def as_rv_param
+      "VALUE rv_#{name}"
+    end
+
+    def struct_item
+      "#{parent_struct.short_name}->#{name}"
+    end
+
+    def struct_item_to_ruby
+      self.class.c_to_ruby(struct_item)
+    end
+
+    def param_item_to_c
+      self.class.ruby_to_c(rv_name)
+    end
+
+    def validate_condition_c(var_c = struct_item)
+      init.validate_condition_c var_c
+    end
+
+    def validate_fail_condition_c(var_c = struct_item)
+      init.validate_fail_condition_c var_c
+    end
+
+    def init_expr_c(from: parent_struct.short_name, init_context: false)
+      e = Expression.new(use_expr(init_context), @parent_struct.attributes, @parent_struct.init_params)
+      e.as_c_code(from)
+    end
+  end
+
   # This class represents information about data elements that can be used to create C and Ruby
   # code for that element.
   #
   class TypeMap
+    include TypeMapCodeSnippets
+
     # The name of the variable within the struct
     # @return [String]
     attr_reader :name
@@ -71,7 +126,7 @@ module Crow
     end
 
     def init_class
-      Crow::TypeInit
+      TypeInit
     end
 
     def self.default
@@ -98,49 +153,8 @@ module Crow
       false
     end
 
-    def pointer_star
-      pointer ? '*' : ''
-    end
-
-    def declare
-      "#{cbase} #{pointer_star}#{name};"
-    end
-
-    def as_param
-      "#{cbase} #{pointer_star}#{name}"
-    end
-
-    def cast
-      "(#{cbase}#{pointer_star})"
-    end
-
     def narray?
       false
-    end
-
-    def rv_name
-      "rv_#{name}"
-    end
-
-    def as_rv_param
-      "VALUE rv_#{name}"
-    end
-
-    def struct_item
-      "#{parent_struct.short_name}->#{name}"
-    end
-
-    def struct_item_to_ruby
-      self.class.c_to_ruby(struct_item)
-    end
-
-    def param_item_to_c
-      self.class.ruby_to_c(rv_name)
-    end
-
-    def init_expr_c(from: parent_struct.short_name, init_context: false)
-      e = Expression.new(use_expr(init_context), @parent_struct.attributes, @parent_struct.init_params)
-      e.as_c_code(from)
     end
 
     def needs_init?
@@ -149,14 +163,6 @@ module Crow
 
     def validate?
       init.validate?
-    end
-
-    def validate_condition_c(var_c = struct_item)
-      init.validate_condition_c var_c
-    end
-
-    def validate_fail_condition_c(var_c = struct_item)
-      init.validate_fail_condition_c var_c
     end
 
     def needs_simple_init?
