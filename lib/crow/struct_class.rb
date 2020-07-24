@@ -4,40 +4,10 @@ require 'erb'
 require 'fileutils'
 
 module Crow
-  # This class models the description of dual Ruby class and C struct code.
+  # This class models the available template files, and rendering them based on structure input.
   #
-  # An object of the class describes a C struct, and its Ruby representation.
-  #
-  # @example Define a basic C struct with two attributes and write its files to a folder
-  #  structdef = Crow::StructClass.new('the_class',
-  #    :attributes => [{name: 'number', ctype: :int}, {name: 'values', ctype: :double, pointer: true}]}])
-  #  structdef.write('/path/to/target_project/ext/the_module')
-  #
-  class StructClass
-    # The label used for file names and struct pointers relating to this struct
-    # @return [String]
-    attr_accessor :short_name
-
-    # The label used for struct type (by default derived from short_name)
-    # @return [String]
-    attr_accessor :struct_name
-
-    # The name used for Ruby Class wrapper for this type (by default derived from short_name)
-    # @return [String]
-    attr_accessor :rb_class_name
-
-    # List of attributes defined in the struct and class
-    # @return [Array<Crow::TypeMap>]
-    attr_accessor :attributes
-
-    # The container library for the struct. Although you can generate struct wrappers without this being set,
-    # some templated code needs to know the correct container.
-    # @return [Crow::LibDef]
-    attr_accessor :parent_lib
-
-    # List of params used to initialize a struct or class of this type
-    # @return [Array<Crow::TypeMap>]
-    attr_accessor :init_params
+  class StructTemplates
+    attr_reader :struct_binding, :short_name
 
     TEMPLATE_DIR = File.realdirpath(File.join(__dir__, '../../lib/templates/class_structs'))
     TEMPLATES = ['struct_dataset.h', 'struct_dataset.c', 'ruby_class_dataset.h', 'ruby_class_dataset.c'].freeze
@@ -51,28 +21,9 @@ module Crow
     SPEC_TEMPLATE_DIR = File.realdirpath(File.join(__dir__, '../../lib/templates/spec'))
     SPEC_TEMPLATES = ['dataset_spec.rb'].freeze
 
-    # Creates a new struct description.
-    # @param [String] short_name identifying name for struct and class
-    # @param [Hash] opts
-    # @option opts [String] :struct_name if provided then over-rides name automatically derived from short_name
-    # @option opts [String] :rb_class_name if provided then over-rides name automatically derived from short_name
-    # @option opts [Array<Hash>] :attributes, if provided these are used to create new Crow::TypeMap objects that
-    #                            describe attributes
-    # @option opts [Array<Hash>] :init_params, if provided these are used to create new Crow::TypeMap objects
-    #                            that describe params to initialise instances of the new class
-    # @option opts [Crow::LibDef] :parent_lib, if provided then sets parent_lib
-    # @return [Crow::StructClass]
-    #
-    def initialize(short_name, opts = {})
-      raise "Short name '#{short_name}' cannot be used" if short_name !~ /\A[a-zA-Z0-9_]+\z/
-
+    def initialize(short_name, struct_binding)
+      @struct_binding = struct_binding
       @short_name = short_name
-      @struct_name = opts[:struct_name] || struct_name_from_short_name(@short_name)
-      @rb_class_name = opts[:rb_class_name] || @struct_name
-      @attributes = create_attributes(opts)
-      @init_params = create_init_params(opts)
-
-      @parent_lib = opts[:parent_lib] || Crow::LibDef.new('module')
     end
 
     # Writes four C source files that implement a basic Ruby native extension for the class. The files
@@ -113,6 +64,128 @@ module Crow
         end
       end
       true
+    end
+
+    private
+
+    def ensure_user_subdirs(path)
+      ext_ruby_dir = File.join(path, 'ruby')
+      FileUtils.mkdir_p ext_ruby_dir unless File.directory?(ext_ruby_dir)
+
+      ext_lib_dir = File.join(path, 'lib')
+      FileUtils.mkdir_p ext_lib_dir unless File.directory?(ext_lib_dir)
+    end
+
+    def write_user_ruby_classes(path)
+      USER_CLASS_TEMPLATES.each do |template|
+        target = File.join(path, 'ruby', template.sub(/dataset/, short_name))
+        next if File.exist?(target)
+
+        File.open(target, 'w') do |file|
+          file.puts render(File.join(USER_CLASS_TEMPLATE_DIR, template))
+        end
+      end
+    end
+
+    def write_user_struct_files(path)
+      USER_STRUCT_TEMPLATES.each do |template|
+        target = File.join(path, 'lib', template.sub(/dataset/, short_name))
+        next if File.exist?(target)
+
+        File.open(target, 'w') do |file|
+          file.puts render(File.join(USER_STRUCT_TEMPLATE_DIR, template))
+        end
+      end
+    end
+
+    def render(template_file)
+      erb = ERB.new(File.read(template_file), trim_mode: '-')
+      erb.result(struct_binding)
+    end
+  end
+
+  # This class models the description of dual Ruby class and C struct code.
+  #
+  # An object of the class describes a C struct, and its Ruby representation.
+  #
+  # @example Define a basic C struct with two attributes and write its files to a folder
+  #  structdef = Crow::StructClass.new('the_class',
+  #    :attributes => [{name: 'number', ctype: :int}, {name: 'values', ctype: :double, pointer: true}]}])
+  #  structdef.write('/path/to/target_project/ext/the_module')
+  #
+  class StructClass
+    # The label used for file names and struct pointers relating to this struct
+    # @return [String]
+    attr_accessor :short_name
+
+    # The label used for struct type (by default derived from short_name)
+    # @return [String]
+    attr_accessor :struct_name
+
+    # The name used for Ruby Class wrapper for this type (by default derived from short_name)
+    # @return [String]
+    attr_accessor :rb_class_name
+
+    # List of attributes defined in the struct and class
+    # @return [Array<Crow::TypeMap>]
+    attr_accessor :attributes
+
+    # The container library for the struct. Although you can generate struct wrappers without this being set,
+    # some templated code needs to know the correct container.
+    # @return [Crow::LibDef]
+    attr_accessor :parent_lib
+
+    # List of params used to initialize a struct or class of this type
+    # @return [Array<Crow::TypeMap>]
+    attr_accessor :init_params
+
+    # Creates a new struct description.
+    # @param [String] short_name identifying name for struct and class
+    # @param [Hash] opts
+    # @option opts [String] :struct_name if provided then over-rides name automatically derived from short_name
+    # @option opts [String] :rb_class_name if provided then over-rides name automatically derived from short_name
+    # @option opts [Array<Hash>] :attributes, if provided these are used to create new Crow::TypeMap objects that
+    #                            describe attributes
+    # @option opts [Array<Hash>] :init_params, if provided these are used to create new Crow::TypeMap objects
+    #                            that describe params to initialise instances of the new class
+    # @option opts [Crow::LibDef] :parent_lib, if provided then sets parent_lib
+    # @return [Crow::StructClass]
+    #
+    def initialize(short_name, opts = {})
+      raise "Short name '#{short_name}' cannot be used" if short_name !~ /\A[a-zA-Z0-9_]+\z/
+
+      @short_name = short_name
+      @struct_name = opts[:struct_name] || struct_name_from_short_name(@short_name)
+      @rb_class_name = opts[:rb_class_name] || @struct_name
+      @attributes = create_attributes(opts)
+      @init_params = create_init_params(opts)
+
+      @parent_lib = opts[:parent_lib] || Crow::LibDef.new('module')
+      @templates = StructTemplates.new(short_name, binding)
+    end
+
+    # Writes four C source files that implement a basic Ruby native extension for the class. The files
+    # are split into a Ruby class binding and a struct definition, each of which has a .c and .h file.
+    # @param [String] path directory to write files to.
+    # @return [true]
+    def write(path)
+      @templates.write(path)
+    end
+
+    # Writes user C files that go in ext/lib/ruby and ext/lib/lib for developer to extend with the
+    # main C-based functionality of the library.
+    # @param [String] path directory to write files to.
+    # @return [true]
+    def write_user(path)
+      @templates.write_user(path)
+    end
+
+    # Writes a Ruby source file containing basic spec examples that exercise standard functions of
+    # the structure as defined.
+    # @param [String] path directory to write spec files to.
+    # @return [true]
+    def write_specs(path)
+      @templates.write_specs(path)
     end
 
     # Adds an attribute definition to the struct/class description.
@@ -212,41 +285,6 @@ module Crow
       else
         []
       end
-    end
-
-    def ensure_user_subdirs(path)
-      ext_ruby_dir = File.join(path, 'ruby')
-      FileUtils.mkdir_p ext_ruby_dir unless File.directory?(ext_ruby_dir)
-
-      ext_lib_dir = File.join(path, 'lib')
-      FileUtils.mkdir_p ext_lib_dir unless File.directory?(ext_lib_dir)
-    end
-
-    def write_user_ruby_classes(path)
-      USER_CLASS_TEMPLATES.each do |template|
-        target = File.join(path, 'ruby', template.sub(/dataset/, short_name))
-        next if File.exist?(target)
-
-        File.open(target, 'w') do |file|
-          file.puts render(File.join(USER_CLASS_TEMPLATE_DIR, template))
-        end
-      end
-    end
-
-    def write_user_struct_files(path)
-      USER_STRUCT_TEMPLATES.each do |template|
-        target = File.join(path, 'lib', template.sub(/dataset/, short_name))
-        next if File.exist?(target)
-
-        File.open(target, 'w') do |file|
-          file.puts render(File.join(USER_STRUCT_TEMPLATE_DIR, template))
-        end
-      end
-    end
-
-    def render(template_file)
-      erb = ERB.new(File.read(template_file), trim_mode: '-')
-      erb.result(binding)
     end
 
     def struct_name_from_short_name(sname)
