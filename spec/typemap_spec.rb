@@ -8,51 +8,51 @@ describe Crow::TypeMap do
   describe 'create' do
     it 'does not create a TypeMap without a ctype' do
       expect do
-        Crow::TypeMap.create(name: 'x', parent_struct: container)
+        Crow::TypeMapFactory.create_typemap(name: 'x', parent_struct: container)
       end.to raise_error ArgumentError, /Type '' not supported\./
     end
 
     it 'does not create a TypeMap with a bad ctype' do
       expect do
-        Crow::TypeMap.create(name: 'x', ctype: 'fish', parent_struct: container)
+        Crow::TypeMapFactory.create_typemap(name: 'x', ctype: 'fish', parent_struct: container)
       end.to raise_error ArgumentError, /Type 'fish' not supported\./
     end
 
     it 'does not create a TypeMap without a parent_struct' do
       expect do
-        Crow::TypeMap.create(name: 'x', ctype: :int)
+        Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :int)
       end.to raise_error ArgumentError, /missing keyword: :?parent_struct/
     end
 
     it 'does not create a TypeMap with a bad parent_struct' do
       expect do
-        Crow::TypeMap.create(name: 'x', ctype: :int, parent_struct: 'Foo')
+        Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :int, parent_struct: 'Foo')
       end.to raise_error ArgumentError, 'parent_struct must be a Crow::StructClass'
     end
 
     it 'creates a Ruby read-only attribute by default' do
-      typemap = Crow::TypeMap.create(name: 'x', ctype: :int, parent_struct: container)
+      typemap = Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :int, parent_struct: container)
       expect(typemap.read_only?).to be true
       expect(typemap.ruby_read).to be true
       expect(typemap.ruby_write).to be false
     end
 
     it 'can create a Ruby read-write attribute' do
-      typemap = Crow::TypeMap.create(name: 'x', ctype: :int, parent_struct: container, ruby_write: true)
+      typemap = Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :int, parent_struct: container, ruby_write: true)
       expect(typemap.read_only?).to be false
       expect(typemap.ruby_read).to be true
       expect(typemap.ruby_write).to be true
     end
 
     it 'can create an internal-only attribute' do
-      typemap = Crow::TypeMap.create(name: 'x', ctype: :int, parent_struct: container, ruby_read: false)
+      typemap = Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :int, parent_struct: container, ruby_read: false)
       expect(typemap.read_only?).to be false
       expect(typemap.ruby_read).to be false
       expect(typemap.ruby_write).to be false
     end
 
     it 'has naming conventions for templating' do
-      typemap = Crow::TypeMap.create(name: 'x', ctype: :int, parent_struct: container)
+      typemap = Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :int, parent_struct: container)
       expect(typemap.name).to eql 'x'
       expect(typemap.rv_name).to eql 'rv_x'
       expect(typemap.as_rv_param).to eql 'VALUE rv_x'
@@ -61,39 +61,44 @@ describe Crow::TypeMap do
 
     context 'initialisation' do
       it 'can accept arbitrary initialisation' do
-        typemap = Crow::TypeMap.create(name: 'x', ctype: :int, parent_struct: container, init: { expr: 'frobnicate()' })
+        typemap = Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :int,
+                                                      parent_struct: container, init: { expr: 'frobnicate()' })
         expect(typemap.init_expr_c).to eql 'frobnicate()'
       end
 
       it 'can refer other parameters from the same struct using %' do
         container.add_attribute(name: 'y', ctype: :int)
-        typemap = Crow::TypeMap.create(name: 'x', ctype: :int, parent_struct: container, init: { expr: '%y' })
+        typemap = Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :int,
+                                                      parent_struct: container, init: { expr: '%y' })
         expect(typemap.init_expr_c).to eql 'foo->y'
       end
 
       it 'can refer other parameters from a renamed struct using % and optional container name' do
         container.add_attribute(name: 'y', ctype: :int)
-        typemap = Crow::TypeMap.create(name: 'x', ctype: :int, parent_struct: container, init: { expr: '%y' })
+        typemap = Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :int,
+                                                      parent_struct: container, init: { expr: '%y' })
         expect(typemap.init_expr_c(from: 'alt_foo')).to eql 'alt_foo->y'
       end
 
       it 'can accept self-referential init param "."' do
         container.add_attribute(name: 'y', ctype: :int)
-        container.init_params << Crow::TypeMap.create(name: 'y', ctype: :int, parent_struct: container)
-        typemap = Crow::TypeMap.create(name: 'y', ctype: :int, parent_struct: container, init: { expr: '.' })
+        container.init_params << Crow::TypeMapFactory.create_typemap(name: 'y', ctype: :int, parent_struct: container)
+        typemap = Crow::TypeMapFactory.create_typemap(name: 'y', ctype: :int,
+                                                      parent_struct: container, init: { expr: '.' })
         expect(typemap.init_expr_c(init_context: true)).to eql 'y'
       end
 
       it 'can accept self-referential init param "." in container context' do
         container.add_attribute(name: 'y', ctype: :int)
-        typemap = Crow::TypeMap.create(name: 'y', ctype: :int, parent_struct: container, init: { expr: '.' })
+        typemap = Crow::TypeMapFactory.create_typemap(name: 'y', ctype: :int,
+                                                      parent_struct: container, init: { expr: '.' })
         expect(typemap.init_expr_c(from: 'alt_foo')).to eql 'alt_foo->y'
       end
     end
   end
 
   describe Crow::TypeMap::Int do
-    subject { Crow::TypeMap.create(name: 'x', ctype: :int, parent_struct: container) }
+    subject { Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :int, parent_struct: container) }
 
     it 'has correct template declare' do
       expect(subject.declare).to eql 'int x;'
@@ -121,7 +126,7 @@ describe Crow::TypeMap do
   end
 
   describe Crow::TypeMap::PointerInt do
-    subject { Crow::TypeMap.create(name: 'x', ctype: :int, pointer: true, parent_struct: container) }
+    subject { Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :int, pointer: true, parent_struct: container) }
 
     it 'has correct template declare' do
       expect(subject.declare).to eql 'int *x;'
@@ -143,7 +148,7 @@ describe Crow::TypeMap do
   end
 
   describe Crow::TypeMap::Float do
-    subject { Crow::TypeMap.create(name: 'x', ctype: :float, parent_struct: container) }
+    subject { Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :float, parent_struct: container) }
 
     it 'has correct template declare' do
       expect(subject.declare).to eql 'float x;'
@@ -171,7 +176,7 @@ describe Crow::TypeMap do
   end
 
   describe Crow::TypeMap::PointerFloat do
-    subject { Crow::TypeMap.create(name: 'x', ctype: :float, pointer: true, parent_struct: container) }
+    subject { Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :float, pointer: true, parent_struct: container) }
 
     it 'has correct template declare' do
       expect(subject.declare).to eql 'float *x;'
@@ -193,7 +198,7 @@ describe Crow::TypeMap do
   end
 
   describe Crow::TypeMap::Double do
-    subject { Crow::TypeMap.create(name: 'x', ctype: :double, parent_struct: container) }
+    subject { Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :double, parent_struct: container) }
 
     it 'has correct template declare' do
       expect(subject.declare).to eql 'double x;'
@@ -221,7 +226,7 @@ describe Crow::TypeMap do
   end
 
   describe Crow::TypeMap::PointerDouble do
-    subject { Crow::TypeMap.create(name: 'x', ctype: :double, pointer: true, parent_struct: container) }
+    subject { Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :double, pointer: true, parent_struct: container) }
 
     it 'has correct template declare' do
       expect(subject.declare).to eql 'double *x;'
@@ -243,7 +248,7 @@ describe Crow::TypeMap do
   end
 
   describe Crow::TypeMap::Char do
-    subject { Crow::TypeMap.create(name: 'x', ctype: :char, parent_struct: container) }
+    subject { Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :char, parent_struct: container) }
 
     it 'has correct template declare' do
       expect(subject.declare).to eql 'char x;'
@@ -271,7 +276,7 @@ describe Crow::TypeMap do
   end
 
   describe Crow::TypeMap::PointerChar do
-    subject { Crow::TypeMap.create(name: 'x', ctype: :char, pointer: true, parent_struct: container) }
+    subject { Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :char, pointer: true, parent_struct: container) }
 
     it 'has correct template declare' do
       expect(subject.declare).to eql 'char *x;'
@@ -293,7 +298,7 @@ describe Crow::TypeMap do
   end
 
   describe Crow::TypeMap::Long do
-    subject { Crow::TypeMap.create(name: 'x', ctype: :long, parent_struct: container) }
+    subject { Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :long, parent_struct: container) }
 
     it 'has correct template declare' do
       expect(subject.declare).to eql 'long x;'
@@ -321,7 +326,7 @@ describe Crow::TypeMap do
   end
 
   describe Crow::TypeMap::PointerLong do
-    subject { Crow::TypeMap.create(name: 'x', ctype: :long, pointer: true, parent_struct: container) }
+    subject { Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :long, pointer: true, parent_struct: container) }
 
     it 'has correct template declare' do
       expect(subject.declare).to eql 'long *x;'
@@ -343,7 +348,7 @@ describe Crow::TypeMap do
   end
 
   describe Crow::TypeMap::UInt do
-    subject { Crow::TypeMap.create(name: 'x', ctype: :uint, parent_struct: container) }
+    subject { Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :uint, parent_struct: container) }
 
     it 'has correct template declare' do
       expect(subject.declare).to eql 'unsigned int x;'
@@ -371,7 +376,7 @@ describe Crow::TypeMap do
   end
 
   describe Crow::TypeMap::PointerUInt do
-    subject { Crow::TypeMap.create(name: 'x', ctype: :uint, pointer: true, parent_struct: container) }
+    subject { Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :uint, pointer: true, parent_struct: container) }
 
     it 'has correct template declare' do
       expect(subject.declare).to eql 'unsigned int *x;'
@@ -393,7 +398,7 @@ describe Crow::TypeMap do
   end
 
   describe Crow::TypeMap::ULong do
-    subject { Crow::TypeMap.create(name: 'x', ctype: :ulong, parent_struct: container) }
+    subject { Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :ulong, parent_struct: container) }
 
     it 'has correct template declare' do
       expect(subject.declare).to eql 'unsigned long x;'
@@ -421,7 +426,7 @@ describe Crow::TypeMap do
   end
 
   describe Crow::TypeMap::PointerULong do
-    subject { Crow::TypeMap.create(name: 'x', ctype: :ulong, pointer: true, parent_struct: container) }
+    subject { Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :ulong, pointer: true, parent_struct: container) }
 
     it 'has correct template declare' do
       expect(subject.declare).to eql 'unsigned long *x;'
@@ -443,7 +448,7 @@ describe Crow::TypeMap do
   end
 
   describe Crow::TypeMap::Value do
-    subject { Crow::TypeMap.create(name: 'x', ctype: :VALUE, parent_struct: container) }
+    subject { Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :VALUE, parent_struct: container) }
 
     it 'has correct template declare' do
       expect(subject.declare).to eql 'volatile VALUE x;'
@@ -473,7 +478,7 @@ describe Crow::TypeMap do
   end
 
   describe Crow::TypeMap::NArrayFloat do
-    subject { Crow::TypeMap.create(name: 'x', ctype: :NARRAY_FLOAT, parent_struct: container) }
+    subject { Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :NARRAY_FLOAT, parent_struct: container) }
 
     it 'has correct template declare' do
       expect(subject.declare).to eql 'volatile VALUE x;'
@@ -515,7 +520,7 @@ describe Crow::TypeMap do
   end
 
   describe Crow::TypeMap::NArrayDouble do
-    subject { Crow::TypeMap.create(name: 'x', ctype: :NARRAY_DOUBLE, parent_struct: container) }
+    subject { Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :NARRAY_DOUBLE, parent_struct: container) }
 
     it 'has correct template declare' do
       expect(subject.declare).to eql 'volatile VALUE x;'
@@ -557,7 +562,7 @@ describe Crow::TypeMap do
   end
 
   describe Crow::TypeMap::NArraySInt do
-    subject { Crow::TypeMap.create(name: 'x', ctype: :NARRAY_INT_16, parent_struct: container) }
+    subject { Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :NARRAY_INT_16, parent_struct: container) }
 
     it 'has correct template declare' do
       expect(subject.declare).to eql 'volatile VALUE x;'
@@ -599,7 +604,7 @@ describe Crow::TypeMap do
   end
 
   describe Crow::TypeMap::NArrayLInt do
-    subject { Crow::TypeMap.create(name: 'x', ctype: :NARRAY_INT_32, parent_struct: container) }
+    subject { Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :NARRAY_INT_32, parent_struct: container) }
 
     it 'has correct template declare' do
       expect(subject.declare).to eql 'volatile VALUE x;'

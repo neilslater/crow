@@ -119,7 +119,7 @@ module Crow
     # @param [Hash] opts passed to Crow::TypeMap constructor
     # @return [Crow::TypeMap] the new attribute definition
     def add_attribute(opts = {})
-      @attributes << Crow::TypeMap.create(opts.merge(parent_struct: self))
+      @attributes << Crow::TypeMapFactory.create_typemap(opts.merge(parent_struct: self))
     end
 
     # Whether any of the attributes are NArray objects.
@@ -195,7 +195,7 @@ module Crow
         opts[:attributes].map do |attr_opts|
           use_opts = attr_opts.clone
           use_opts[:parent_struct] = self
-          Crow::TypeMap.create(use_opts)
+          Crow::TypeMapFactory.create_typemap(use_opts)
         end
       else
         []
@@ -207,7 +207,7 @@ module Crow
         opts[:init_params].map do |init_param_opts|
           use_opts = init_param_opts.clone
           use_opts[:parent_struct] = self
-          Crow::TypeMap.create(use_opts)
+          Crow::TypeMapFactory.create_typemap(use_opts)
         end
       else
         []

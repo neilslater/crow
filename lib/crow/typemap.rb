@@ -7,22 +7,6 @@ module Crow
   # code for that element.
   #
   class TypeMap
-    # Key is supported type name, value is array with subclass and pointer subclass names
-    CTYPES = Hash[
-      int: %w[Int PointerInt],
-      float: %w[Float PointerFloat],
-      double: %w[Double PointerDouble],
-      char: %w[Char PointerChar],
-      long: %w[Long PointerLong],
-      uint: %w[UInt PointerUInt],
-      ulong: %w[ULong PointerULong],
-      VALUE: %w[Value Value],
-      NARRAY_FLOAT: %w[NArrayFloat NArrayFloat],
-      NARRAY_DOUBLE: %w[NArrayDouble NArrayDouble],
-      NARRAY_INT_16: %w[NArraySInt NArraySInt],
-      NARRAY_INT_32: %w[NArrayLInt NArrayLInt],
-    ]
-
     # The name of the variable within the struct
     # @return [String]
     attr_reader :name
@@ -90,20 +74,6 @@ module Crow
       Crow::TypeInit
     end
 
-    def self.create(opts = {})
-      unless (class_lookup = CTYPES[opts[:ctype]])
-        raise ArgumentError, "Type '#{opts[:ctype]}' not supported. Allowed types #{CTYPES.keys.join(', ')}"
-      end
-
-      attribute_class = if opts[:pointer]
-                          class_lookup.last
-                        else
-                          class_lookup.first
-                        end
-
-      const_get(attribute_class).new(opts)
-    end
-
     def self.default
       @class_default
     end
@@ -169,17 +139,7 @@ module Crow
     end
 
     def init_expr_c(from: parent_struct.short_name, init_context: false)
-      use_expr = init.expr
-
-      if init.expr == '.'
-        use_expr = if init_context
-                     "$#{name}"
-                   else
-                     "%#{name}"
-                   end
-      end
-
-      e = Expression.new(use_expr, @parent_struct.attributes, @parent_struct.init_params)
+      e = Expression.new(use_expr(init_context), @parent_struct.attributes, @parent_struct.init_params)
       e.as_c_code(from)
     end
 
@@ -275,9 +235,42 @@ module Crow
       @ruby_write = opts[:ruby_write].nil? ? false : opts[:ruby_write]
     end
   end
-end
 
-# These need to be at end to refer the mixins above, and are not part of
-require_relative 'typemap_basic_types'
-require_relative 'typemap_pointers'
-require_relative 'typemap_narray'
+  # This class constructs valid TypeMaps from config
+  #
+  class TypeMapFactory
+    require_relative 'typemap_basic_types'
+    require_relative 'typemap_pointers'
+    require_relative 'typemap_narray'
+
+    # Key is supported type name, value is array with subclass and pointer subclass names
+    CTYPES = Hash[
+      int: [TypeMap::Int, TypeMap::PointerInt],
+      float: [TypeMap::Float, TypeMap::PointerFloat],
+      double: [TypeMap::Double, TypeMap::PointerDouble],
+      char: [TypeMap::Char, TypeMap::PointerChar],
+      long: [TypeMap::Long, TypeMap::PointerLong],
+      uint: [TypeMap::UInt, TypeMap::PointerUInt],
+      ulong: [TypeMap::ULong, TypeMap::PointerULong],
+      VALUE: [TypeMap::Value, TypeMap::Value],
+      NARRAY_FLOAT: [TypeMap::NArrayFloat, TypeMap::NArrayFloat],
+      NARRAY_DOUBLE: [TypeMap::NArrayDouble, TypeMap::NArrayDouble],
+      NARRAY_INT_16: [TypeMap::NArraySInt, TypeMap::NArraySInt],
+      NARRAY_INT_32: [TypeMap::NArrayLInt, TypeMap::NArrayLInt]
+    ]
+
+    def self.create_typemap(opts = {})
+      unless (class_lookup = CTYPES[opts[:ctype]])
+        raise ArgumentError, "Type '#{opts[:ctype]}' not supported. Allowed types #{CTYPES.keys.join(', ')}"
+      end
+
+      attribute_class = if opts[:pointer]
+                          class_lookup.last
+                        else
+                          class_lookup.first
+                        end
+
+      attribute_class.new(opts)
+    end
+  end
+end
