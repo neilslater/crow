@@ -5,8 +5,6 @@ require 'rspec/core/rake_task'
 require 'fileutils'
 
 require 'bundler/audit/task'
-require 'bundler/gem_tasks'
-require 'rspec/core/rake_task'
 require 'rubocop/rake_task'
 require 'yard'
 
@@ -69,7 +67,7 @@ def demo_table_attributes
       init: { rank_expr: '2', shape_exprs: ['$width', '$height'] } },
     { name: 'narr_summary', ruby_name: 'summary', ctype: :NARRAY_DOUBLE,
       init: { rank_expr: '1', shape_exprs: ['$width'] } },
-    { name: 'narr_counts', ruby_name: 'counts', ctype: :NARRAY_INT_32,
+    { name: 'narr_counts', ruby_name: 'counts', ctype: :NARRAY_INT32,
       init: { rank_expr: '1', shape_exprs: ['$height'] } },
     { name: 'narr_inverse', ruby_name: 'inverse', ctype: :NARRAY_FLOAT,
       init: { rank_expr: '2', shape_exprs: ['$height', '$width'] } }

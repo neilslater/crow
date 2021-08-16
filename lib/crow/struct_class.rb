@@ -288,8 +288,7 @@ module Crow
     end
 
     def struct_name_from_short_name(sname)
-      parts = sname.split('_')
-      parts.map { |part| part[0].upcase + part[1, 30] }.join
+      sname.split('_').map { |part| part[0].upcase + part[1, 30] }.join
     end
   end
 end

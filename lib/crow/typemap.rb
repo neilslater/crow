@@ -260,8 +260,8 @@ module Crow
                VALUE: [TypeMap::Value, TypeMap::Value],
                NARRAY_FLOAT: [TypeMap::NArrayFloat, TypeMap::NArrayFloat],
                NARRAY_DOUBLE: [TypeMap::NArrayDouble, TypeMap::NArrayDouble],
-               NARRAY_INT_16: [TypeMap::NArraySInt, TypeMap::NArraySInt],
-               NARRAY_INT_32: [TypeMap::NArrayLInt, TypeMap::NArrayLInt] }.freeze
+               NARRAY_INT16: [TypeMap::NArraySInt, TypeMap::NArraySInt],
+               NARRAY_INT32: [TypeMap::NArrayLInt, TypeMap::NArrayLInt] }.freeze
 
     def self.create_typemap(opts = {})
       unless (class_lookup = CTYPES[opts[:ctype]])

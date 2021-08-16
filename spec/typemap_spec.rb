@@ -562,7 +562,7 @@ describe Crow::TypeMap do
   end
 
   describe Crow::TypeMap::NArraySInt do
-    subject { Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :NARRAY_INT_16, parent_struct: container) }
+    subject { Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :NARRAY_INT16, parent_struct: container) }
 
     it 'has correct template declare' do
       expect(subject.declare).to eql 'volatile VALUE x;'
@@ -604,7 +604,7 @@ describe Crow::TypeMap do
   end
 
   describe Crow::TypeMap::NArrayLInt do
-    subject { Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :NARRAY_INT_32, parent_struct: container) }
+    subject { Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :NARRAY_INT32, parent_struct: container) }
 
     it 'has correct template declare' do
       expect(subject.declare).to eql 'volatile VALUE x;'
