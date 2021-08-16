@@ -113,13 +113,13 @@ module Crow
     # @param [Boolean] ruby_write false by default, if true exposes the field as writable from Ruby class wrapper
     # @param [Hash] init constructor params for a Crow::TypeInit description for how the value should be set
     # @return [Crow::TypeMap]
-    def initialize(name:, ruby_name: name, default: self.class.default, pointer: false, ctype:,
-                   init: {}, parent_struct:, ruby_read: true, ruby_write: false, store: self.class.store_default)
+    def initialize(name:, ctype:, parent_struct:, ruby_name: name, default: self.class.default, pointer: false,
+                   init: {}, ruby_read: true, ruby_write: false, store: self.class.store_default)
       check_init_args(name, parent_struct)
       basic_attributes(name: name, ruby_name: ruby_name, default: default, pointer: pointer, ctype: ctype)
 
       @parent_struct = parent_struct
-      @init = init_class.new(init.merge(parent_typemap: self))
+      @init = init_class.new(**init.merge(parent_typemap: self))
       @ruby_read = ruby_read
       @ruby_write = ruby_write
       @store = store
@@ -235,7 +235,7 @@ module Crow
     end
 
     def initialize(opts = {})
-      super(opts)
+      super(**opts)
 
       @ruby_read = opts[:ruby_read].nil? ? true : opts[:ruby_read]
       @ruby_write = opts[:ruby_write].nil? ? false : opts[:ruby_write]
@@ -250,20 +250,18 @@ module Crow
     require_relative 'typemap_narray'
 
     # Key is supported type name, value is array with subclass and pointer subclass names
-    CTYPES = Hash[
-      int: [TypeMap::Int, TypeMap::PointerInt],
-      float: [TypeMap::Float, TypeMap::PointerFloat],
-      double: [TypeMap::Double, TypeMap::PointerDouble],
-      char: [TypeMap::Char, TypeMap::PointerChar],
-      long: [TypeMap::Long, TypeMap::PointerLong],
-      uint: [TypeMap::UInt, TypeMap::PointerUInt],
-      ulong: [TypeMap::ULong, TypeMap::PointerULong],
-      VALUE: [TypeMap::Value, TypeMap::Value],
-      NARRAY_FLOAT: [TypeMap::NArrayFloat, TypeMap::NArrayFloat],
-      NARRAY_DOUBLE: [TypeMap::NArrayDouble, TypeMap::NArrayDouble],
-      NARRAY_INT_16: [TypeMap::NArraySInt, TypeMap::NArraySInt],
-      NARRAY_INT_32: [TypeMap::NArrayLInt, TypeMap::NArrayLInt]
-    ]
+    CTYPES = { int: [TypeMap::Int, TypeMap::PointerInt],
+               float: [TypeMap::Float, TypeMap::PointerFloat],
+               double: [TypeMap::Double, TypeMap::PointerDouble],
+               char: [TypeMap::Char, TypeMap::PointerChar],
+               long: [TypeMap::Long, TypeMap::PointerLong],
+               uint: [TypeMap::UInt, TypeMap::PointerUInt],
+               ulong: [TypeMap::ULong, TypeMap::PointerULong],
+               VALUE: [TypeMap::Value, TypeMap::Value],
+               NARRAY_FLOAT: [TypeMap::NArrayFloat, TypeMap::NArrayFloat],
+               NARRAY_DOUBLE: [TypeMap::NArrayDouble, TypeMap::NArrayDouble],
+               NARRAY_INT_16: [TypeMap::NArraySInt, TypeMap::NArraySInt],
+               NARRAY_INT_32: [TypeMap::NArrayLInt, TypeMap::NArrayLInt] }.freeze
 
     def self.create_typemap(opts = {})
       unless (class_lookup = CTYPES[opts[:ctype]])
@@ -276,7 +274,7 @@ module Crow
                           class_lookup.first
                         end
 
-      attribute_class.new(opts)
+      attribute_class.new(**opts)
     end
   end
 end

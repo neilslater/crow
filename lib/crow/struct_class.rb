@@ -254,11 +254,11 @@ module Crow
     end
 
     def full_class_name
-      parent_lib.module_name + '_' + rb_class_name
+      "#{parent_lib.module_name}_#{rb_class_name}"
     end
 
     def full_class_name_ruby
-      parent_lib.module_name + '::' + rb_class_name.gsub(/_/, '::')
+      "#{parent_lib.module_name}::#{rb_class_name.gsub(/_/, '::')}"
     end
 
     private

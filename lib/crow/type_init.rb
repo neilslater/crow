@@ -93,7 +93,7 @@ module Crow
     #
     class Pointer < TypeInit
       def initialize(opts = {})
-        super(opts)
+        super(**opts)
         @expr ||= parent_typemap.class.item_default
       end
 
@@ -126,7 +126,7 @@ module Crow
     #
     class NArray < TypeInit
       def initialize(opts = {})
-        super(opts)
+        super(**opts)
         @expr ||= parent_typemap.class.item_default
         if @shape_expr
           # Do nothing
