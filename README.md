@@ -1,5 +1,9 @@
 # Crow
 
+[![Build Status](https://api.travis-ci.com/neilslater/crow.png?branch=master)](https://travis-ci.com/github/neilslater/crow)
+[![Coverage Status](https://coveralls.io/repos/neilslater/crow/badge.png?branch=master)](https://coveralls.io/r/neilslater/crow?branch=master)
+[![Code Climate](https://codeclimate.com/github/neilslater/crow.png)](https://codeclimate.com/github/neilslater/crow)
+
 C Ruby Object Writer. Utilities for speeding up drudge work parts of writing C extensions.
 
 ## What is it?
@@ -7,9 +11,8 @@ C Ruby Object Writer. Utilities for speeding up drudge work parts of writing C e
 A set of templates to generate some of the C code for Ruby extensions. I found myself writing a
 lot of boiler-plate C for other projects, and the gem includes templates for that C.
 
-Although packaged as a gem, there is no intent to release this onto rubygems.
-
-This project does not include documentation or tests. Use it at your own risk!
+Although packaged as a gem, there is no intent to release this onto rubygems. Also, there is an
+existing gem `crow` for API mocking, so it would need a name change at the very least.
 
 Feel free to fork this code and adapt it to your code generating needs.
 
