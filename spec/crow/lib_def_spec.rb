@@ -7,21 +7,24 @@ describe Crow::LibDef do
   def run_command(command)
     stdout, stderr, status = Open3.capture3(command)
 
-    [stdout + stderr, status.exitstatus]
+    [stdout, stderr, status.exitstatus]
+  end
+
+  def successful_output(command)
+    stdout, stderr, exit_code = run_command(command)
+    expect(exit_code).to be_zero, stdout + stderr
+    stdout
   end
 
   def build(_lib_name, dir)
     command = "cd #{dir} && BUNDLE_GEMFILE=#{dir}/Gemfile bundle install"
-    output, exit_code = run_command(command)
-    expect(exit_code).to be_zero, output
+    output = successful_output(command)
     expect(output).to include 'Bundle complete!'
   end
 
   def run_rake(_lib_name, dir, task)
-    command = "cd #{dir} && BUNDLE_GEMFILE=#{dir}/Gemfile bundle exec rake #{task} 2>&1"
-    output, exit_code = run_command(command)
-    expect(exit_code).to be_zero, output
-    output
+    command = "cd #{dir} && BUNDLE_GEMFILE=#{dir}/Gemfile bundle exec rake #{task}"
+    successful_output(command)
   end
 
   def build_and_run_rake(lib_name, dir, task = '')
@@ -40,9 +43,7 @@ describe Crow::LibDef do
 
   def run_script_in_project(_lib_name, dir, script)
     command = "cd #{dir} && BUNDLE_GEMFILE=#{dir}/Gemfile bundle exec #{script}"
-    output, exit_code = run_command(command)
-    expect(exit_code).to be_zero, output
-    output
+    successful_output(command)
   end
 
   def run_ruby_in_project(lib_name, dir, ruby_script)
