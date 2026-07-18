@@ -10,8 +10,8 @@ module Crow
     private
 
     def skip_project_file?(rel_source_file)
-      return true if rel_source_file =~ /\Atmp/
-      return true if rel_source_file =~ /\.DS_Store\z/
+      return true if rel_source_file.start_with?('tmp')
+      return true if rel_source_file.end_with?('.DS_Store')
 
       false
     end
@@ -25,14 +25,14 @@ module Crow
 
     def contains_user_code?(rel_source_file)
       # There may be a few mixed user/generated files in future, but for now everything is one or other
-      return true if rel_source_file =~ %r{\A(?:ruby|lib)/}
+      return true if %r{\A(?:ruby|lib)/}.match?(rel_source_file)
 
       false
     end
 
     def run_template?(rel_source_file)
       rel_ext = File.extname(rel_source_file)
-      return true if rel_ext =~ /\A\.(?:c|h|rb)\z/
+      return true if /\A\.(?:c|h|rb)\z/.match?(rel_ext)
 
       false
     end
@@ -80,7 +80,7 @@ module Crow
     # @return [Crow::LibDef]
     #
     def initialize(short_name, opts = {})
-      raise "Short name '#{short_name}' cannot be used" if short_name !~ /\A[a-zA-Z0-9_]+\z/
+      raise "Short name '#{short_name}' cannot be used" unless /\A[a-zA-Z0-9_]+\z/.match?(short_name)
 
       @short_name = short_name
       @module_name = opts[:module_name] || module_name_from_short_name(@short_name)
@@ -91,7 +91,7 @@ module Crow
     # @param [String] project_type identifier for template. Supported value 'kaggle'.
     # @param [String] target_dir folder where files will be copied to. New files will be written,
     #                 existing files are skipped.
-    # @return [true]
+    # @return [void]
     #
     def create_project(target_dir, project_type = 'kaggle')
       source_dir = check_pre_create_project(project_type)
@@ -149,8 +149,6 @@ module Crow
         struct_class.write_user ext_dir
         struct_class.write_specs spec_dir
       end
-
-      true
     end
 
     # Writes project files copied from a template directory.
@@ -161,7 +159,7 @@ module Crow
     #                                will be globally replaced
     # @option source_names [String] :source_module_name, namespace used in template project content,
     #                                will be globally replaced
-    # @return [true]
+    # @return [void]
     #
     def copy_project(source_dir, target_dir,
                      source_names = { source_short_name: 'kaggle_skeleton', source_module_name: 'KaggleSkeleton' })
@@ -173,7 +171,6 @@ module Crow
       Dir.glob(File.join(source_dir, '**', '*')) do |source_file|
         copy_project_file source_file, source_dir, target_dir, source_names
       end
-      true
     end
 
     def copy_project_file(source_file, source_dir, target_dir, source_names)

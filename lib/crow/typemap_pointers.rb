@@ -5,6 +5,7 @@ module Crow
     # Describes a C `int*` data type.
     class PointerInt < TypeMap
       include IsACPointer
+
       self.default = 'NULL'
       self.item_default = '0'
 
@@ -20,7 +21,7 @@ module Crow
         'INT2NUM'
       end
 
-      def self.store_default
+      def self.store_default?
         false
       end
     end
@@ -28,6 +29,7 @@ module Crow
     # Describes a C `unsigned int*` data type.
     class PointerUInt < TypeMap
       include IsACPointer
+
       self.default = 'NULL'
       self.item_default = '0'
 
@@ -43,7 +45,7 @@ module Crow
         'UINT2NUM'
       end
 
-      def self.store_default
+      def self.store_default?
         false
       end
     end
@@ -51,6 +53,7 @@ module Crow
     # Describes a C `long*` data type.
     class PointerLong < TypeMap
       include IsACPointer
+
       self.default = 'NULL'
       self.item_default = '0L'
 
@@ -66,7 +69,7 @@ module Crow
         'LONG2NUM'
       end
 
-      def self.store_default
+      def self.store_default?
         false
       end
     end
@@ -74,6 +77,7 @@ module Crow
     # Describes a C `unsigned long*` data type.
     class PointerULong < TypeMap
       include IsACPointer
+
       self.default = 'NULL'
       self.item_default = '0L'
 
@@ -89,7 +93,7 @@ module Crow
         'ULONG2NUM'
       end
 
-      def self.store_default
+      def self.store_default?
         false
       end
     end
@@ -97,6 +101,7 @@ module Crow
     # Describes a C `float*` data type.
     class PointerFloat < TypeMap
       include IsACPointer
+
       self.default = 'NULL'
       self.item_default = '0.0'
 
@@ -112,7 +117,7 @@ module Crow
         'FLT2NUM'
       end
 
-      def self.store_default
+      def self.store_default?
         false
       end
     end
@@ -120,6 +125,7 @@ module Crow
     # Describes a C `double*` data type.
     class PointerDouble < TypeMap
       include IsACPointer
+
       self.default = 'NULL'
       self.item_default = '0.0'
 
@@ -135,7 +141,7 @@ module Crow
         'DBL2NUM'
       end
 
-      def self.store_default
+      def self.store_default?
         false
       end
     end
@@ -143,6 +149,7 @@ module Crow
     # Describes a C `char*` data type.
     class PointerChar < TypeMap
       include IsACPointer
+
       self.default = 'NULL'
       self.item_default = '0'
 
@@ -154,7 +161,7 @@ module Crow
         'String'
       end
 
-      def self.store_default
+      def self.store_default?
         false
       end
     end

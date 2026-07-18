@@ -29,41 +29,38 @@ module Crow
     # Writes four C source files that implement a basic Ruby native extension for the class. The files
     # are split into a Ruby class binding and a struct definition, each of which has a .c and .h file.
     # @param [String] path directory to write files to.
-    # @return [true]
+    # @return [void]
     def write(path)
       ext_base_dir = File.join(path, 'base')
       FileUtils.mkdir_p ext_base_dir unless File.directory?(ext_base_dir)
 
       TEMPLATES.each do |template|
-        File.open(File.join(path, 'base', template.sub(/dataset/, short_name)), 'w') do |file|
+        File.open(File.join(path, 'base', template.sub('dataset', short_name)), 'w') do |file|
           file.puts render(File.join(TEMPLATE_DIR, template))
         end
       end
-      true
     end
 
     # Writes user C files that go in ext/lib/ruby and ext/lib/lib for developer to extend with the
     # main C-based functionality of the library.
     # @param [String] path directory to write files to.
-    # @return [true]
+    # @return [void]
     def write_user(path)
       ensure_user_subdirs(path)
       write_user_ruby_classes(path)
       write_user_struct_files(path)
-      true
     end
 
     # Writes a Ruby source file containing basic spec examples that exercise standard functions of
     # the structure as defined.
     # @param [String] path directory to write spec files to.
-    # @return [true]
+    # @return [void]
     def write_specs(path)
       SPEC_TEMPLATES.each do |template|
-        File.open(File.join(path, template.sub(/dataset/, short_name)), 'w') do |file|
+        File.open(File.join(path, template.sub('dataset', short_name)), 'w') do |file|
           file.puts render(File.join(SPEC_TEMPLATE_DIR, template))
         end
       end
-      true
     end
 
     private
@@ -78,7 +75,7 @@ module Crow
 
     def write_user_ruby_classes(path)
       USER_CLASS_TEMPLATES.each do |template|
-        target = File.join(path, 'ruby', template.sub(/dataset/, short_name))
+        target = File.join(path, 'ruby', template.sub('dataset', short_name))
         next if File.exist?(target)
 
         File.open(target, 'w') do |file|
@@ -89,7 +86,7 @@ module Crow
 
     def write_user_struct_files(path)
       USER_STRUCT_TEMPLATES.each do |template|
-        target = File.join(path, 'lib', template.sub(/dataset/, short_name))
+        target = File.join(path, 'lib', template.sub('dataset', short_name))
         next if File.exist?(target)
 
         File.open(target, 'w') do |file|
@@ -152,7 +149,7 @@ module Crow
     # @return [Crow::StructClass]
     #
     def initialize(short_name, opts = {})
-      raise "Short name '#{short_name}' cannot be used" if short_name !~ /\A[a-zA-Z0-9_]+\z/
+      raise "Short name '#{short_name}' cannot be used" unless /\A[a-zA-Z0-9_]+\z/.match?(short_name)
 
       @short_name = short_name
       @struct_name = opts[:struct_name] || struct_name_from_short_name(@short_name)
@@ -167,7 +164,7 @@ module Crow
     # Writes four C source files that implement a basic Ruby native extension for the class. The files
     # are split into a Ruby class binding and a struct definition, each of which has a .c and .h file.
     # @param [String] path directory to write files to.
-    # @return [true]
+    # @return [void]
     def write(path)
       @templates.write(path)
     end
@@ -175,7 +172,7 @@ module Crow
     # Writes user C files that go in ext/lib/ruby and ext/lib/lib for developer to extend with the
     # main C-based functionality of the library.
     # @param [String] path directory to write files to.
-    # @return [true]
+    # @return [void]
     def write_user(path)
       @templates.write_user(path)
     end
@@ -183,7 +180,7 @@ module Crow
     # Writes a Ruby source file containing basic spec examples that exercise standard functions of
     # the structure as defined.
     # @param [String] path directory to write spec files to.
-    # @return [true]
+    # @return [void]
     def write_specs(path)
       @templates.write_specs(path)
     end
@@ -258,7 +255,7 @@ module Crow
     end
 
     def full_class_name_ruby
-      "#{parent_lib.module_name}::#{rb_class_name.gsub(/_/, '::')}"
+      "#{parent_lib.module_name}::#{rb_class_name.gsub('_', '::')}"
     end
 
     private

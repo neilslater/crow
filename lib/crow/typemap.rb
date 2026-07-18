@@ -114,12 +114,12 @@ module Crow
     # @param [Hash] init constructor params for a Crow::TypeInit description for how the value should be set
     # @return [Crow::TypeMap]
     def initialize(name:, ctype:, parent_struct:, ruby_name: name, default: self.class.default, pointer: false,
-                   init: {}, ruby_read: true, ruby_write: false, store: self.class.store_default)
+                   init: {}, ruby_read: true, ruby_write: false, store: self.class.store_default?)
       check_init_args(name, parent_struct)
       basic_attributes(name: name, ruby_name: ruby_name, default: default, pointer: pointer, ctype: ctype)
 
       @parent_struct = parent_struct
-      @init = init_class.new(**init.merge(parent_typemap: self))
+      @init = init_class.new(**init, parent_typemap: self)
       @ruby_read = ruby_read
       @ruby_write = ruby_write
       @store = store
@@ -145,7 +145,7 @@ module Crow
       @class_item_default = new_default
     end
 
-    def self.store_default
+    def self.store_default?
       true
     end
 
@@ -195,7 +195,7 @@ module Crow
     end
 
     def check_init_args(name, parent_struct)
-      raise "Variable name '#{name}' cannot be used" if name !~ /\A[a-zA-Z0-9_]+\z/
+      raise "Variable name '#{name}' cannot be used" unless /\A[a-zA-Z0-9_]+\z/.match?(name)
 
       raise ArgumentError, 'parent_struct must be a Crow::StructClass' unless parent_struct.is_a? Crow::StructClass
     end
@@ -237,7 +237,7 @@ module Crow
     def initialize(opts = {})
       super(**opts)
 
-      @ruby_read = opts[:ruby_read].nil? ? true : opts[:ruby_read]
+      @ruby_read = opts[:ruby_read].nil? || opts[:ruby_read]
       @ruby_write = opts[:ruby_write].nil? ? false : opts[:ruby_write]
     end
   end

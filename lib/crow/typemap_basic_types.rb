@@ -5,6 +5,7 @@ module Crow
     # Describes a C `int` data type.
     class Int < TypeMap
       include NotACPointer
+
       self.default = '0'
 
       def cbase
@@ -73,6 +74,7 @@ module Crow
     # Describes a C `unsigned long` data type.
     class ULong < TypeMap::Long
       include NotACPointer
+
       self.default = '0L'
 
       def cbase
@@ -95,6 +97,7 @@ module Crow
     # Describes a C `float` data type.
     class Float < TypeMap
       include NotACPointer
+
       self.default = '0.0'
 
       def cbase
@@ -117,6 +120,7 @@ module Crow
     # Describes a C `double` data type.
     class Double < TypeMap
       include NotACPointer
+
       self.default = '0.0'
 
       def cbase
@@ -139,6 +143,7 @@ module Crow
     # Describes a C `char` data type.
     class Char < TypeMap
       include NotACPointer
+
       self.default = '0'
 
       def cbase
@@ -161,6 +166,7 @@ module Crow
     # Describes a C `VALUE` data type from `ruby.h`, i.e. a Ruby Object pointer.
     class Value < TypeMap
       include NotACPointer
+
       self.default = 'Qnil'
 
       def cbase

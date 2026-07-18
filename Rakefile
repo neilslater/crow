@@ -16,7 +16,7 @@ Bundler::Audit::Task.new
 
 desc 'Crow unit tests'
 RSpec::Core::RakeTask.new(:spec) do |t|
-  t.pattern = 'spec/*_spec.rb'
+  t.pattern = 'spec/**/*_spec.rb'
   t.verbose = false
 end
 
