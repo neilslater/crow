@@ -8,6 +8,7 @@ AllCops:
   NewCops: enable
   Exclude:
     - 'lib/templates/**/*'
+    - 'vendor/bundle/**/*'
 
 Layout/LineLength:
   Max: 120
