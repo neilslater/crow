@@ -19,7 +19,7 @@ describe Crow::Expression do
                      ])
   end
 
-  context 'template expression' do
+  context 'with a template expression' do
     it 'can substitute attributes using %' do
       expr = described_class.new '// %num', libdef.structs.first.attributes
 

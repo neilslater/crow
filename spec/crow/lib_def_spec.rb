@@ -187,9 +187,13 @@ describe Crow::LibDef do
           lib_definition.create_project(dir)
 
           c_path = File.join(dir, 'ext', lib_name)
-          expect(File.exist?(File.join(c_path, 'base', "ruby_module_#{lib_name}.h"))).to be true
-          expect(File.exist?(File.join(c_path, 'base', "ruby_module_#{lib_name}.c"))).to be true
-          expect(File.exist?(File.join(c_path, "#{lib_name}.c"))).to be true
+          expect(
+            [
+              File.join(c_path, 'base', "ruby_module_#{lib_name}.h"),
+              File.join(c_path, 'base', "ruby_module_#{lib_name}.c"),
+              File.join(c_path, "#{lib_name}.c")
+            ]
+          ).to all_exist
         end
       end
 
@@ -199,12 +203,15 @@ describe Crow::LibDef do
 
           c_path = File.join(dir, 'ext', lib_name)
 
-          struct_names.each do |expected_name|
-            expect(File.exist?(File.join(c_path, 'base', "struct_#{expected_name}.h"))).to be true
-            expect(File.exist?(File.join(c_path, 'base', "struct_#{expected_name}.c"))).to be true
-            expect(File.exist?(File.join(c_path, 'base', "ruby_class_#{expected_name}.h"))).to be true
-            expect(File.exist?(File.join(c_path, 'base', "ruby_class_#{expected_name}.c"))).to be true
+          expected_files = struct_names.flat_map do |expected_name|
+            [
+              File.join(c_path, 'base', "struct_#{expected_name}.h"),
+              File.join(c_path, 'base', "struct_#{expected_name}.c"),
+              File.join(c_path, 'base', "ruby_class_#{expected_name}.h"),
+              File.join(c_path, 'base', "ruby_class_#{expected_name}.c")
+            ]
           end
+          expect(expected_files).to all_exist
         end
       end
 
@@ -214,10 +221,13 @@ describe Crow::LibDef do
 
           c_path = File.join(dir, 'ext', lib_name)
 
-          struct_names.each do |expected_name|
-            expect(File.exist?(File.join(c_path, 'ruby', "class_#{expected_name}.h"))).to be true
-            expect(File.exist?(File.join(c_path, 'ruby', "class_#{expected_name}.c"))).to be true
+          expected_files = struct_names.flat_map do |expected_name|
+            [
+              File.join(c_path, 'ruby', "class_#{expected_name}.h"),
+              File.join(c_path, 'ruby', "class_#{expected_name}.c")
+            ]
           end
+          expect(expected_files).to all_exist
         end
       end
 
@@ -237,11 +247,15 @@ describe Crow::LibDef do
         Dir.mktmpdir do |dir|
           lib_definition.create_project(dir)
 
-          expect(File.exist?(File.join(dir, 'data', 'README.txt'))).to be true
-          expect(File.exist?(File.join(dir, 'Gemfile'))).to be true
-          expect(File.exist?(File.join(dir, 'LICENSE.txt'))).to be true
-          expect(File.exist?(File.join(dir, 'Rakefile'))).to be true
-          expect(File.exist?(File.join(dir, 'README.md'))).to be true
+          expect(
+            [
+              File.join(dir, 'data', 'README.txt'),
+              File.join(dir, 'Gemfile'),
+              File.join(dir, 'LICENSE.txt'),
+              File.join(dir, 'Rakefile'),
+              File.join(dir, 'README.md')
+            ]
+          ).to all_exist
         end
       end
 
@@ -250,15 +264,19 @@ describe Crow::LibDef do
           lib_definition.create_project(dir)
 
           c_path = File.join(dir, 'ext', lib_name)
-          expect(File.exist?(File.join(c_path, 'util', 'narray_helper.c'))).to be true
-          expect(File.exist?(File.join(c_path, 'util', 'narray_helper.h'))).to be true
-          expect(File.exist?(File.join(c_path, 'extconf.rb'))).to be true
-          expect(File.exist?(File.join(c_path, 'util', 'mt.c'))).to be true
-          expect(File.exist?(File.join(c_path, 'util', 'mt.h'))).to be true
-          expect(File.exist?(File.join(c_path, 'util', 'ruby_helpers.c'))).to be true
-          expect(File.exist?(File.join(c_path, 'util', 'ruby_helpers.h'))).to be true
-          expect(File.exist?(File.join(c_path, 'base', 'shared_vars.h'))).to be true
-          expect(File.exist?(File.join(c_path, 'base', 'all_structs.h'))).to be true
+          expect(
+            [
+              File.join(c_path, 'util', 'narray_helper.c'),
+              File.join(c_path, 'util', 'narray_helper.h'),
+              File.join(c_path, 'extconf.rb'),
+              File.join(c_path, 'util', 'mt.c'),
+              File.join(c_path, 'util', 'mt.h'),
+              File.join(c_path, 'util', 'ruby_helpers.c'),
+              File.join(c_path, 'util', 'ruby_helpers.h'),
+              File.join(c_path, 'base', 'shared_vars.h'),
+              File.join(c_path, 'base', 'all_structs.h')
+            ]
+          ).to all_exist
         end
       end
 
@@ -301,14 +319,12 @@ describe Crow::LibDef do
         lib_definition.create_project(dir)
         compile_project('foo', dir)
 
-        result = run_ruby_in_project('foo', dir, %(p [Foo::Bar, Foo::Bar.class]))
-        expect(result.chomp).to end_with '[Foo::Bar, Class]'
-
-        result = run_ruby_in_project('foo', dir, %(f = Foo::Bar.new; p f.hi))
-        expect(result.chomp).to end_with '0'
-
-        result = run_ruby_in_project('foo', dir, %(f = Foo::Bar.new; f.hi = -17; p f.hi))
-        expect(result.chomp).to end_with '-17'
+        results = [
+          run_ruby_in_project('foo', dir, %(p [Foo::Bar, Foo::Bar.class])).chomp,
+          run_ruby_in_project('foo', dir, %(f = Foo::Bar.new; p f.hi)).chomp,
+          run_ruby_in_project('foo', dir, %(f = Foo::Bar.new; f.hi = -17; p f.hi)).chomp
+        ]
+        expect(results).to match [end_with('[Foo::Bar, Class]'), end_with('0'), end_with('-17')]
       end
     end
 
@@ -318,14 +334,7 @@ describe Crow::LibDef do
         compile_project('foo', dir)
 
         result = run_script_in_project('foo', dir, 'rspec -f d -c spec/bar_spec.rb')
-        expect(result).to include("\nFoo::Bar\n")
-        expect(result).to match(/\d+ examples?, 0 failures/)
-
-        # Individual spec examples we expect
-        expected_specs = ['is a valid Class']
-        expected_specs.each do |spec_text|
-          expect(result).to include(spec_text)
-        end
+        expect(result).to include("\nFoo::Bar\n", 'is a valid Class').and match(/\d+ examples?, 0 failures/)
       end
     end
 

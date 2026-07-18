@@ -11,3 +11,14 @@ $LOAD_PATH.unshift File.expand_path('../lib', __dir__)
 require 'crow'
 require 'tmpdir'
 require 'fileutils'
+
+RSpec::Matchers.define :all_exist do
+  match do |paths|
+    @missing_paths = paths.reject { |path| File.exist?(path) }
+    @missing_paths.empty?
+  end
+
+  failure_message do
+    "expected all paths to exist; missing: #{@missing_paths.join(', ')}"
+  end
+end

@@ -10,10 +10,14 @@ describe Crow::StructClass do
       it 'creates four suitably-named "base" files' do
         Dir.mktmpdir do |dir|
           struct_class.write(dir)
-          expect(File.exist?(File.join(dir, 'base', "struct_#{expected_name}.h"))).to be true
-          expect(File.exist?(File.join(dir, 'base', "struct_#{expected_name}.c"))).to be true
-          expect(File.exist?(File.join(dir, 'base', "ruby_class_#{expected_name}.h"))).to be true
-          expect(File.exist?(File.join(dir, 'base', "ruby_class_#{expected_name}.c"))).to be true
+          expect(
+            %W[
+              #{dir}/base/struct_#{expected_name}.h
+              #{dir}/base/struct_#{expected_name}.c
+              #{dir}/base/ruby_class_#{expected_name}.h
+              #{dir}/base/ruby_class_#{expected_name}.c
+            ]
+          ).to all_exist
         end
       end
     end
@@ -22,8 +26,7 @@ describe Crow::StructClass do
       it 'creates two suitably-named "ruby" files' do
         Dir.mktmpdir do |dir|
           struct_class.write_user(dir)
-          expect(File.exist?(File.join(dir, 'ruby', "class_#{expected_name}.h"))).to be true
-          expect(File.exist?(File.join(dir, 'ruby', "class_#{expected_name}.c"))).to be true
+          expect(%W[#{dir}/ruby/class_#{expected_name}.h #{dir}/ruby/class_#{expected_name}.c]).to all_exist
         end
       end
 
@@ -52,14 +55,15 @@ describe Crow::StructClass do
     subject(:struct_class) { described_class.new('bar', parent_lib: libdef) }
 
     it 'has default names' do
-      expect(struct_class.short_name).to eql 'bar'
-      expect(struct_class.struct_name).to eql 'Bar'
-      expect(struct_class.rb_class_name).to eql 'Bar'
-
-      expect(struct_class.lib_short_name).to eql 'foo'
-      expect(struct_class.lib_module_name).to eql 'Foo'
-      expect(struct_class.full_class_name).to eql 'Foo_Bar'
-      expect(struct_class.full_class_name_ruby).to eql 'Foo::Bar'
+      expect(struct_class).to have_attributes(
+        short_name: 'bar',
+        struct_name: 'Bar',
+        rb_class_name: 'Bar',
+        lib_short_name: 'foo',
+        lib_module_name: 'Foo',
+        full_class_name: 'Foo_Bar',
+        full_class_name_ruby: 'Foo::Bar'
+      )
     end
 
     it 'has empty attributes array' do
@@ -71,13 +75,11 @@ describe Crow::StructClass do
     end
 
     it 'has no narrays' do
-      expect(struct_class.any_narray?).to be false
-      expect(struct_class.narray_attributes).to be_empty
+      expect(struct_class).to have_attributes(any_narray?: false, narray_attributes: be_empty)
     end
 
     it 'has no attributes requiring malloc' do
-      expect(struct_class.any_alloc?).to be false
-      expect(struct_class.alloc_attributes).to be_empty
+      expect(struct_class).to have_attributes(any_alloc?: false, alloc_attributes: be_empty)
     end
 
     it 'has no attributes requiring initialisation' do
@@ -85,8 +87,7 @@ describe Crow::StructClass do
     end
 
     it 'has no "simple" attributes' do
-      expect(struct_class.simple_attributes).to be_empty
-      expect(struct_class.simple_attributes_with_init).to be_empty
+      expect(struct_class).to have_attributes(simple_attributes: be_empty, simple_attributes_with_init: be_empty)
     end
 
     it_behaves_like 'a C source creator', 'bar'

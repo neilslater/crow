@@ -32,34 +32,30 @@ describe Crow::TypeMap do
 
     it 'creates a Ruby read-only attribute by default' do
       typemap = Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :int, parent_struct: container)
-      expect(typemap.read_only?).to be true
-      expect(typemap.ruby_read).to be true
-      expect(typemap.ruby_write).to be false
+      expect(typemap).to have_attributes(read_only?: true, ruby_read: true, ruby_write: false)
     end
 
     it 'can create a Ruby read-write attribute' do
       typemap = Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :int, parent_struct: container, ruby_write: true)
-      expect(typemap.read_only?).to be false
-      expect(typemap.ruby_read).to be true
-      expect(typemap.ruby_write).to be true
+      expect(typemap).to have_attributes(read_only?: false, ruby_read: true, ruby_write: true)
     end
 
     it 'can create an internal-only attribute' do
       typemap = Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :int, parent_struct: container, ruby_read: false)
-      expect(typemap.read_only?).to be false
-      expect(typemap.ruby_read).to be false
-      expect(typemap.ruby_write).to be false
+      expect(typemap).to have_attributes(read_only?: false, ruby_read: false, ruby_write: false)
     end
 
     it 'has naming conventions for templating' do
       typemap = Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :int, parent_struct: container)
-      expect(typemap.name).to eql 'x'
-      expect(typemap.rv_name).to eql 'rv_x'
-      expect(typemap.as_rv_param).to eql 'VALUE rv_x'
-      expect(typemap.struct_item).to eql 'foo->x'
+      expect(typemap).to have_attributes(
+        name: 'x',
+        rv_name: 'rv_x',
+        as_rv_param: 'VALUE rv_x',
+        struct_item: 'foo->x'
+      )
     end
 
-    context 'initialisation' do
+    context 'with initialisation' do
       it 'can accept arbitrary initialisation' do
         typemap = Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :int,
                                                       parent_struct: container, init: { expr: 'frobnicate()' })
