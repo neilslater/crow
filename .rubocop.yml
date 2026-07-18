@@ -1,14 +1,19 @@
+plugins:
+  - rubocop-performance
+  - rubocop-rake
+  - rubocop-rspec
+
 AllCops:
   TargetRubyVersion: 2.7.1
   NewCops: enable
   Exclude:
     - 'lib/templates/**/*'
-    
+
 Layout/LineLength:
   Max: 120
-  
+
 Metrics/BlockLength:
-  IgnoredMethods:
+  AllowedMethods:
     - context
     - describe
     - shared_examples
