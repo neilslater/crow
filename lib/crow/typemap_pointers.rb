@@ -5,6 +5,7 @@ module Crow
     # Describes a C `int*` data type.
     class PointerInt < TypeMap
       include IsACPointer
+
       self.default = 'NULL'
       self.item_default = '0'
 
@@ -28,6 +29,7 @@ module Crow
     # Describes a C `unsigned int*` data type.
     class PointerUInt < TypeMap
       include IsACPointer
+
       self.default = 'NULL'
       self.item_default = '0'
 
@@ -51,6 +53,7 @@ module Crow
     # Describes a C `long*` data type.
     class PointerLong < TypeMap
       include IsACPointer
+
       self.default = 'NULL'
       self.item_default = '0L'
 
@@ -74,6 +77,7 @@ module Crow
     # Describes a C `unsigned long*` data type.
     class PointerULong < TypeMap
       include IsACPointer
+
       self.default = 'NULL'
       self.item_default = '0L'
 
@@ -97,6 +101,7 @@ module Crow
     # Describes a C `float*` data type.
     class PointerFloat < TypeMap
       include IsACPointer
+
       self.default = 'NULL'
       self.item_default = '0.0'
 
@@ -120,6 +125,7 @@ module Crow
     # Describes a C `double*` data type.
     class PointerDouble < TypeMap
       include IsACPointer
+
       self.default = 'NULL'
       self.item_default = '0.0'
 
@@ -143,6 +149,7 @@ module Crow
     # Describes a C `char*` data type.
     class PointerChar < TypeMap
       include IsACPointer
+
       self.default = 'NULL'
       self.item_default = '0'
 

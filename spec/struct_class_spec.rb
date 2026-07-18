@@ -49,7 +49,7 @@ describe Crow::StructClass do
   end
 
   describe 'minimal struct' do
-    subject { Crow::StructClass.new('bar', parent_lib: libdef) }
+    subject { described_class.new('bar', parent_lib: libdef) }
 
     it 'has default names' do
       expect(subject.short_name).to eql 'bar'

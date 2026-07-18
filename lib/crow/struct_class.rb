@@ -35,7 +35,7 @@ module Crow
       FileUtils.mkdir_p ext_base_dir unless File.directory?(ext_base_dir)
 
       TEMPLATES.each do |template|
-        File.open(File.join(path, 'base', template.sub(/dataset/, short_name)), 'w') do |file|
+        File.open(File.join(path, 'base', template.sub('dataset', short_name)), 'w') do |file|
           file.puts render(File.join(TEMPLATE_DIR, template))
         end
       end
@@ -59,7 +59,7 @@ module Crow
     # @return [true]
     def write_specs(path)
       SPEC_TEMPLATES.each do |template|
-        File.open(File.join(path, template.sub(/dataset/, short_name)), 'w') do |file|
+        File.open(File.join(path, template.sub('dataset', short_name)), 'w') do |file|
           file.puts render(File.join(SPEC_TEMPLATE_DIR, template))
         end
       end
@@ -78,7 +78,7 @@ module Crow
 
     def write_user_ruby_classes(path)
       USER_CLASS_TEMPLATES.each do |template|
-        target = File.join(path, 'ruby', template.sub(/dataset/, short_name))
+        target = File.join(path, 'ruby', template.sub('dataset', short_name))
         next if File.exist?(target)
 
         File.open(target, 'w') do |file|
@@ -89,7 +89,7 @@ module Crow
 
     def write_user_struct_files(path)
       USER_STRUCT_TEMPLATES.each do |template|
-        target = File.join(path, 'lib', template.sub(/dataset/, short_name))
+        target = File.join(path, 'lib', template.sub('dataset', short_name))
         next if File.exist?(target)
 
         File.open(target, 'w') do |file|
@@ -152,7 +152,7 @@ module Crow
     # @return [Crow::StructClass]
     #
     def initialize(short_name, opts = {})
-      raise "Short name '#{short_name}' cannot be used" if short_name !~ /\A[a-zA-Z0-9_]+\z/
+      raise "Short name '#{short_name}' cannot be used" unless /\A[a-zA-Z0-9_]+\z/.match?(short_name)
 
       @short_name = short_name
       @struct_name = opts[:struct_name] || struct_name_from_short_name(@short_name)
@@ -258,7 +258,7 @@ module Crow
     end
 
     def full_class_name_ruby
-      "#{parent_lib.module_name}::#{rb_class_name.gsub(/_/, '::')}"
+      "#{parent_lib.module_name}::#{rb_class_name.gsub('_', '::')}"
     end
 
     private

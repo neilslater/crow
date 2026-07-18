@@ -10,8 +10,8 @@ module Crow
     private
 
     def skip_project_file?(rel_source_file)
-      return true if rel_source_file =~ /\Atmp/
-      return true if rel_source_file =~ /\.DS_Store\z/
+      return true if rel_source_file.start_with?('tmp')
+      return true if rel_source_file.end_with?('.DS_Store')
 
       false
     end
@@ -25,14 +25,14 @@ module Crow
 
     def contains_user_code?(rel_source_file)
       # There may be a few mixed user/generated files in future, but for now everything is one or other
-      return true if rel_source_file =~ %r{\A(?:ruby|lib)/}
+      return true if %r{\A(?:ruby|lib)/}.match?(rel_source_file)
 
       false
     end
 
     def run_template?(rel_source_file)
       rel_ext = File.extname(rel_source_file)
-      return true if rel_ext =~ /\A\.(?:c|h|rb)\z/
+      return true if /\A\.(?:c|h|rb)\z/.match?(rel_ext)
 
       false
     end
@@ -80,7 +80,7 @@ module Crow
     # @return [Crow::LibDef]
     #
     def initialize(short_name, opts = {})
-      raise "Short name '#{short_name}' cannot be used" if short_name !~ /\A[a-zA-Z0-9_]+\z/
+      raise "Short name '#{short_name}' cannot be used" unless /\A[a-zA-Z0-9_]+\z/.match?(short_name)
 
       @short_name = short_name
       @module_name = opts[:module_name] || module_name_from_short_name(@short_name)

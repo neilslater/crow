@@ -21,13 +21,13 @@ describe Crow::Expression do
 
   context 'template expression' do
     it 'can substitute attributes using %' do
-      expr = Crow::Expression.new '// %num', libdef.structs.first.attributes
+      expr = described_class.new '// %num', libdef.structs.first.attributes
 
       expect(expr.as_c_code).to eql '// bar->num'
     end
 
     it 'can substitute parameters using $' do
-      expr = Crow::Expression.new '// $x', libdef.structs.first.attributes, libdef.structs.first.init_params
+      expr = described_class.new '// $x', libdef.structs.first.attributes, libdef.structs.first.init_params
 
       expect(expr.as_c_code).to eql '// x'
     end
