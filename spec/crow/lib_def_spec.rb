@@ -5,7 +5,10 @@ require 'open3'
 
 describe Crow::LibDef do
   def run_command(command)
-    stdout, stderr, status = Open3.capture3(command)
+    # Prevent the generated project's Bundler commands inheriting Crow's active bundle.
+    stdout, stderr, status = Bundler.with_unbundled_env do
+      Open3.capture3(command)
+    end
 
     [stdout, stderr, status.exitstatus]
   end
