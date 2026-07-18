@@ -135,26 +135,22 @@ describe Crow::LibDef do
   end
 
   def run_command(command)
-    output, exit_code = Open3.popen3(command) do |_stdin, stdout, _stderr, wait_thr|
-      [stdout.read, wait_thr.value.to_i]
-    end
+    stdout, stderr, status = Open3.capture3(command)
 
-    [output, exit_code]
+    [stdout + stderr, status.exitstatus]
   end
 
   def build(_lib_name, dir)
     command = "cd #{dir} && BUNDLE_GEMFILE=#{dir}/Gemfile bundle install"
     output, exit_code = run_command(command)
-     if exit_code > 0
-    expect(exit_code).to be 0
+    expect(exit_code).to be_zero, output
     expect(output).to include 'Bundle complete!'
   end
 
   def run_rake(_lib_name, dir, task)
     command = "cd #{dir} && BUNDLE_GEMFILE=#{dir}/Gemfile bundle exec rake #{task} 2>&1"
     output, exit_code = run_command(command)
-     if exit_code > 0
-    expect(exit_code).to be 0
+    expect(exit_code).to be_zero, output
     output
   end
 
@@ -175,8 +171,7 @@ describe Crow::LibDef do
   def run_script_in_project(_lib_name, dir, script)
     command = "cd #{dir} && BUNDLE_GEMFILE=#{dir}/Gemfile bundle exec #{script}"
     output, exit_code = run_command(command)
-     if exit_code > 0
-    expect(exit_code).to be 0
+    expect(exit_code).to be_zero, output
     output
   end
 

@@ -114,7 +114,7 @@ module Crow
     # @param [Hash] init constructor params for a Crow::TypeInit description for how the value should be set
     # @return [Crow::TypeMap]
     def initialize(name:, ctype:, parent_struct:, ruby_name: name, default: self.class.default, pointer: false,
-                   init: {}, ruby_read: true, ruby_write: false, store: self.class.store_default)
+                   init: {}, ruby_read: true, ruby_write: false, store: self.class.store_default?)
       check_init_args(name, parent_struct)
       basic_attributes(name: name, ruby_name: ruby_name, default: default, pointer: pointer, ctype: ctype)
 
@@ -145,7 +145,7 @@ module Crow
       @class_item_default = new_default
     end
 
-    def self.store_default
+    def self.store_default?
       true
     end
 

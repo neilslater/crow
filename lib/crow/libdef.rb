@@ -91,7 +91,7 @@ module Crow
     # @param [String] project_type identifier for template. Supported value 'kaggle'.
     # @param [String] target_dir folder where files will be copied to. New files will be written,
     #                 existing files are skipped.
-    # @return [true]
+    # @return [void]
     #
     def create_project(target_dir, project_type = 'kaggle')
       source_dir = check_pre_create_project(project_type)
@@ -149,8 +149,6 @@ module Crow
         struct_class.write_user ext_dir
         struct_class.write_specs spec_dir
       end
-
-      true
     end
 
     # Writes project files copied from a template directory.
@@ -161,7 +159,7 @@ module Crow
     #                                will be globally replaced
     # @option source_names [String] :source_module_name, namespace used in template project content,
     #                                will be globally replaced
-    # @return [true]
+    # @return [void]
     #
     def copy_project(source_dir, target_dir,
                      source_names = { source_short_name: 'kaggle_skeleton', source_module_name: 'KaggleSkeleton' })
@@ -173,7 +171,6 @@ module Crow
       Dir.glob(File.join(source_dir, '**', '*')) do |source_file|
         copy_project_file source_file, source_dir, target_dir, source_names
       end
-      true
     end
 
     def copy_project_file(source_file, source_dir, target_dir, source_names)

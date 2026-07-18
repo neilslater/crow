@@ -21,7 +21,7 @@ module Crow
         'INT2NUM'
       end
 
-      def self.store_default
+      def self.store_default?
         false
       end
     end
@@ -45,7 +45,7 @@ module Crow
         'UINT2NUM'
       end
 
-      def self.store_default
+      def self.store_default?
         false
       end
     end
@@ -69,7 +69,7 @@ module Crow
         'LONG2NUM'
       end
 
-      def self.store_default
+      def self.store_default?
         false
       end
     end
@@ -93,7 +93,7 @@ module Crow
         'ULONG2NUM'
       end
 
-      def self.store_default
+      def self.store_default?
         false
       end
     end
@@ -117,7 +117,7 @@ module Crow
         'FLT2NUM'
       end
 
-      def self.store_default
+      def self.store_default?
         false
       end
     end
@@ -141,7 +141,7 @@ module Crow
         'DBL2NUM'
       end
 
-      def self.store_default
+      def self.store_default?
         false
       end
     end
@@ -161,7 +161,7 @@ module Crow
         'String'
       end
 
-      def self.store_default
+      def self.store_default?
         false
       end
     end
