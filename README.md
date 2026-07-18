@@ -1,9 +1,5 @@
 # Crow
 
-[![Build Status](https://api.travis-ci.com/neilslater/crow.png?branch=master)](https://travis-ci.com/github/neilslater/crow)
-[![Coverage Status](https://coveralls.io/repos/neilslater/crow/badge.png?branch=master)](https://coveralls.io/r/neilslater/crow?branch=master)
-[![Code Climate](https://codeclimate.com/github/neilslater/crow.png)](https://codeclimate.com/github/neilslater/crow)
-
 C Ruby Object Writer. Utilities for speeding up drudge work parts of writing C extensions.
 
 ## What is it?
