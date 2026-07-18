@@ -5,6 +5,17 @@ require 'spec_helper'
 describe Crow::StructClass do
   let(:libdef) { Crow::LibDef.new('foo') }
 
+  def write_files(paths, contents)
+    paths.each { |path| File.write(path, contents) }
+  end
+
+  def create_user_files(dir, expected_name)
+    FileUtils.mkdir_p File.join(dir, 'ruby')
+    paths = %w[h c].map { |extension| File.join(dir, 'ruby', "class_#{expected_name}.#{extension}") }
+    write_files(paths, "Leave me alone!\n")
+    paths
+  end
+
   shared_examples 'a C source creator' do |expected_name|
     describe '#write' do
       it 'creates four suitably-named "base" files' do
@@ -32,20 +43,9 @@ describe Crow::StructClass do
 
       it 'does not over-write existing "ruby" files' do
         Dir.mktmpdir do |dir|
-          FileUtils.mkdir_p File.join(dir, 'ruby')
-          target_files = %w[h c].map { |e| File.join(dir, 'ruby', "class_#{expected_name}.#{e}") }
-          target_files.each do |target_file|
-            File.open(target_file, 'wb') do |f|
-              f.puts 'Leave me alone!'
-            end
-          end
-
+          target_files = create_user_files(dir, expected_name)
           struct_class.write_user(dir)
-
-          target_files.each do |target_file|
-            lines = File.readlines(target_file)
-            expect(lines).to eql ["Leave me alone!\n"]
-          end
+          expect(target_files.map { |path| File.read(path) }).to all eq "Leave me alone!\n"
         end
       end
     end

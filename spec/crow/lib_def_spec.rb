@@ -180,13 +180,34 @@ describe Crow::LibDef do
     run_script_in_project(lib_name, dir, "ruby -Ilib -e '#{ruby_script}'")
   end
 
+  def in_project(lib_definition)
+    Dir.mktmpdir do |dir|
+      lib_definition.create_project(dir)
+      yield dir, File.join(dir, 'ext', lib_definition.short_name)
+    end
+  end
+
+  def write_project_files(dir, files)
+    files.each do |path_segments, contents|
+      File.write(File.join(dir, *path_segments), contents)
+    end
+  end
+
+  def add_user_library_sources(dir)
+    write_project_files(
+      dir,
+      {
+        %w[ext foo lib bar.h] => c_libh_source,
+        %w[ext foo lib bar.c] => c_lib_source,
+        %w[ext foo ruby class_bar.c] => c_rb_source
+      }
+    )
+  end
+
   shared_examples 'a source code generator' do |lib_name, struct_names|
     describe '#create_project' do
       it 'creates C source files for the Ruby module' do
-        Dir.mktmpdir do |dir|
-          lib_definition.create_project(dir)
-
-          c_path = File.join(dir, 'ext', lib_name)
+        in_project(lib_definition) do |_dir, c_path|
           expect(
             [
               File.join(c_path, 'base', "ruby_module_#{lib_name}.h"),
@@ -198,11 +219,7 @@ describe Crow::LibDef do
       end
 
       it 'creates four base C files for each struct' do
-        Dir.mktmpdir do |dir|
-          lib_definition.create_project(dir)
-
-          c_path = File.join(dir, 'ext', lib_name)
-
+        in_project(lib_definition) do |_dir, c_path|
           expected_files = struct_names.flat_map do |expected_name|
             [
               File.join(c_path, 'base', "struct_#{expected_name}.h"),
@@ -216,11 +233,7 @@ describe Crow::LibDef do
       end
 
       it 'creates two "ruby" C files for each struct' do
-        Dir.mktmpdir do |dir|
-          lib_definition.create_project(dir)
-
-          c_path = File.join(dir, 'ext', lib_name)
-
+        in_project(lib_definition) do |_dir, c_path|
           expected_files = struct_names.flat_map do |expected_name|
             [
               File.join(c_path, 'ruby', "class_#{expected_name}.h"),
@@ -232,11 +245,8 @@ describe Crow::LibDef do
       end
 
       it 'creates a spec file for each struct' do
-        Dir.mktmpdir do |dir|
-          lib_definition.create_project(dir)
-
+        in_project(lib_definition) do |dir|
           spec_path = File.join(dir, 'spec')
-
           struct_names.each do |expected_name|
             expect(File.exist?(File.join(spec_path, "#{expected_name}_spec.rb"))).to be true
           end
@@ -244,8 +254,7 @@ describe Crow::LibDef do
       end
 
       it 'copies boilerplate files into the project' do
-        Dir.mktmpdir do |dir|
-          lib_definition.create_project(dir)
+        in_project(lib_definition) do |dir|
 
           expect(
             [
@@ -260,10 +269,7 @@ describe Crow::LibDef do
       end
 
       it 'copies standard C files into the project' do
-        Dir.mktmpdir do |dir|
-          lib_definition.create_project(dir)
-
-          c_path = File.join(dir, 'ext', lib_name)
+        in_project(lib_definition) do |_dir, c_path|
           expect(
             [
               File.join(c_path, 'util', 'narray_helper.c'),
@@ -281,8 +287,7 @@ describe Crow::LibDef do
       end
 
       it 'can build a project and compile the C files' do
-        Dir.mktmpdir do |dir|
-          lib_definition.create_project(dir)
+        in_project(lib_definition) do |dir|
           compile_project(lib_name, dir)
           result = run_ruby_in_project(lib_name, dir, %(puts "Loaded OK"))
           expect(result.chomp).to end_with 'Loaded OK'
@@ -290,8 +295,7 @@ describe Crow::LibDef do
       end
 
       it 'can run default rake task and pass tests' do
-        Dir.mktmpdir do |dir|
-          lib_definition.create_project(dir)
+        in_project(lib_definition) do |dir|
           result = build_and_run_rake(lib_name, dir)
           expect(result.chomp).to match(/\d+ examples, 0 failures/)
         end
@@ -305,8 +309,7 @@ describe Crow::LibDef do
     it_behaves_like 'a source code generator', 'foo', ['bar']
 
     it 'creates a module in C extension, named after the library' do
-      Dir.mktmpdir do |dir|
-        lib_definition.create_project(dir)
+      in_project(lib_definition) do |dir|
         compile_project('foo', dir)
 
         result = run_ruby_in_project('foo', dir, %(p [Foo, Foo.class]))
@@ -315,8 +318,7 @@ describe Crow::LibDef do
     end
 
     it 'creates a class in C extension, with correct name and properties' do
-      Dir.mktmpdir do |dir|
-        lib_definition.create_project(dir)
+      in_project(lib_definition) do |dir|
         compile_project('foo', dir)
 
         results = [
@@ -329,8 +331,7 @@ describe Crow::LibDef do
     end
 
     it 'creates a spec file for testing Foo::Bar' do
-      Dir.mktmpdir do |dir|
-        lib_definition.create_project(dir)
+      in_project(lib_definition) do |dir|
         compile_project('foo', dir)
 
         result = run_script_in_project('foo', dir, 'rspec -f d -c spec/bar_spec.rb')
@@ -339,11 +340,8 @@ describe Crow::LibDef do
     end
 
     it 'allows user source code to be added in "ruby" dir' do
-      Dir.mktmpdir do |dir|
-        lib_definition.create_project(dir)
-        File.open(File.join(dir, 'ext', 'foo', 'ruby', 'class_bar.c'), 'w') do |f|
-          f.puts c_source
-        end
+      in_project(lib_definition) do |dir|
+        write_project_files(dir, %w[ext foo ruby class_bar.c] => c_source)
         compile_project('foo', dir)
 
         result = run_ruby_in_project('foo', dir, %(f = Foo::Bar.new; f.hi = -17; p f.hi_doubled))
@@ -352,23 +350,9 @@ describe Crow::LibDef do
     end
 
     it 'allows user source code to be added in "lib" dir' do
-      Dir.mktmpdir do |dir|
-        lib_definition.create_project(dir)
-
-        File.open(File.join(dir, 'ext', 'foo', 'lib', 'bar.h'), 'w') do |f|
-          f.puts c_libh_source
-        end
-
-        File.open(File.join(dir, 'ext', 'foo', 'lib', 'bar.c'), 'w') do |f|
-          f.puts c_lib_source
-        end
-
-        File.open(File.join(dir, 'ext', 'foo', 'ruby', 'class_bar.c'), 'w') do |f|
-          f.puts c_rb_source
-        end
-
+      in_project(lib_definition) do |dir|
+        add_user_library_sources(dir)
         compile_project('foo', dir)
-
         result = run_ruby_in_project('foo', dir, %(f = Foo::Bar.new; f.hi = -3; p f.hi_user))
         expect(result.chomp).to end_with '-5.25'
       end

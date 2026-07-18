@@ -21,3 +21,9 @@ Metrics/BlockLength:
 Metrics/ParameterLists:
   Max: 4
   CountKeywordArgs: false
+
+RSpec/ExampleLength:
+  Max: 6
+  CountAsOne:
+    - array
+    - hash
