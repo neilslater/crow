@@ -4,136 +4,6 @@ require 'spec_helper'
 require 'open3'
 
 describe Crow::LibDef do
-  let(:simple_libdef) do
-    described_class.new(
-      'foo',
-      structs: [
-        {
-          name: 'bar',
-          attributes: [
-            { name: 'hi', ctype: :int, ruby_write: true }
-          ]
-        }
-      ]
-    )
-  end
-
-  let(:demo_table_attributes) do
-    [
-      { name: 'narr_data', ruby_name: 'data', ctype: :NARRAY_DOUBLE,
-        init: { rank_expr: '2', shape_exprs: ['$width', '$height'] } },
-      { name: 'narr_summary', ruby_name: 'summary', ctype: :NARRAY_DOUBLE,
-        init: { rank_expr: '1', shape_exprs: ['$width'] } },
-      { name: 'narr_counts', ruby_name: 'counts', ctype: :NARRAY_INT32,
-        init: { rank_expr: '1', shape_exprs: ['$height'] } },
-      { name: 'narr_inverse', ruby_name: 'inverse', ctype: :NARRAY_FLOAT,
-        init: { rank_expr: '2', shape_exprs: ['$height', '$width'] } }
-    ]
-  end
-
-  let(:demo_table) do
-    {
-      name: 'table',
-      attributes: demo_table_attributes,
-      init_params: [
-        { name: 'width', ctype: :int, init: { validate_min: 1, validate_max: 10 } },
-        { name: 'height', ctype: :int, init: { validate_min: 1, validate_max: 20 } }
-      ]
-    }
-  end
-
-  let(:demo_baz) do
-    {
-      name: 'baz',
-      attributes: [
-        { name: 'num_things', ctype: :int, init: { expr: '.' } },
-        { name: 'things', ctype: :int, pointer: true, ruby_read: false,
-          init: { size_expr: '.num_things', expr: '0' } }
-      ],
-      init_params: [{ name: 'num_things', ctype: :int }]
-    }
-  end
-
-  let(:demo_bar) do
-    {
-      name: 'bar',
-      attributes: [
-        { name: 'hi', ctype: :int, ruby_write: true, init: { expr: '.' } }
-      ],
-      init_params: [{ name: 'hi', ctype: :int }]
-    }
-  end
-
-  let(:demo_structs) do
-    [
-      demo_bar,
-      demo_baz,
-      demo_table
-    ]
-  end
-
-  let(:libdef_b) do
-    described_class.new(
-      'foo',
-      structs: demo_structs
-    )
-  end
-
-  let(:c_source) do
-    <<~CENDS
-      #include "ruby/class_bar.h"
-
-      VALUE bar_rbobject__hi_doubled( VALUE self ) {
-        Bar *bar = get_bar_struct( self );
-        return INT2NUM( bar->hi * 2 );
-      }
-
-      void init_class_bar_ext() {
-        rb_define_method( Foo_Bar, "hi_doubled", bar_rbobject__hi_doubled, 0 );
-        return;
-      }
-    CENDS
-  end
-
-  let(:c_libh_source) do
-    <<~CLIBHENDS
-      #ifndef LIB_STRUCT_BAR_H
-      #define LIB_STRUCT_BAR_H
-
-      #include "base/all_structs.h"
-
-      int bar__count( Bar *bar );
-
-      #endif
-    CLIBHENDS
-  end
-
-  let(:c_lib_source) do
-    <<~CLIBENDS
-      #include "lib/bar.h"
-
-      int bar__count( Bar *bar ) {
-        return bar->hi * 7;
-      }
-    CLIBENDS
-  end
-
-  let(:c_rb_source) do
-    <<~CRBENDS
-      #include "ruby/class_bar.h"
-
-      VALUE bar_rbobject__hi_user( VALUE self ) {
-        Bar *bar = get_bar_struct( self );
-        return DBL2NUM( bar__count( bar ) * 0.25 );
-      }
-
-      void init_class_bar_ext() {
-        rb_define_method( Foo_Bar, "hi_user", bar_rbobject__hi_user, 0 );
-        return;
-      }
-    CRBENDS
-  end
-
   def run_command(command)
     stdout, stderr, status = Open3.capture3(command)
 
@@ -197,9 +67,9 @@ describe Crow::LibDef do
     write_project_files(
       dir,
       {
-        %w[ext foo lib bar.h] => c_libh_source,
-        %w[ext foo lib bar.c] => c_lib_source,
-        %w[ext foo ruby class_bar.c] => c_rb_source
+        %w[ext foo lib bar.h] => user_sources.fetch(:library_header),
+        %w[ext foo lib bar.c] => user_sources.fetch(:library),
+        %w[ext foo ruby class_bar.c] => user_sources.fetch(:ruby_binding)
       }
     )
   end
@@ -255,7 +125,6 @@ describe Crow::LibDef do
 
       it 'copies boilerplate files into the project' do
         in_project(lib_definition) do |dir|
-
           expect(
             [
               File.join(dir, 'data', 'README.txt'),
@@ -306,6 +175,68 @@ describe Crow::LibDef do
   describe 'minimal libdef' do
     subject(:lib_definition) { simple_libdef }
 
+    let(:simple_libdef) do
+      described_class.new(
+        'foo',
+        structs: [
+          {
+            name: 'bar',
+            attributes: [
+              { name: 'hi', ctype: :int, ruby_write: true }
+            ]
+          }
+        ]
+      )
+    end
+
+    let(:user_sources) do
+      {
+        extension: <<~C,
+          #include "ruby/class_bar.h"
+
+          VALUE bar_rbobject__hi_doubled( VALUE self ) {
+            Bar *bar = get_bar_struct( self );
+            return INT2NUM( bar->hi * 2 );
+          }
+
+          void init_class_bar_ext() {
+            rb_define_method( Foo_Bar, "hi_doubled", bar_rbobject__hi_doubled, 0 );
+            return;
+          }
+        C
+        library_header: <<~C,
+          #ifndef LIB_STRUCT_BAR_H
+          #define LIB_STRUCT_BAR_H
+
+          #include "base/all_structs.h"
+
+          int bar__count( Bar *bar );
+
+          #endif
+        C
+        library: <<~C,
+          #include "lib/bar.h"
+
+          int bar__count( Bar *bar ) {
+            return bar->hi * 7;
+          }
+        C
+        ruby_binding: <<~C
+          #include "ruby/class_bar.h"
+
+          VALUE bar_rbobject__hi_user( VALUE self ) {
+            Bar *bar = get_bar_struct( self );
+            return DBL2NUM( bar__count( bar ) * 0.25 );
+          }
+
+          void init_class_bar_ext() {
+            rb_define_method( Foo_Bar, "hi_user", bar_rbobject__hi_user, 0 );
+            return;
+          }
+        C
+      }
+    end
+
     it_behaves_like 'a source code generator', 'foo', ['bar']
 
     it 'creates a module in C extension, named after the library' do
@@ -341,7 +272,7 @@ describe Crow::LibDef do
 
     it 'allows user source code to be added in "ruby" dir' do
       in_project(lib_definition) do |dir|
-        write_project_files(dir, %w[ext foo ruby class_bar.c] => c_source)
+        write_project_files(dir, %w[ext foo ruby class_bar.c] => user_sources.fetch(:extension))
         compile_project('foo', dir)
 
         result = run_ruby_in_project('foo', dir, %(f = Foo::Bar.new; f.hi = -17; p f.hi_doubled))
@@ -361,6 +292,46 @@ describe Crow::LibDef do
 
   describe 'libdef with C array and NArray' do
     subject(:lib_definition) { libdef_b }
+
+    let(:libdef_b) { described_class.new('foo', structs: demo_structs) }
+
+    let(:demo_structs) do
+      [
+        {
+          name: 'bar',
+          attributes: [
+            { name: 'hi', ctype: :int, ruby_write: true, init: { expr: '.' } }
+          ],
+          init_params: [{ name: 'hi', ctype: :int }]
+        },
+        {
+          name: 'baz',
+          attributes: [
+            { name: 'num_things', ctype: :int, init: { expr: '.' } },
+            { name: 'things', ctype: :int, pointer: true, ruby_read: false,
+              init: { size_expr: '.num_things', expr: '0' } }
+          ],
+          init_params: [{ name: 'num_things', ctype: :int }]
+        },
+        {
+          name: 'table',
+          attributes: [
+            { name: 'narr_data', ruby_name: 'data', ctype: :NARRAY_DOUBLE,
+              init: { rank_expr: '2', shape_exprs: ['$width', '$height'] } },
+            { name: 'narr_summary', ruby_name: 'summary', ctype: :NARRAY_DOUBLE,
+              init: { rank_expr: '1', shape_exprs: ['$width'] } },
+            { name: 'narr_counts', ruby_name: 'counts', ctype: :NARRAY_INT32,
+              init: { rank_expr: '1', shape_exprs: ['$height'] } },
+            { name: 'narr_inverse', ruby_name: 'inverse', ctype: :NARRAY_FLOAT,
+              init: { rank_expr: '2', shape_exprs: ['$height', '$width'] } }
+          ],
+          init_params: [
+            { name: 'width', ctype: :int, init: { validate_min: 1, validate_max: 10 } },
+            { name: 'height', ctype: :int, init: { validate_min: 1, validate_max: 20 } }
+          ]
+        }
+      ]
+    end
 
     it_behaves_like 'a source code generator', 'foo', %w[bar baz table]
   end
