@@ -189,7 +189,7 @@ describe Crow::LibDef do
     describe '#create_project' do
       it 'creates C source files for the Ruby module' do
         Dir.mktmpdir do |dir|
-          subject.create_project(dir)
+          lib_definition.create_project(dir)
 
           c_path = File.join(dir, 'ext', lib_name)
           expect(File.exist?(File.join(c_path, 'base', "ruby_module_#{lib_name}.h"))).to be true
@@ -200,7 +200,7 @@ describe Crow::LibDef do
 
       it 'creates four base C files for each struct' do
         Dir.mktmpdir do |dir|
-          subject.create_project(dir)
+          lib_definition.create_project(dir)
 
           c_path = File.join(dir, 'ext', lib_name)
 
@@ -215,7 +215,7 @@ describe Crow::LibDef do
 
       it 'creates two "ruby" C files for each struct' do
         Dir.mktmpdir do |dir|
-          subject.create_project(dir)
+          lib_definition.create_project(dir)
 
           c_path = File.join(dir, 'ext', lib_name)
 
@@ -228,7 +228,7 @@ describe Crow::LibDef do
 
       it 'creates a spec file for each struct' do
         Dir.mktmpdir do |dir|
-          subject.create_project(dir)
+          lib_definition.create_project(dir)
 
           spec_path = File.join(dir, 'spec')
 
@@ -240,7 +240,7 @@ describe Crow::LibDef do
 
       it 'copies boilerplate files into the project' do
         Dir.mktmpdir do |dir|
-          subject.create_project(dir)
+          lib_definition.create_project(dir)
 
           expect(File.exist?(File.join(dir, 'data', 'README.txt'))).to be true
           expect(File.exist?(File.join(dir, 'Gemfile'))).to be true
@@ -252,7 +252,7 @@ describe Crow::LibDef do
 
       it 'copies standard C files into the project' do
         Dir.mktmpdir do |dir|
-          subject.create_project(dir)
+          lib_definition.create_project(dir)
 
           c_path = File.join(dir, 'ext', lib_name)
           expect(File.exist?(File.join(c_path, 'util', 'narray_helper.c'))).to be true
@@ -269,7 +269,7 @@ describe Crow::LibDef do
 
       it 'can build a project and compile the C files' do
         Dir.mktmpdir do |dir|
-          subject.create_project(dir)
+          lib_definition.create_project(dir)
           compile_project(lib_name, dir)
           result = run_ruby_in_project(lib_name, dir, %(puts "Loaded OK"))
           expect(result.chomp).to end_with 'Loaded OK'
@@ -278,7 +278,7 @@ describe Crow::LibDef do
 
       it 'can run default rake task and pass tests' do
         Dir.mktmpdir do |dir|
-          subject.create_project(dir)
+          lib_definition.create_project(dir)
           result = build_and_run_rake(lib_name, dir)
           expect(result.chomp).to match(/\d+ examples, 0 failures/)
         end
@@ -287,13 +287,13 @@ describe Crow::LibDef do
   end
 
   describe 'minimal libdef' do
-    subject { simple_libdef }
+    subject(:lib_definition) { simple_libdef }
 
     it_behaves_like 'a source code generator', 'foo', ['bar']
 
     it 'creates a module in C extension, named after the library' do
       Dir.mktmpdir do |dir|
-        subject.create_project(dir)
+        lib_definition.create_project(dir)
         compile_project('foo', dir)
 
         result = run_ruby_in_project('foo', dir, %(p [Foo, Foo.class]))
@@ -303,7 +303,7 @@ describe Crow::LibDef do
 
     it 'creates a class in C extension, with correct name and properties' do
       Dir.mktmpdir do |dir|
-        subject.create_project(dir)
+        lib_definition.create_project(dir)
         compile_project('foo', dir)
 
         result = run_ruby_in_project('foo', dir, %(p [Foo::Bar, Foo::Bar.class]))
@@ -319,7 +319,7 @@ describe Crow::LibDef do
 
     it 'creates a spec file for testing Foo::Bar' do
       Dir.mktmpdir do |dir|
-        subject.create_project(dir)
+        lib_definition.create_project(dir)
         compile_project('foo', dir)
 
         result = run_script_in_project('foo', dir, 'rspec -f d -c spec/bar_spec.rb')
@@ -336,7 +336,7 @@ describe Crow::LibDef do
 
     it 'allows user source code to be added in "ruby" dir' do
       Dir.mktmpdir do |dir|
-        subject.create_project(dir)
+        lib_definition.create_project(dir)
         File.open(File.join(dir, 'ext', 'foo', 'ruby', 'class_bar.c'), 'w') do |f|
           f.puts c_source
         end
@@ -349,7 +349,7 @@ describe Crow::LibDef do
 
     it 'allows user source code to be added in "lib" dir' do
       Dir.mktmpdir do |dir|
-        subject.create_project(dir)
+        lib_definition.create_project(dir)
 
         File.open(File.join(dir, 'ext', 'foo', 'lib', 'bar.h'), 'w') do |f|
           f.puts c_libh_source
@@ -372,7 +372,7 @@ describe Crow::LibDef do
   end
 
   describe 'libdef with C array and NArray' do
-    subject { libdef_b }
+    subject(:lib_definition) { libdef_b }
 
     it_behaves_like 'a source code generator', 'foo', %w[bar baz table]
   end

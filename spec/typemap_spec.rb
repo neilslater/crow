@@ -98,550 +98,550 @@ describe Crow::TypeMap do
   end
 
   describe Crow::TypeMap::Int do
-    subject { Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :int, parent_struct: container) }
+    subject(:type_map) { Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :int, parent_struct: container) }
 
     it 'has correct template declare' do
-      expect(subject.declare).to eql 'int x;'
+      expect(type_map.declare).to eql 'int x;'
     end
 
     it 'has correct template as_param' do
-      expect(subject.as_param).to eql 'int x'
+      expect(type_map.as_param).to eql 'int x'
     end
 
     it 'has correct template cast' do
-      expect(subject.cast).to eql '(int)'
+      expect(type_map.cast).to eql '(int)'
     end
 
     it 'is not a NArray' do
-      expect(subject.narray?).to be false
+      expect(type_map.narray?).to be false
     end
 
     it 'has correct to Ruby converter for template' do
-      expect(subject.struct_item_to_ruby).to eql 'INT2NUM( foo->x )'
+      expect(type_map.struct_item_to_ruby).to eql 'INT2NUM( foo->x )'
     end
 
     it 'has correct from Ruby converter for template' do
-      expect(subject.param_item_to_c).to eql 'NUM2INT( rv_x )'
+      expect(type_map.param_item_to_c).to eql 'NUM2INT( rv_x )'
     end
   end
 
   describe Crow::TypeMap::PointerInt do
-    subject { Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :int, pointer: true, parent_struct: container) }
+    subject(:type_map) { Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :int, pointer: true, parent_struct: container) }
 
     it 'has correct template declare' do
-      expect(subject.declare).to eql 'int *x;'
+      expect(type_map.declare).to eql 'int *x;'
     end
 
     it 'has correct template as_param' do
-      expect(subject.as_param).to eql 'int *x'
+      expect(type_map.as_param).to eql 'int *x'
     end
 
     it 'has correct template cast' do
-      expect(subject.cast).to eql '(int*)'
+      expect(type_map.cast).to eql '(int*)'
     end
 
     it 'is not a NArray' do
-      expect(subject.narray?).to be false
+      expect(type_map.narray?).to be false
     end
 
     # No Ruby/C converters for arrays yet . . .
   end
 
   describe Crow::TypeMap::Float do
-    subject { Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :float, parent_struct: container) }
+    subject(:type_map) { Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :float, parent_struct: container) }
 
     it 'has correct template declare' do
-      expect(subject.declare).to eql 'float x;'
+      expect(type_map.declare).to eql 'float x;'
     end
 
     it 'has correct template as_param' do
-      expect(subject.as_param).to eql 'float x'
+      expect(type_map.as_param).to eql 'float x'
     end
 
     it 'has correct template cast' do
-      expect(subject.cast).to eql '(float)'
+      expect(type_map.cast).to eql '(float)'
     end
 
     it 'is not a NArray' do
-      expect(subject.narray?).to be false
+      expect(type_map.narray?).to be false
     end
 
     it 'has correct to Ruby converter for template' do
-      expect(subject.struct_item_to_ruby).to eql 'FLT2NUM( foo->x )'
+      expect(type_map.struct_item_to_ruby).to eql 'FLT2NUM( foo->x )'
     end
 
     it 'has correct from Ruby converter for template' do
-      expect(subject.param_item_to_c).to eql 'NUM2FLT( rv_x )'
+      expect(type_map.param_item_to_c).to eql 'NUM2FLT( rv_x )'
     end
   end
 
   describe Crow::TypeMap::PointerFloat do
-    subject { Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :float, pointer: true, parent_struct: container) }
+    subject(:type_map) { Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :float, pointer: true, parent_struct: container) }
 
     it 'has correct template declare' do
-      expect(subject.declare).to eql 'float *x;'
+      expect(type_map.declare).to eql 'float *x;'
     end
 
     it 'has correct template as_param' do
-      expect(subject.as_param).to eql 'float *x'
+      expect(type_map.as_param).to eql 'float *x'
     end
 
     it 'has correct template cast' do
-      expect(subject.cast).to eql '(float*)'
+      expect(type_map.cast).to eql '(float*)'
     end
 
     it 'is not a NArray' do
-      expect(subject.narray?).to be false
+      expect(type_map.narray?).to be false
     end
 
     # No Ruby/C converters for arrays yet . . .
   end
 
   describe Crow::TypeMap::Double do
-    subject { Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :double, parent_struct: container) }
+    subject(:type_map) { Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :double, parent_struct: container) }
 
     it 'has correct template declare' do
-      expect(subject.declare).to eql 'double x;'
+      expect(type_map.declare).to eql 'double x;'
     end
 
     it 'has correct template as_param' do
-      expect(subject.as_param).to eql 'double x'
+      expect(type_map.as_param).to eql 'double x'
     end
 
     it 'has correct template cast' do
-      expect(subject.cast).to eql '(double)'
+      expect(type_map.cast).to eql '(double)'
     end
 
     it 'is not a NArray' do
-      expect(subject.narray?).to be false
+      expect(type_map.narray?).to be false
     end
 
     it 'has correct to Ruby converter for template' do
-      expect(subject.struct_item_to_ruby).to eql 'DBL2NUM( foo->x )'
+      expect(type_map.struct_item_to_ruby).to eql 'DBL2NUM( foo->x )'
     end
 
     it 'has correct from Ruby converter for template' do
-      expect(subject.param_item_to_c).to eql 'NUM2DBL( rv_x )'
+      expect(type_map.param_item_to_c).to eql 'NUM2DBL( rv_x )'
     end
   end
 
   describe Crow::TypeMap::PointerDouble do
-    subject { Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :double, pointer: true, parent_struct: container) }
+    subject(:type_map) { Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :double, pointer: true, parent_struct: container) }
 
     it 'has correct template declare' do
-      expect(subject.declare).to eql 'double *x;'
+      expect(type_map.declare).to eql 'double *x;'
     end
 
     it 'has correct template as_param' do
-      expect(subject.as_param).to eql 'double *x'
+      expect(type_map.as_param).to eql 'double *x'
     end
 
     it 'has correct template cast' do
-      expect(subject.cast).to eql '(double*)'
+      expect(type_map.cast).to eql '(double*)'
     end
 
     it 'is not a NArray' do
-      expect(subject.narray?).to be false
+      expect(type_map.narray?).to be false
     end
 
     # No Ruby/C converters for arrays yet . . .
   end
 
   describe Crow::TypeMap::Char do
-    subject { Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :char, parent_struct: container) }
+    subject(:type_map) { Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :char, parent_struct: container) }
 
     it 'has correct template declare' do
-      expect(subject.declare).to eql 'char x;'
+      expect(type_map.declare).to eql 'char x;'
     end
 
     it 'has correct template as_param' do
-      expect(subject.as_param).to eql 'char x'
+      expect(type_map.as_param).to eql 'char x'
     end
 
     it 'has correct template cast' do
-      expect(subject.cast).to eql '(char)'
+      expect(type_map.cast).to eql '(char)'
     end
 
     it 'is not a NArray' do
-      expect(subject.narray?).to be false
+      expect(type_map.narray?).to be false
     end
 
     it 'has correct to Ruby converter for template' do
-      expect(subject.struct_item_to_ruby).to eql 'LONG2FIX( foo->x )'
+      expect(type_map.struct_item_to_ruby).to eql 'LONG2FIX( foo->x )'
     end
 
     it 'has correct from Ruby converter for template' do
-      expect(subject.param_item_to_c).to eql 'NUM2CHR( rv_x )'
+      expect(type_map.param_item_to_c).to eql 'NUM2CHR( rv_x )'
     end
   end
 
   describe Crow::TypeMap::PointerChar do
-    subject { Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :char, pointer: true, parent_struct: container) }
+    subject(:type_map) { Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :char, pointer: true, parent_struct: container) }
 
     it 'has correct template declare' do
-      expect(subject.declare).to eql 'char *x;'
+      expect(type_map.declare).to eql 'char *x;'
     end
 
     it 'has correct template as_param' do
-      expect(subject.as_param).to eql 'char *x'
+      expect(type_map.as_param).to eql 'char *x'
     end
 
     it 'has correct template cast' do
-      expect(subject.cast).to eql '(char*)'
+      expect(type_map.cast).to eql '(char*)'
     end
 
     it 'is not a NArray' do
-      expect(subject.narray?).to be false
+      expect(type_map.narray?).to be false
     end
 
     # No Ruby/C converters for arrays yet . . .
   end
 
   describe Crow::TypeMap::Long do
-    subject { Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :long, parent_struct: container) }
+    subject(:type_map) { Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :long, parent_struct: container) }
 
     it 'has correct template declare' do
-      expect(subject.declare).to eql 'long x;'
+      expect(type_map.declare).to eql 'long x;'
     end
 
     it 'has correct template as_param' do
-      expect(subject.as_param).to eql 'long x'
+      expect(type_map.as_param).to eql 'long x'
     end
 
     it 'has correct template cast' do
-      expect(subject.cast).to eql '(long)'
+      expect(type_map.cast).to eql '(long)'
     end
 
     it 'is not a NArray' do
-      expect(subject.narray?).to be false
+      expect(type_map.narray?).to be false
     end
 
     it 'has correct to Ruby converter for template' do
-      expect(subject.struct_item_to_ruby).to eql 'LONG2NUM( foo->x )'
+      expect(type_map.struct_item_to_ruby).to eql 'LONG2NUM( foo->x )'
     end
 
     it 'has correct from Ruby converter for template' do
-      expect(subject.param_item_to_c).to eql 'NUM2LONG( rv_x )'
+      expect(type_map.param_item_to_c).to eql 'NUM2LONG( rv_x )'
     end
   end
 
   describe Crow::TypeMap::PointerLong do
-    subject { Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :long, pointer: true, parent_struct: container) }
+    subject(:type_map) { Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :long, pointer: true, parent_struct: container) }
 
     it 'has correct template declare' do
-      expect(subject.declare).to eql 'long *x;'
+      expect(type_map.declare).to eql 'long *x;'
     end
 
     it 'has correct template as_param' do
-      expect(subject.as_param).to eql 'long *x'
+      expect(type_map.as_param).to eql 'long *x'
     end
 
     it 'has correct template cast' do
-      expect(subject.cast).to eql '(long*)'
+      expect(type_map.cast).to eql '(long*)'
     end
 
     it 'is not a NArray' do
-      expect(subject.narray?).to be false
+      expect(type_map.narray?).to be false
     end
 
     # No Ruby/C converters for arrays yet . . .
   end
 
   describe Crow::TypeMap::UInt do
-    subject { Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :uint, parent_struct: container) }
+    subject(:type_map) { Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :uint, parent_struct: container) }
 
     it 'has correct template declare' do
-      expect(subject.declare).to eql 'unsigned int x;'
+      expect(type_map.declare).to eql 'unsigned int x;'
     end
 
     it 'has correct template as_param' do
-      expect(subject.as_param).to eql 'unsigned int x'
+      expect(type_map.as_param).to eql 'unsigned int x'
     end
 
     it 'has correct template cast' do
-      expect(subject.cast).to eql '(unsigned int)'
+      expect(type_map.cast).to eql '(unsigned int)'
     end
 
     it 'is not a NArray' do
-      expect(subject.narray?).to be false
+      expect(type_map.narray?).to be false
     end
 
     it 'has correct to Ruby converter for template' do
-      expect(subject.struct_item_to_ruby).to eql 'UINT2NUM( foo->x )'
+      expect(type_map.struct_item_to_ruby).to eql 'UINT2NUM( foo->x )'
     end
 
     it 'has correct from Ruby converter for template' do
-      expect(subject.param_item_to_c).to eql 'NUM2UINT( rv_x )'
+      expect(type_map.param_item_to_c).to eql 'NUM2UINT( rv_x )'
     end
   end
 
   describe Crow::TypeMap::PointerUInt do
-    subject { Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :uint, pointer: true, parent_struct: container) }
+    subject(:type_map) { Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :uint, pointer: true, parent_struct: container) }
 
     it 'has correct template declare' do
-      expect(subject.declare).to eql 'unsigned int *x;'
+      expect(type_map.declare).to eql 'unsigned int *x;'
     end
 
     it 'has correct template as_param' do
-      expect(subject.as_param).to eql 'unsigned int *x'
+      expect(type_map.as_param).to eql 'unsigned int *x'
     end
 
     it 'has correct template cast' do
-      expect(subject.cast).to eql '(unsigned int*)'
+      expect(type_map.cast).to eql '(unsigned int*)'
     end
 
     it 'is not a NArray' do
-      expect(subject.narray?).to be false
+      expect(type_map.narray?).to be false
     end
 
     # No Ruby/C converters for arrays yet . . .
   end
 
   describe Crow::TypeMap::ULong do
-    subject { Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :ulong, parent_struct: container) }
+    subject(:type_map) { Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :ulong, parent_struct: container) }
 
     it 'has correct template declare' do
-      expect(subject.declare).to eql 'unsigned long x;'
+      expect(type_map.declare).to eql 'unsigned long x;'
     end
 
     it 'has correct template as_param' do
-      expect(subject.as_param).to eql 'unsigned long x'
+      expect(type_map.as_param).to eql 'unsigned long x'
     end
 
     it 'has correct template cast' do
-      expect(subject.cast).to eql '(unsigned long)'
+      expect(type_map.cast).to eql '(unsigned long)'
     end
 
     it 'is not a NArray' do
-      expect(subject.narray?).to be false
+      expect(type_map.narray?).to be false
     end
 
     it 'has correct to Ruby converter for template' do
-      expect(subject.struct_item_to_ruby).to eql 'ULONG2NUM( foo->x )'
+      expect(type_map.struct_item_to_ruby).to eql 'ULONG2NUM( foo->x )'
     end
 
     it 'has correct from Ruby converter for template' do
-      expect(subject.param_item_to_c).to eql 'NUM2ULONG( rv_x )'
+      expect(type_map.param_item_to_c).to eql 'NUM2ULONG( rv_x )'
     end
   end
 
   describe Crow::TypeMap::PointerULong do
-    subject { Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :ulong, pointer: true, parent_struct: container) }
+    subject(:type_map) { Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :ulong, pointer: true, parent_struct: container) }
 
     it 'has correct template declare' do
-      expect(subject.declare).to eql 'unsigned long *x;'
+      expect(type_map.declare).to eql 'unsigned long *x;'
     end
 
     it 'has correct template as_param' do
-      expect(subject.as_param).to eql 'unsigned long *x'
+      expect(type_map.as_param).to eql 'unsigned long *x'
     end
 
     it 'has correct template cast' do
-      expect(subject.cast).to eql '(unsigned long*)'
+      expect(type_map.cast).to eql '(unsigned long*)'
     end
 
     it 'is not a NArray' do
-      expect(subject.narray?).to be false
+      expect(type_map.narray?).to be false
     end
 
     # No Ruby/C converters for arrays yet . . .
   end
 
   describe Crow::TypeMap::Value do
-    subject { Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :VALUE, parent_struct: container) }
+    subject(:type_map) { Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :VALUE, parent_struct: container) }
 
     it 'has correct template declare' do
-      expect(subject.declare).to eql 'volatile VALUE x;'
+      expect(type_map.declare).to eql 'volatile VALUE x;'
     end
 
     it 'has correct template as_param' do
       # TODO: Is this correct?
-      expect(subject.as_param).to eql 'volatile VALUE x'
+      expect(type_map.as_param).to eql 'volatile VALUE x'
     end
 
     it 'has correct template cast' do
-      expect(subject.cast).to eql 'ERROR'
+      expect(type_map.cast).to eql 'ERROR'
     end
 
     it 'is not a NArray' do
-      expect(subject.narray?).to be false
+      expect(type_map.narray?).to be false
     end
 
     it 'has correct to Ruby converter for template' do
-      expect(subject.struct_item_to_ruby).to eql 'foo->x'
+      expect(type_map.struct_item_to_ruby).to eql 'foo->x'
     end
 
     it 'has correct from Ruby converter for template' do
       # TODO: There should be a validation that we have a T_OBJECT here?
-      expect(subject.param_item_to_c).to eql 'rv_x'
+      expect(type_map.param_item_to_c).to eql 'rv_x'
     end
   end
 
   describe Crow::TypeMap::NArrayFloat do
-    subject { Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :NARRAY_FLOAT, parent_struct: container) }
+    subject(:type_map) { Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :NARRAY_FLOAT, parent_struct: container) }
 
     it 'has correct template declare' do
-      expect(subject.declare).to eql 'volatile VALUE x;'
+      expect(type_map.declare).to eql 'volatile VALUE x;'
     end
 
     it 'has correct template as_param' do
       # TODO: Is this correct?
-      expect(subject.as_param).to eql 'volatile VALUE x'
+      expect(type_map.as_param).to eql 'volatile VALUE x'
     end
 
     it 'has correct template cast' do
-      expect(subject.cast).to eql 'ERROR'
+      expect(type_map.cast).to eql 'ERROR'
     end
 
     it 'is a NArray' do
-      expect(subject.narray?).to be true
+      expect(type_map.narray?).to be true
     end
 
     it 'has correct to Ruby converter for template' do
-      expect(subject.struct_item_to_ruby).to eql 'foo->x'
+      expect(type_map.struct_item_to_ruby).to eql 'foo->x'
     end
 
     it 'has correct from Ruby converter for template' do
       # TODO: There should be a validation that we have a NArray here, and casting from existing type
-      expect(subject.param_item_to_c).to eql 'rv_x'
+      expect(type_map.param_item_to_c).to eql 'rv_x'
     end
 
     it 'overrides item_ctype' do
-      expect(subject.item_ctype).to eql 'float'
+      expect(type_map.item_ctype).to eql 'float'
     end
 
     it 'overrides narray_enum_type' do
-      expect(subject.narray_enum_type).to eql 'NA_SFLOAT'
+      expect(type_map.narray_enum_type).to eql 'NA_SFLOAT'
     end
 
     it 'overrides rdoc_type' do
-      expect(subject.rdoc_type).to eql 'NArray<sfloat>'
+      expect(type_map.rdoc_type).to eql 'NArray<sfloat>'
     end
   end
 
   describe Crow::TypeMap::NArrayDouble do
-    subject { Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :NARRAY_DOUBLE, parent_struct: container) }
+    subject(:type_map) { Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :NARRAY_DOUBLE, parent_struct: container) }
 
     it 'has correct template declare' do
-      expect(subject.declare).to eql 'volatile VALUE x;'
+      expect(type_map.declare).to eql 'volatile VALUE x;'
     end
 
     it 'has correct template as_param' do
       # TODO: Is this correct?
-      expect(subject.as_param).to eql 'volatile VALUE x'
+      expect(type_map.as_param).to eql 'volatile VALUE x'
     end
 
     it 'has correct template cast' do
-      expect(subject.cast).to eql 'ERROR'
+      expect(type_map.cast).to eql 'ERROR'
     end
 
     it 'is a NArray' do
-      expect(subject.narray?).to be true
+      expect(type_map.narray?).to be true
     end
 
     it 'has correct to Ruby converter for template' do
-      expect(subject.struct_item_to_ruby).to eql 'foo->x'
+      expect(type_map.struct_item_to_ruby).to eql 'foo->x'
     end
 
     it 'has correct from Ruby converter for template' do
       # TODO: There should be a validation that we have a NArray here, and casting from existing type
-      expect(subject.param_item_to_c).to eql 'rv_x'
+      expect(type_map.param_item_to_c).to eql 'rv_x'
     end
 
     it 'overrides item_ctype' do
-      expect(subject.item_ctype).to eql 'double'
+      expect(type_map.item_ctype).to eql 'double'
     end
 
     it 'overrides narray_enum_type' do
-      expect(subject.narray_enum_type).to eql 'NA_DFLOAT'
+      expect(type_map.narray_enum_type).to eql 'NA_DFLOAT'
     end
 
     it 'overrides rdoc_type' do
-      expect(subject.rdoc_type).to eql 'NArray<float>'
+      expect(type_map.rdoc_type).to eql 'NArray<float>'
     end
   end
 
   describe Crow::TypeMap::NArraySInt do
-    subject { Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :NARRAY_INT16, parent_struct: container) }
+    subject(:type_map) { Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :NARRAY_INT16, parent_struct: container) }
 
     it 'has correct template declare' do
-      expect(subject.declare).to eql 'volatile VALUE x;'
+      expect(type_map.declare).to eql 'volatile VALUE x;'
     end
 
     it 'has correct template as_param' do
       # TODO: Is this correct?
-      expect(subject.as_param).to eql 'volatile VALUE x'
+      expect(type_map.as_param).to eql 'volatile VALUE x'
     end
 
     it 'has correct template cast' do
-      expect(subject.cast).to eql 'ERROR'
+      expect(type_map.cast).to eql 'ERROR'
     end
 
     it 'is a NArray' do
-      expect(subject.narray?).to be true
+      expect(type_map.narray?).to be true
     end
 
     it 'has correct to Ruby converter for template' do
-      expect(subject.struct_item_to_ruby).to eql 'foo->x'
+      expect(type_map.struct_item_to_ruby).to eql 'foo->x'
     end
 
     it 'has correct from Ruby converter for template' do
       # TODO: There should be a validation that we have a NArray here, and casting from existing type
-      expect(subject.param_item_to_c).to eql 'rv_x'
+      expect(type_map.param_item_to_c).to eql 'rv_x'
     end
 
     it 'overrides item_ctype' do
-      expect(subject.item_ctype).to eql 'int16_t'
+      expect(type_map.item_ctype).to eql 'int16_t'
     end
 
     it 'overrides narray_enum_type' do
-      expect(subject.narray_enum_type).to eql 'NA_SINT'
+      expect(type_map.narray_enum_type).to eql 'NA_SINT'
     end
 
     it 'overrides rdoc_type' do
-      expect(subject.rdoc_type).to eql 'NArray<sint>'
+      expect(type_map.rdoc_type).to eql 'NArray<sint>'
     end
   end
 
   describe Crow::TypeMap::NArrayLInt do
-    subject { Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :NARRAY_INT32, parent_struct: container) }
+    subject(:type_map) { Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :NARRAY_INT32, parent_struct: container) }
 
     it 'has correct template declare' do
-      expect(subject.declare).to eql 'volatile VALUE x;'
+      expect(type_map.declare).to eql 'volatile VALUE x;'
     end
 
     it 'has correct template as_param' do
       # TODO: Is this correct?
-      expect(subject.as_param).to eql 'volatile VALUE x'
+      expect(type_map.as_param).to eql 'volatile VALUE x'
     end
 
     it 'has correct template cast' do
-      expect(subject.cast).to eql 'ERROR'
+      expect(type_map.cast).to eql 'ERROR'
     end
 
     it 'is a NArray' do
-      expect(subject.narray?).to be true
+      expect(type_map.narray?).to be true
     end
 
     it 'has correct to Ruby converter for template' do
-      expect(subject.struct_item_to_ruby).to eql 'foo->x'
+      expect(type_map.struct_item_to_ruby).to eql 'foo->x'
     end
 
     it 'has correct from Ruby converter for template' do
       # TODO: There should be a validation that we have a NArray here, and casting from existing type
-      expect(subject.param_item_to_c).to eql 'rv_x'
+      expect(type_map.param_item_to_c).to eql 'rv_x'
     end
 
     it 'overrides item_ctype' do
-      expect(subject.item_ctype).to eql 'int32_t'
+      expect(type_map.item_ctype).to eql 'int32_t'
     end
 
     it 'overrides narray_enum_type' do
-      expect(subject.narray_enum_type).to eql 'NA_LINT'
+      expect(type_map.narray_enum_type).to eql 'NA_LINT'
     end
 
     it 'overrides rdoc_type' do
-      expect(subject.rdoc_type).to eql 'NArray<int>'
+      expect(type_map.rdoc_type).to eql 'NArray<int>'
     end
   end
 end
