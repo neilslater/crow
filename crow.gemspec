@@ -16,7 +16,7 @@ Gem::Specification.new do |spec|
 
   spec.required_ruby_version = '>= 2.7.1'
 
-  spec.add_dependency 'numo-narray-alt', '>= 0.9.9', '< 0.11'
+  spec.add_dependency 'numo-narray-alt', '>= 0.9.9', '< 0.12'
   spec.add_dependency 'rake-compiler', '>= 0.8.3'
 
   spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features|gem)/}) }
