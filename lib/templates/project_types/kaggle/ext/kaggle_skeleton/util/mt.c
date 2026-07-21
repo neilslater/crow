@@ -51,7 +51,7 @@ static uint32_t mt[N]; /* the array for the state vector  */
 static int mti=N+1; /* mti==N+1 means mt[N] is not initialized */
 
 /* initializes mt[N] with a seed */
-void init_genrand(uint32_t s)
+void kaggle_skeleton_mt_init(uint32_t s)
 {
     mt[0]= s & 0xffffffffUL;
     for (mti=1; mti<N; mti++) {
@@ -70,10 +70,10 @@ void init_genrand(uint32_t s)
 /* init_key is the array for initializing keys */
 /* key_length is its length */
 /* slight change for C++, 2004/2/26 */
-void init_by_array(const uint32_t init_key[], int key_length)
+void kaggle_skeleton_mt_init_by_array(const uint32_t init_key[], int key_length)
 {
     int i, j, k;
-    init_genrand(19650218UL);
+    kaggle_skeleton_mt_init(19650218UL);
     i=1; j=0;
     k = (N>key_length ? N : key_length);
     for (; k; k--) {
@@ -96,7 +96,7 @@ void init_by_array(const uint32_t init_key[], int key_length)
 }
 
 /* generates a random number on [0,0xffffffff]-interval */
-uint32_t genrand_int32(void)
+uint32_t kaggle_skeleton_mt_uint32(void)
 {
     uint32_t y;
     static const uint32_t mag01[2]={0x0UL, MATRIX_A};
@@ -106,7 +106,7 @@ uint32_t genrand_int32(void)
         int kk;
 
         if (mti == N+1)   /* if init_genrand() has not been called, */
-            init_genrand(5489UL); /* a default initial seed is used */
+            kaggle_skeleton_mt_init(5489UL); /* a default initial seed is used */
 
         for (kk=0;kk<N-M;kk++) {
             y = (mt[kk]&UPPER_MASK)|(mt[kk+1]&LOWER_MASK);
@@ -134,23 +134,23 @@ uint32_t genrand_int32(void)
 }
 
 /* generates a random number on [0,0x7fffffff]-interval */
-long genrand_int31(void)
+long kaggle_skeleton_mt_int31(void)
 {
-    return (long)(genrand_int32()>>1);
+    return (long)(kaggle_skeleton_mt_uint32()>>1);
 }
 
 /* generates a random number on [0,1]-real-interval */
-float genrand_real1(void)
+float kaggle_skeleton_mt_real1(void)
 {
-  uint32_t y = genrand_int32() ^ UINT32_C(0x80000000);
+  uint32_t y = kaggle_skeleton_mt_uint32() ^ UINT32_C(0x80000000);
   return (float)(y * (1.0 / UINT32_MAX));
 }
 
 /* generates a random number from normal distribution with SD 1 */
-float genrand_norm(void)
+float kaggle_skeleton_mt_norm(void)
 {
-    float n1 = genrand_real1();
-    float n2 = genrand_real1();
+    float n1 = kaggle_skeleton_mt_real1();
+    float n2 = kaggle_skeleton_mt_real1();
 
     // Box-Muller transform (well, half of it)
     if ( n1 < 1e-50 ) n1 = 1e-50;
@@ -159,19 +159,19 @@ float genrand_norm(void)
 }
 
 /* generates a random number on [0,1) with 53-bit resolution */
-double genrand_res53(void)
+double kaggle_skeleton_mt_res53(void)
 {
   // Casting to signed long explicitly can improve speed
-  long a = (long)(genrand_int32()>>5);
-  long b = (long)(genrand_int32()>>6);
+  long a = (long)(kaggle_skeleton_mt_uint32()>>5);
+  long b = (long)(kaggle_skeleton_mt_uint32()>>6);
   return(a*67108864.0+b)*(1.0/9007199254740992.0);
 }
 
 /* generates a random number from normal distribution with SD 1 */
-double genrand_norm_dbl(void)
+double kaggle_skeleton_mt_norm_dbl(void)
 {
-    double n1 = genrand_res53();
-    double n2 = genrand_res53();
+    double n1 = kaggle_skeleton_mt_res53();
+    double n2 = kaggle_skeleton_mt_res53();
 
     // Box-Muller transform (well, half of it)
     if ( n1 < 1e-100 ) n1 = 1e-100;
@@ -179,13 +179,13 @@ double genrand_norm_dbl(void)
     return sqrt( n1 ) * cos( n2 * 6.2831853071795 );
 }
 
-void init_srand_by_time() {
+void kaggle_skeleton_mt_init_by_time(void) {
   uint32_t seed[2];
   struct timeval tv;
   gettimeofday(&tv, 0);
   seed[0] = (uint32_t)tv.tv_sec;
   seed[1] = (uint32_t)tv.tv_usec;
   // Anything else easy to raid for entropy?
-  init_by_array( seed , 2 );
+  kaggle_skeleton_mt_init_by_array( seed , 2 );
   return;
 }

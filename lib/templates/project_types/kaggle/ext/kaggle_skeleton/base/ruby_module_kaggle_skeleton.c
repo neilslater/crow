@@ -8,7 +8,7 @@
  * @return [nil]
  */
 static VALUE rbmodule__srand( VALUE self, VALUE rv_seed ) {
-  init_genrand( NUM2UINT( rv_seed ) );
+  kaggle_skeleton_mt_init( NUM2UINT( rv_seed ) );
   return Qnil;
 }
 
@@ -30,7 +30,7 @@ static VALUE rbmodule__srand_array( VALUE self, VALUE rv_seed_array ) {
   for ( i = 0; i < n; i++ ) {
     kaggle_skeleton_srand_seed[i] = NUM2UINT( rb_ary_entry( rv_seed_array, i ) );
   }
-  init_by_array( kaggle_skeleton_srand_seed, n );
+  kaggle_skeleton_mt_init_by_array( kaggle_skeleton_srand_seed, n );
   return Qnil;
 }
 
@@ -40,7 +40,7 @@ static VALUE rbmodule__srand_array( VALUE self, VALUE rv_seed_array ) {
  * @return [Float] random number in range 0.0..1.0
  */
 static VALUE rbmodule__rand_float( VALUE self ) {
-  return FLT2NUM( genrand_real1() );
+  return FLT2NUM( kaggle_skeleton_mt_real1() );
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

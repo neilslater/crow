@@ -55,14 +55,14 @@
 #include <stdint.h>
 #include <sys/time.h>
 
-void init_genrand(uint32_t s);
-void init_by_array(const uint32_t init_key[], int key_length);
-uint32_t genrand_int32(void);
-double genrand_res53(void);
-float genrand_real1(void);
-long genrand_int31(void);
-void init_srand_by_time();
-float genrand_norm(void);
-double genrand_norm_dbl(void);
+void kaggle_skeleton_mt_init(uint32_t s);
+void kaggle_skeleton_mt_init_by_array(const uint32_t init_key[], int key_length);
+uint32_t kaggle_skeleton_mt_uint32(void);
+double kaggle_skeleton_mt_res53(void);
+float kaggle_skeleton_mt_real1(void);
+long kaggle_skeleton_mt_int31(void);
+void kaggle_skeleton_mt_init_by_time(void);
+float kaggle_skeleton_mt_norm(void);
+double kaggle_skeleton_mt_norm_dbl(void);
 
 #endif
