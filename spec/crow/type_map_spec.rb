@@ -507,11 +507,11 @@ describe Crow::TypeMap do
     end
 
     it 'overrides narray_enum_type' do
-      expect(type_map.narray_enum_type).to eql 'NA_SFLOAT'
+      expect(type_map.narray_enum_type).to eql 'numo_cSFloat'
     end
 
     it 'overrides rdoc_type' do
-      expect(type_map.rdoc_type).to eql 'NArray<sfloat>'
+      expect(type_map.rdoc_type).to eql 'Numo::SFloat'
     end
   end
 
@@ -549,11 +549,11 @@ describe Crow::TypeMap do
     end
 
     it 'overrides narray_enum_type' do
-      expect(type_map.narray_enum_type).to eql 'NA_DFLOAT'
+      expect(type_map.narray_enum_type).to eql 'numo_cDFloat'
     end
 
     it 'overrides rdoc_type' do
-      expect(type_map.rdoc_type).to eql 'NArray<float>'
+      expect(type_map.rdoc_type).to eql 'Numo::DFloat'
     end
   end
 
@@ -591,11 +591,11 @@ describe Crow::TypeMap do
     end
 
     it 'overrides narray_enum_type' do
-      expect(type_map.narray_enum_type).to eql 'NA_SINT'
+      expect(type_map.narray_enum_type).to eql 'numo_cInt16'
     end
 
     it 'overrides rdoc_type' do
-      expect(type_map.rdoc_type).to eql 'NArray<sint>'
+      expect(type_map.rdoc_type).to eql 'Numo::Int16'
     end
   end
 
@@ -633,11 +633,11 @@ describe Crow::TypeMap do
     end
 
     it 'overrides narray_enum_type' do
-      expect(type_map.narray_enum_type).to eql 'NA_LINT'
+      expect(type_map.narray_enum_type).to eql 'numo_cInt32'
     end
 
     it 'overrides rdoc_type' do
-      expect(type_map.rdoc_type).to eql 'NArray<int>'
+      expect(type_map.rdoc_type).to eql 'Numo::Int32'
     end
   end
 end

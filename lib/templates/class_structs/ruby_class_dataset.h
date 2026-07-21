@@ -4,7 +4,7 @@
 #define BASE_RUBY_CLASS_<%= short_name.upcase %>_H
 
 #include <ruby.h>
-#include "narray.h"
+#include <numo/narray.h>
 #include "base/struct_<%= short_name %>.h"
 #include "shared_vars.h"
 

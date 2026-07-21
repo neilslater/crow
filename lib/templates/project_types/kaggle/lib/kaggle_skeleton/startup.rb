@@ -25,7 +25,7 @@ module KaggleSkeleton
   def self.import_from_csv
     raise NotImplementedError
 
-    data = NArray.int(2, 10_000_000)
+    data = Numo::Int32.zeros(2, 10_000_000)
 
     puts "Reading #{CSV_PATH}"
 

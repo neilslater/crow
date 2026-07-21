@@ -9,7 +9,8 @@
 #define BASE_STRUCT_<%= short_name.upcase %>_H
 
 #include <ruby.h>
-#include "narray.h"
+#include <numo/narray.h>
+#include <numo/intern.h>
 
 typedef struct _<%= short_name %>_raw {
 <% attributes.each do |attribute| -%>
@@ -24,13 +25,13 @@ void <%= short_name %>__init( <%= struct_name %> *<%= short_name %><% unless ini
 
 <% end -%>
 <% narray_attributes.each do |attribute| -%>
-struct NARRAY * <%= attribute.narray_fn_name %>( <%= struct_name %> *<%= short_name %> );
+narray_t * <%= attribute.narray_fn_name %>( <%= struct_name %> *<%= short_name %> );
 
-int * <%= attribute.shape_fn_name %>( <%= struct_name %> *<%= short_name %> );
+size_t * <%= attribute.shape_fn_name %>( <%= struct_name %> *<%= short_name %> );
 
 <%= attribute.item_ctype %> * <%= attribute.ptr_fn_name %>( <%= struct_name %> *<%= short_name %> );
 
-int <%= attribute.size_fn_name %>( <%= struct_name %> *<%= short_name %> );
+size_t <%= attribute.size_fn_name %>( <%= struct_name %> *<%= short_name %> );
 
 int <%= attribute.rank_fn_name %>( <%= struct_name %> *<%= short_name %> );
 

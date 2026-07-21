@@ -2,7 +2,7 @@
 
 module Crow
   class TypeMap
-    # Describes a C `VALUE` data type intended to be used with a NArray.
+    # Describes a C `VALUE` data type intended to be used with a Numo::NArray.
     class NArray < TypeMap::Value
       include NotACPointer
 
@@ -25,7 +25,7 @@ module Crow
       end
 
       def rdoc_type
-        'NArray'
+        'Numo::NArray'
       end
 
       def declare_ptr_cache
@@ -33,11 +33,12 @@ module Crow
       end
 
       def declare_shape_var
-        "int *#{shape_tmp_var};"
+        "size_t *#{shape_tmp_var};"
       end
 
       def set_ptr_cache
-        "#{ptr_tmp_var} = #{ptr_fn_name}( #{@parent_struct.short_name} );"
+        "#{ptr_tmp_var} = (#{item_ctype} *)na_get_pointer_for_write( " \
+          "#{@parent_struct.short_name}->#{name} );"
       end
 
       def set_shape_var
@@ -65,7 +66,7 @@ module Crow
       end
     end
 
-    # Describes a C `VALUE` data type intended to be used with a NArray with NA_SFLOAT subtype.
+    # Describes a C `VALUE` data type intended to be used with a Numo::SFloat.
     class NArrayFloat < TypeMap::NArray
       include NotACPointer
 
@@ -77,15 +78,15 @@ module Crow
       end
 
       def narray_enum_type
-        'NA_SFLOAT'
+        'numo_cSFloat'
       end
 
       def rdoc_type
-        'NArray<sfloat>'
+        'Numo::SFloat'
       end
     end
 
-    # Describes a C `VALUE` data type intended to be used with a NArray with NA_DFLOAT subtype.
+    # Describes a C `VALUE` data type intended to be used with a Numo::DFloat.
     class NArrayDouble < TypeMap::NArray
       include NotACPointer
 
@@ -97,15 +98,15 @@ module Crow
       end
 
       def narray_enum_type
-        'NA_DFLOAT'
+        'numo_cDFloat'
       end
 
       def rdoc_type
-        'NArray<float>'
+        'Numo::DFloat'
       end
     end
 
-    # Describes a C `VALUE` data type intended to be used with a NArray with NA_SINT subtype.
+    # Describes a C `VALUE` data type intended to be used with a Numo::Int16.
     class NArraySInt < TypeMap::NArray
       include NotACPointer
 
@@ -117,15 +118,15 @@ module Crow
       end
 
       def narray_enum_type
-        'NA_SINT'
+        'numo_cInt16'
       end
 
       def rdoc_type
-        'NArray<sint>'
+        'Numo::Int16'
       end
     end
 
-    # Describes a C `VALUE` data type intended to be used with a NArray with NA_LINT subtype.
+    # Describes a C `VALUE` data type intended to be used with a Numo::Int32.
     class NArrayLInt < TypeMap::NArray
       include NotACPointer
 
@@ -137,11 +138,11 @@ module Crow
       end
 
       def narray_enum_type
-        'NA_LINT'
+        'numo_cInt32'
       end
 
       def rdoc_type
-        'NArray<int>'
+        'Numo::Int32'
       end
     end
   end

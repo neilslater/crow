@@ -34,7 +34,7 @@ Kaggle competition:
     $ bundle exec rake
 
 
-This should compile the C code, import the problem data from the CSV file (into Ruby's NArray
+This should compile the C code, import the problem data from the CSV file (into a Numo::NArray
 format), run the unit tests, and then run the default solution. The process should take
 around XX minutes in total. The output is saved to ```data/submission.csv```.
 
