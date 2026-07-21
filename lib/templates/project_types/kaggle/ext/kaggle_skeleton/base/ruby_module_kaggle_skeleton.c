@@ -8,11 +8,11 @@
  * @return [nil]
  */
 static VALUE rbmodule__srand( VALUE self, VALUE rv_seed ) {
-  init_genrand( NUM2ULONG( rv_seed ) );
+  init_genrand( NUM2UINT( rv_seed ) );
   return Qnil;
 }
 
-static unsigned long kaggle_skeleton_srand_seed[640];
+static uint32_t kaggle_skeleton_srand_seed[640];
 
 /* @overload srand_array( seed )
  * Seed the random number generator used inside KaggleSkeleton.
@@ -28,7 +28,7 @@ static VALUE rbmodule__srand_array( VALUE self, VALUE rv_seed_array ) {
   }
   if ( n > 640 ) { n = 640; }
   for ( i = 0; i < n; i++ ) {
-    kaggle_skeleton_srand_seed[i] = NUM2ULONG( rb_ary_entry( rv_seed_array, i ) );
+    kaggle_skeleton_srand_seed[i] = NUM2UINT( rb_ary_entry( rv_seed_array, i ) );
   }
   init_by_array( kaggle_skeleton_srand_seed, n );
   return Qnil;

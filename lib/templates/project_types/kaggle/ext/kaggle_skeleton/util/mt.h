@@ -52,10 +52,12 @@
 #define CORE_MT_H
 
 #include <ruby.h>
+#include <stdint.h>
 #include <sys/time.h>
 
-void init_genrand(unsigned long s);
-void init_by_array(unsigned long init_key[], int key_length);
+void init_genrand(uint32_t s);
+void init_by_array(const uint32_t init_key[], int key_length);
+uint32_t genrand_int32(void);
 double genrand_res53(void);
 float genrand_real1(void);
 long genrand_int31(void);

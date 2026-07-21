@@ -47,11 +47,11 @@
 
 #include "mt.h"
 
-static unsigned long mt[N]; /* the array for the state vector  */
+static uint32_t mt[N]; /* the array for the state vector  */
 static int mti=N+1; /* mti==N+1 means mt[N] is not initialized */
 
 /* initializes mt[N] with a seed */
-void init_genrand(unsigned long s)
+void init_genrand(uint32_t s)
 {
     mt[0]= s & 0xffffffffUL;
     for (mti=1; mti<N; mti++) {
@@ -70,7 +70,7 @@ void init_genrand(unsigned long s)
 /* init_key is the array for initializing keys */
 /* key_length is its length */
 /* slight change for C++, 2004/2/26 */
-void init_by_array(unsigned long init_key[], int key_length)
+void init_by_array(const uint32_t init_key[], int key_length)
 {
     int i, j, k;
     init_genrand(19650218UL);
@@ -96,10 +96,10 @@ void init_by_array(unsigned long init_key[], int key_length)
 }
 
 /* generates a random number on [0,0xffffffff]-interval */
-unsigned long genrand_int32(void)
+uint32_t genrand_int32(void)
 {
-    unsigned long y;
-    static unsigned long mag01[2]={0x0UL, MATRIX_A};
+    uint32_t y;
+    static const uint32_t mag01[2]={0x0UL, MATRIX_A};
     /* mag01[x] = x * MATRIX_A  for x=0,1 */
 
     if (mti >= N) { /* generate N words at one time */
@@ -142,9 +142,8 @@ long genrand_int31(void)
 /* generates a random number on [0,1]-real-interval */
 float genrand_real1(void)
 {
-  unsigned long y = genrand_int32();
-  return (float)((int)y) * (1.0/4294967295.0)
-    + (0.5 + 0.5/4294967295.0);
+  uint32_t y = genrand_int32() ^ UINT32_C(0x80000000);
+  return (float)(y * (1.0 / UINT32_MAX));
 }
 
 /* generates a random number from normal distribution with SD 1 */
@@ -181,11 +180,11 @@ double genrand_norm_dbl(void)
 }
 
 void init_srand_by_time() {
-  unsigned long seed[2];
+  uint32_t seed[2];
   struct timeval tv;
   gettimeofday(&tv, 0);
-  seed[0] = tv.tv_sec;
-  seed[1] = tv.tv_usec;
+  seed[0] = (uint32_t)tv.tv_sec;
+  seed[1] = (uint32_t)tv.tv_usec;
   // Anything else easy to raid for entropy?
   init_by_array( seed , 2 );
   return;
