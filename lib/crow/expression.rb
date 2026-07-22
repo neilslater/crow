@@ -5,19 +5,37 @@ module Crow
   # available within a structure.
   #
   class Expression
-    attr_reader :text, :attributes, :params
+    # @return [String] expression template before substitution
+    attr_reader :text
 
+    # @return [Array<Crow::TypeMap>] attributes available to the expression
+    attr_reader :attributes
+
+    # @return [Array<Crow::TypeMap>] initializer parameters available to the expression
+    attr_reader :params
+
+    # Creates an expression that may refer to struct attributes and initializer parameters.
+    # @param [String] text expression template; `%name` refers to an attribute and `$name` to a parameter
+    # @param [Array<Crow::TypeMap>] attributes attributes available to the expression
+    # @param [Array<Crow::TypeMap>] params initializer parameters available to the expression
     def initialize(text, attributes, params = [])
       @text = text
       @attributes = attributes
       @params = params
     end
 
+    # Renders the expression as C code, validating all attribute and parameter references.
+    # @param [String] struct_var C variable used to access struct attributes
+    # @return [String]
+    # @raise [RuntimeError] if the expression references an unknown attribute or parameter
     def as_c_code(struct_var = attributes.first.parent_struct.short_name)
       code = c_sub_named_params(text, struct_var)
       c_sub_attributes(code, struct_var)
     end
 
+    # Evaluates the expression using representative Ruby values for generated specs.
+    # @return [Object]
+    # @raise [RuntimeError] if the expression references an unknown attribute or parameter
     def as_ruby_test_value
       code = ruby_testval_named_params(text)
       code = ruby_testval_attributes(code)
