@@ -20,7 +20,7 @@ module Crow
 
     def as_ruby_test_value
       code = ruby_testval_named_params(text)
-      ruby_testval_attributes(code)
+      code = ruby_testval_attributes(code)
 
       # Given the purpose of Crow, this is not a security issue
       eval code # rubocop: disable Security/Eval

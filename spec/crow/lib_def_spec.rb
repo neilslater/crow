@@ -4,6 +4,39 @@ require 'spec_helper'
 require 'open3'
 
 describe Crow::LibDef do
+  describe Crow::LibTemplateRules do
+    subject(:rules) { Class.new { include Crow::LibTemplateRules }.new }
+
+    it 'skips temporary and Finder metadata files' do
+      results = %w[tmp/build.o source/.DS_Store lib/code.rb].map { |path| rules.send(:skip_project_file?, path) }
+      expect(results).to eq [true, true, false]
+    end
+
+    it 'identifies files whose names and contents should change' do
+      results = %w[README lib/code.rb image.png].map { |path| rules.send(:change_names?, path) }
+      expect(results).to eq [true, true, false]
+    end
+
+    it 'identifies user-owned source files' do
+      paths = %w[ruby/class.c lib/code.c base/generated.c]
+      expect(paths.map { |path| rules.send(:contains_user_code?, path) }).to eq [true, true, false]
+    end
+
+    it 'only renders source templates' do
+      paths = %w[source.c header.h source.rb README.md]
+      expect(paths.map { |path| rules.send(:run_template?, path) }).to eq [true, true, true, false]
+    end
+  end
+
+  it 'rejects an invalid short name' do
+    expect { described_class.new('not-valid') }.to raise_error RuntimeError, /cannot be used/
+  end
+
+  it 'rejects an unknown project type' do
+    expect { described_class.new('foo').create_project('/unused', 'unknown') }
+      .to raise_error RuntimeError, /Unknown project type/
+  end
+
   def run_command(command)
     # Prevent the generated project's Bundler commands inheriting Crow's active bundle.
     stdout, stderr, status = Bundler.with_unbundled_env do
@@ -290,6 +323,17 @@ describe Crow::LibDef do
         compile_project('foo', dir)
         result = run_ruby_in_project('foo', dir, %(f = Foo::Bar.new; f.hi = -3; p f.hi_user))
         expect(result.chomp).to end_with '-5.25'
+      end
+    end
+
+    it 'preserves user source code when regenerating a project' do
+      in_project(lib_definition) do |dir|
+        target = File.join(dir, 'ext', 'foo', 'ruby', 'class_bar.c')
+        File.write(target, "Leave me alone!\n")
+
+        lib_definition.create_project(dir)
+
+        expect(File.read(target)).to eq "Leave me alone!\n"
       end
     end
   end

@@ -183,7 +183,7 @@ module Crow
 
       target_file = File.join(target_dir, rel_target_file)
 
-      return if File.exist?(target_file) && contains_user_code?(target_file)
+      return if File.exist?(target_file) && contains_user_code?(rel_target_file)
 
       finish_copy_project_file(source_file, target_file, rel_target_file, source_names)
     end

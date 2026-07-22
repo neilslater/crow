@@ -41,10 +41,6 @@ module Crow
           "#{@parent_struct.short_name}->#{name} );"
       end
 
-      def set_shape_var
-        "#{shape_tmp_var} = #{shape_fn_name}( #{@parent_struct.short_name} );"
-      end
-
       def narray_fn_name
         "#{@parent_struct.short_name}__get_#{name}_NARRAY"
       end

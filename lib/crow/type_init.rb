@@ -8,6 +8,9 @@ module Crow
   # can then be rendered into C code for validationa or setting values in project files.
   #
   class TypeInit
+    DEFAULT_UNSET = Object.new.freeze
+    private_constant :DEFAULT_UNSET
+
     # The default value, assigned when nothing else provided.
     # @return [String]
     attr_reader :default
@@ -44,11 +47,12 @@ module Crow
     # @return [String]
     attr_reader :validate_max
 
-    def initialize(parent_typemap:, default: parent_typemap.class.default, size_expr: nil,
+    def initialize(parent_typemap:, default: DEFAULT_UNSET, size_expr: nil,
                    shape_expr: nil, shape_exprs: nil, rank_expr: nil, expr: nil, validate_min: nil,
                    validate_max: nil)
-      @default = default
       raise ArgumentError, 'parent_typemap must be a Crow::TypeMap' unless parent_typemap.is_a? Crow::TypeMap
+
+      @default = default.equal?(DEFAULT_UNSET) ? parent_typemap.class.default : default
 
       init_expressions(
         size_expr: size_expr, shape_expr: shape_expr, shape_exprs: shape_exprs, rank_expr: rank_expr, expr: expr
