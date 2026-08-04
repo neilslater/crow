@@ -8,34 +8,32 @@
 //
 
 <% narray_attributes.each do |attribute| -%>
-struct NARRAY * <%= attribute.narray_fn_name %>( <%= struct_name %> *<%= short_name %> ) {
-  struct NARRAY *narr;
+narray_t * <%= attribute.narray_fn_name %>( <%= struct_name %> *<%= short_name %> ) {
+  narray_t *narr;
   GetNArray( <%= short_name %>-><%= attribute.name %>, narr );
   return narr;
 }
 
-int * <%= attribute.shape_fn_name %>( <%= struct_name %> *<%= short_name %> ) {
-  struct NARRAY *narr;
+size_t * <%= attribute.shape_fn_name %>( <%= struct_name %> *<%= short_name %> ) {
+  narray_t *narr;
   GetNArray( <%= short_name %>-><%= attribute.name %>, narr );
   return narr->shape;
 }
 
 <%= attribute.item_ctype %> * <%= attribute.ptr_fn_name %>( <%= struct_name %> *<%= short_name %> ) {
-  struct NARRAY *narr;
-  GetNArray( <%= short_name %>-><%= attribute.name %>, narr );
-  return (<%= attribute.item_ctype %> * ) narr->ptr;
+  return (<%= attribute.item_ctype %> *)na_get_pointer_for_read_write( <%= short_name %>-><%= attribute.name %> );
 }
 
-int <%= attribute.size_fn_name %>( <%= struct_name %> *<%= short_name %> ) {
-  struct NARRAY *narr;
+size_t <%= attribute.size_fn_name %>( <%= struct_name %> *<%= short_name %> ) {
+  narray_t *narr;
   GetNArray( <%= short_name %>-><%= attribute.name %>, narr );
-  return narr->total;
+  return narr->size;
 }
 
 int <%= attribute.rank_fn_name %>( <%= struct_name %> *<%= short_name %> ) {
-  struct NARRAY *narr;
+  narray_t *narr;
   GetNArray( <%= short_name %>-><%= attribute.name %>, narr );
-  return narr->rank;
+  return narr->ndim;
 }
 
 <% end -%>
@@ -51,7 +49,7 @@ int <%= attribute.rank_fn_name %>( <%= struct_name %> *<%= short_name %> ) {
 <% if needs_init? -%>
 void <%= short_name %>__init( <%= struct_name %> *<%= short_name %><% unless init_params.empty? %>, <%= init_params.map(&:as_param).join(', ') %><% end %> ) {
 <% if needs_init_iterators? -%>
-  int i;
+  size_t i;
 <% end -%>
 <% narray_attributes.each do |attribute| -%>
   <%= attribute.declare_ptr_cache %>
@@ -70,12 +68,12 @@ void <%= short_name %>__init( <%= struct_name %> *<%= short_name %><% unless ini
 
 <% end -%>
 <% narray_attributes.each do |attribute| -%>
-  <%= attribute.shape_tmp_var %> = ALLOC_N( int, <%= attribute.init.rank_expr %> );
+  <%= attribute.shape_tmp_var %> = ALLOC_N( size_t, <%= attribute.init.rank_expr %> );
 <% attribute.init.shape_exprs.each_with_index do |expr,n| -%>
   <%= attribute.shape_tmp_var %>[<%= n %>] = <%= Crow::Expression.new( expr, attribute.parent_struct.attributes, attribute.parent_struct.init_params ).as_c_code( short_name ) %>;
 <% end -%>
-  <%= short_name %>-><%= attribute.name %> = na_make_object( <%= attribute.narray_enum_type %>, <%= attribute.init.rank_expr %>, <%= attribute.init.shape_expr_c %>, cNArray );
-  <%= attribute.ptr_tmp_var %> = <%= attribute.ptr_fn_name %>( <%= short_name %> );
+  <%= short_name %>-><%= attribute.name %> = nary_new( <%= attribute.narray_enum_type %>, <%= attribute.init.rank_expr %>, <%= attribute.init.shape_expr_c %> );
+  <%= attribute.set_ptr_cache %>
   for( i = 0; i < <%= attribute.size_fn_name %>( <%= short_name %> ); i++ ) {
     <%= attribute.ptr_tmp_var %>[i] = <%= attribute.init_expr_c %>;
   }
@@ -110,7 +108,7 @@ void <%= short_name %>__deep_copy( <%= struct_name %> *<%= short_name %>_copy, <
 <% end -%>
 
 <% narray_attributes.each do |attribute| -%>
-  <%= short_name %>_copy-><%= attribute.name %> = na_clone( <%= short_name %>_orig-><%= attribute.name %> );
+  <%= short_name %>_copy-><%= attribute.name %> = rb_funcall( <%= short_name %>_orig-><%= attribute.name %>, rb_intern("dup"), 0 );
 <% end -%>
 
 <% alloc_attributes.each do |attribute| -%>

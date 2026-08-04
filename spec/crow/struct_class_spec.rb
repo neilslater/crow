@@ -5,6 +5,10 @@ require 'spec_helper'
 describe Crow::StructClass do
   let(:libdef) { Crow::LibDef.new('foo') }
 
+  it 'rejects a short name that is not a C identifier component' do
+    expect { described_class.new('not-valid') }.to raise_error RuntimeError, /cannot be used/
+  end
+
   def write_files(paths, contents)
     paths.each { |path| File.write(path, contents) }
   end
@@ -91,5 +95,19 @@ describe Crow::StructClass do
     end
 
     it_behaves_like 'a C source creator', 'bar'
+  end
+
+  describe 'stored attributes' do
+    subject(:struct_class) do
+      described_class.new('bar',
+                          parent_lib: libdef,
+                          attributes: [{ name: 'saved', ctype: :int },
+                                       { name: 'transient', ctype: :int, store: false }])
+    end
+
+    it 'separates stored and non-stored attributes' do
+      groups = [struct_class.stored_attributes, struct_class.non_stored_attributes]
+      expect(groups.map { |attributes| attributes.map(&:name) }).to eq [%w[saved], %w[transient]]
+    end
   end
 end

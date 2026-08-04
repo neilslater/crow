@@ -1,4 +1,4 @@
-require 'narray'
+require 'numo/narray/alt'
 require 'csv'
 require 'kaggle_skeleton/kaggle_skeleton'
 require 'kaggle_skeleton/narray_ext'

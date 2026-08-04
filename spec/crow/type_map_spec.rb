@@ -6,6 +6,12 @@ describe Crow::TypeMap do
   let(:container) { Crow::StructClass.new('foo') }
 
   describe 'create' do
+    it 'rejects an invalid variable name' do
+      expect do
+        Crow::TypeMapFactory.create_typemap(name: 'not-valid', ctype: :int, parent_struct: container)
+      end.to raise_error RuntimeError, /Variable name.*cannot be used/
+    end
+
     it 'does not create a TypeMap without a ctype' do
       expect do
         Crow::TypeMapFactory.create_typemap(name: 'x', parent_struct: container)
@@ -55,6 +61,31 @@ describe Crow::TypeMap do
       )
     end
 
+    it 'selects pointer and value implementations independently' do
+      value = Crow::TypeMapFactory.create_typemap(name: 'value', ctype: :int, parent_struct: container)
+      pointer = Crow::TypeMapFactory.create_typemap(name: 'pointer', ctype: :int, pointer: true,
+                                                    parent_struct: container)
+
+      expect([value.class, pointer.class]).to eq [Crow::TypeMap::Int, Crow::TypeMap::PointerInt]
+    end
+
+    it 'only needs simple initialization for initialized scalar values' do
+      plain = Crow::TypeMapFactory.create_typemap(name: 'plain', ctype: :int, parent_struct: container)
+      initialized = Crow::TypeMapFactory.create_typemap(
+        name: 'initialized', ctype: :int, parent_struct: container, init: { expr: '1' }
+      )
+      pointer = Crow::TypeMapFactory.create_typemap(
+        name: 'pointer', ctype: :int, pointer: true, parent_struct: container,
+        init: { size_expr: '1', expr: '1' }
+      )
+      narray = Crow::TypeMapFactory.create_typemap(
+        name: 'narray', ctype: :NARRAY_FLOAT, parent_struct: container,
+        init: { rank_expr: '1', expr: '1' }
+      )
+
+      expect([plain, initialized, pointer, narray].map(&:needs_simple_init?)).to eq [false, true, false, false]
+    end
+
     context 'with initialisation' do
       it 'can accept arbitrary initialisation' do
         typemap = Crow::TypeMapFactory.create_typemap(name: 'x', ctype: :int,
@@ -89,6 +120,36 @@ describe Crow::TypeMap do
         typemap = Crow::TypeMapFactory.create_typemap(name: 'y', ctype: :int,
                                                       parent_struct: container, init: { expr: '.' })
         expect(typemap.init_expr_c(from: 'alt_foo')).to eql 'alt_foo->y'
+      end
+    end
+  end
+
+  describe 'template metadata' do
+    scalar_types = {
+      int: 'Integer', uint: 'Integer', long: 'Integer', ulong: 'Integer',
+      float: 'Float', double: 'Float', char: 'Byte', VALUE: 'Object'
+    }
+    pointer_types = {
+      int: ['Array<Integer>', 'INT2NUM'], uint: ['Array<Integer>', 'UINT2NUM'],
+      long: %w[Integer LONG2NUM], ulong: ['Array<Integer>', 'ULONG2NUM'],
+      float: ['Array<Float>', 'FLT2NUM'], double: ['Array<Float>', 'DBL2NUM'], char: ['String', nil]
+    }
+
+    scalar_types.each do |ctype, expected_rdoc_type|
+      it "describes #{ctype} for generated documentation" do
+        type_map = Crow::TypeMapFactory.create_typemap(name: 'x', ctype: ctype, parent_struct: container)
+
+        expect(type_map.rdoc_type).to eq expected_rdoc_type
+      end
+    end
+
+    pointer_types.each do |ctype, (expected_rdoc_type, converter)|
+      it "describes #{ctype} pointers for generated templates" do
+        type_map = Crow::TypeMapFactory.create_typemap(name: 'x', ctype: ctype, pointer: true,
+                                                       parent_struct: container)
+
+        actual = [type_map.rdoc_type, converter && type_map.array_item_to_ruby_converter]
+        expect(actual).to eq [expected_rdoc_type, converter]
       end
     end
   end
@@ -507,11 +568,11 @@ describe Crow::TypeMap do
     end
 
     it 'overrides narray_enum_type' do
-      expect(type_map.narray_enum_type).to eql 'NA_SFLOAT'
+      expect(type_map.narray_enum_type).to eql 'numo_cSFloat'
     end
 
     it 'overrides rdoc_type' do
-      expect(type_map.rdoc_type).to eql 'NArray<sfloat>'
+      expect(type_map.rdoc_type).to eql 'Numo::SFloat'
     end
   end
 
@@ -549,11 +610,11 @@ describe Crow::TypeMap do
     end
 
     it 'overrides narray_enum_type' do
-      expect(type_map.narray_enum_type).to eql 'NA_DFLOAT'
+      expect(type_map.narray_enum_type).to eql 'numo_cDFloat'
     end
 
     it 'overrides rdoc_type' do
-      expect(type_map.rdoc_type).to eql 'NArray<float>'
+      expect(type_map.rdoc_type).to eql 'Numo::DFloat'
     end
   end
 
@@ -591,11 +652,11 @@ describe Crow::TypeMap do
     end
 
     it 'overrides narray_enum_type' do
-      expect(type_map.narray_enum_type).to eql 'NA_SINT'
+      expect(type_map.narray_enum_type).to eql 'numo_cInt16'
     end
 
     it 'overrides rdoc_type' do
-      expect(type_map.rdoc_type).to eql 'NArray<sint>'
+      expect(type_map.rdoc_type).to eql 'Numo::Int16'
     end
   end
 
@@ -633,11 +694,11 @@ describe Crow::TypeMap do
     end
 
     it 'overrides narray_enum_type' do
-      expect(type_map.narray_enum_type).to eql 'NA_LINT'
+      expect(type_map.narray_enum_type).to eql 'numo_cInt32'
     end
 
     it 'overrides rdoc_type' do
-      expect(type_map.rdoc_type).to eql 'NArray<int>'
+      expect(type_map.rdoc_type).to eql 'Numo::Int32'
     end
   end
 end

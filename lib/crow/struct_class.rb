@@ -7,20 +7,49 @@ module Crow
   # This class models the available template files, and rendering them based on structure input.
   #
   class StructTemplates
-    attr_reader :struct_binding, :short_name
+    # The binding used to render templates.
+    # @return [Binding]
+    attr_reader :struct_binding
 
+    # Base name substituted into generated file names.
+    # @return [String]
+    attr_reader :short_name
+
+    # Directory containing generated base implementation templates.
+    # @return [String]
     TEMPLATE_DIR = File.realdirpath(File.join(__dir__, '../../lib/templates/class_structs'))
+
+    # Base implementation templates rendered for every struct.
+    # @return [Array<String>]
     TEMPLATES = ['struct_dataset.h', 'struct_dataset.c', 'ruby_class_dataset.h', 'ruby_class_dataset.c'].freeze
 
+    # Directory containing user-editable Ruby binding templates.
+    # @return [String]
     USER_CLASS_TEMPLATE_DIR = File.realdirpath(File.join(__dir__, '../../lib/templates/class_structs'))
+
+    # User-editable Ruby binding templates rendered for every struct.
+    # @return [Array<String>]
     USER_CLASS_TEMPLATES = ['class_dataset.h', 'class_dataset.c'].freeze
 
+    # Directory containing user-editable C struct templates.
+    # @return [String]
     USER_STRUCT_TEMPLATE_DIR = File.realdirpath(File.join(__dir__, '../../lib/templates/class_structs'))
+
+    # User-editable C struct templates rendered for every struct.
+    # @return [Array<String>]
     USER_STRUCT_TEMPLATES = ['dataset.h', 'dataset.c'].freeze
 
+    # Directory containing generated RSpec templates.
+    # @return [String]
     SPEC_TEMPLATE_DIR = File.realdirpath(File.join(__dir__, '../../lib/templates/spec'))
+
+    # RSpec templates rendered for every struct.
+    # @return [Array<String>]
     SPEC_TEMPLATES = ['dataset_spec.rb'].freeze
 
+    # Creates a renderer for one struct definition.
+    # @param [String] short_name base name substituted into generated file names
+    # @param [Binding] struct_binding context used to evaluate ERB templates
     def initialize(short_name, struct_binding)
       @struct_binding = struct_binding
       @short_name = short_name
@@ -107,7 +136,8 @@ module Crow
   #
   # @example Define a basic C struct with two attributes and write its files to a folder
   #  structdef = Crow::StructClass.new('the_class',
-  #    :attributes => [{name: 'number', ctype: :int}, {name: 'values', ctype: :double, pointer: true}]}])
+  #    attributes: [{ name: 'number', ctype: :int },
+  #                 { name: 'values', ctype: :double, pointer: true }])
   #  structdef.write('/path/to/target_project/ext/the_module')
   #
   class StructClass
@@ -186,7 +216,7 @@ module Crow
     end
 
     # Adds an attribute definition to the struct/class description.
-    # @param [Hash] opts passed to Crow::TypeMap constructor
+    # @param [Hash] opts options passed to {TypeMapFactory.create_typemap}
     # @return [Crow::TypeMap] the new attribute definition
     def add_attribute(opts = {})
       @attributes << Crow::TypeMapFactory.create_typemap(opts.merge(parent_struct: self))
@@ -210,50 +240,74 @@ module Crow
       @attributes.select(&:store)
     end
 
+    # Attributes excluded from generated persistence helpers.
+    # @return [Array<Crow::TypeMap>]
     def non_stored_attributes
       @attributes.reject(&:store)
     end
 
+    # Whether any attribute requires separately allocated storage.
+    # @return [Boolean]
     def any_alloc?
       @attributes.any?(&:needs_alloc?)
     end
 
+    # Whether generated initialization code is required.
+    # @return [Boolean]
     def needs_init?
       !!(any_narray? || any_alloc? || init_params.any?)
     end
 
+    # Whether initialization must iterate over allocated or NArray data.
+    # @return [Boolean]
     def needs_init_iterators?
       !!(any_narray? || any_alloc?)
     end
 
+    # Attributes whose generated C representation requires allocation.
+    # @return [Array<Crow::TypeMap>]
     def alloc_attributes
       @attributes.select(&:needs_alloc?)
     end
 
+    # Scalar attributes that require neither allocation nor NArray handling.
+    # @return [Array<Crow::TypeMap>]
     def simple_attributes
       @attributes.reject { |a| a.needs_alloc? || a.narray? }
     end
 
+    # Scalar attributes that have an initialization expression.
+    # @return [Array<Crow::TypeMap>]
     def simple_attributes_with_init
       @attributes.reject { |a| a.needs_alloc? || a.narray? }.select(&:needs_init?)
     end
 
+    # Attributes for which generated specs can construct simple test values.
+    # @return [Array<Crow::TypeMap>]
     def testable_attributes
       simple_attributes
     end
 
+    # Short file-name identifier of the containing library.
+    # @return [String]
     def lib_short_name
       parent_lib.short_name
     end
 
+    # Ruby module name of the containing library.
+    # @return [String]
     def lib_module_name
       parent_lib.module_name
     end
 
+    # C identifier for the generated Ruby class.
+    # @return [String]
     def full_class_name
       "#{parent_lib.module_name}_#{rb_class_name}"
     end
 
+    # Fully qualified Ruby constant name for the generated class.
+    # @return [String]
     def full_class_name_ruby
       "#{parent_lib.module_name}::#{rb_class_name.gsub('_', '::')}"
     end

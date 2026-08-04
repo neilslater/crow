@@ -5,11 +5,14 @@ require 'set'
 module Crow
   # This class describes initialisation properties for simple data elements within a
   # struct container. An instance of this class describes specific initialisation options that
-  # can then be rendered into C code for validationa or setting values in project files.
+  # can then be rendered into C code for validation or setting values in project files.
   #
   class TypeInit
-    # The default value, assigned when nothing else provided.
-    # @return [String]
+    DEFAULT_UNSET = Object.new.freeze
+    private_constant :DEFAULT_UNSET
+
+    # The default C expression, inherited from the type map unless explicitly supplied.
+    # @return [String, nil]
     attr_reader :default
 
     # The containing type description.
@@ -17,38 +20,50 @@ module Crow
     attr_reader :parent_typemap
 
     # The initialising expression (in C syntax) for single value or for all data elements in an array.
-    # @return [String]
+    # @return [String, nil]
     attr_reader :expr
 
     # The initialising expression for array size (in C syntax), applicable if data type is a pointer.
-    # @return [String]
+    # @return [String, nil]
     attr_reader :size_expr
 
     # The initialising expression for array shape (in C syntax), applicable if data type is NArray.
-    # @return [String]
+    # @return [String, nil]
     attr_reader :shape_expr
 
     # The initialising expressions for array shape (in C syntax), applicable if data type is NArray.
-    # @return [Array<String>]
+    # @return [Array<String>, nil]
     attr_reader :shape_exprs
 
     # The initialising expression for array rank (in C syntax), applicable if data type is NArray.
-    # @return [String]
+    # @return [String, nil]
     attr_reader :rank_expr
 
     # The minimum acceptable value.
-    # @return [String]
+    # @return [String, Numeric, nil]
     attr_reader :validate_min
 
     # The maximum acceptable value.
-    # @return [String]
+    # @return [String, Numeric, nil]
     attr_reader :validate_max
 
-    def initialize(parent_typemap:, default: parent_typemap.class.default, size_expr: nil,
+    # Creates initialization rules for a type mapping.
+    # @param [Crow::TypeMap] parent_typemap type mapping these rules initialize
+    # @param [String, nil] default default C expression; omitted to inherit the type default
+    # @param [String, nil] size_expr expression giving the number of pointer elements
+    # @param [String, nil] shape_expr C expression for an NArray shape
+    # @param [Array<String>, nil] shape_exprs expressions used to populate a temporary NArray shape
+    # @param [String, nil] rank_expr C expression for an NArray rank
+    # @param [String, nil] expr expression used to initialize a value or each array element
+    # @param [String, Numeric, nil] validate_min inclusive minimum value
+    # @param [String, Numeric, nil] validate_max inclusive maximum value
+    # @raise [ArgumentError] if +parent_typemap+ is not a {Crow::TypeMap}
+    def initialize(parent_typemap:, default: DEFAULT_UNSET, size_expr: nil,
                    shape_expr: nil, shape_exprs: nil, rank_expr: nil, expr: nil, validate_min: nil,
                    validate_max: nil)
-      @default = default
       raise ArgumentError, 'parent_typemap must be a Crow::TypeMap' unless parent_typemap.is_a? Crow::TypeMap
+
+      @default = default.equal?(DEFAULT_UNSET) ? parent_typemap.class.default : default
 
       init_expressions(
         size_expr: size_expr, shape_expr: shape_expr, shape_exprs: shape_exprs, rank_expr: rank_expr, expr: expr
@@ -59,10 +74,15 @@ module Crow
       @validate_max ||= validate_max
     end
 
+    # Whether a minimum or maximum validation bound is configured.
+    # @return [Boolean]
     def validate?
       validate_min || validate_max
     end
 
+    # Builds a C condition that is true when a value is within configured bounds.
+    # @param [String] var_c C expression to validate
+    # @return [String]
     def validate_condition_c(var_c = parent_typemap.struct_item)
       return '( 1 )' unless validate?
 
@@ -75,6 +95,9 @@ module Crow
       end
     end
 
+    # Builds a C condition that is true when a value is outside configured bounds.
+    # @param [String] var_c C expression to validate
+    # @return [String]
     def validate_fail_condition_c(var_c = parent_typemap.struct_item)
       return '( 0 )' unless validate?
 
@@ -89,14 +112,20 @@ module Crow
 
     # This class describes initialisation properties for pointer data elements within a
     # struct container. An instance of this class describes specific initialisation options that
-    # can then be rendered into C code for validationa or setting values in project files.
+    # can then be rendered into C code for validation or setting values in project files.
     #
     class Pointer < TypeInit
+      # Creates pointer initialization rules and supplies the item-type default expression when needed.
+      # @param [Hash] opts keyword options accepted by {TypeInit#initialize}
       def initialize(opts = {})
         super(**opts)
         @expr ||= parent_typemap.class.item_default
       end
 
+      # Renders the pointer-size expression as C code.
+      # @param [String] from C struct variable used for attribute references
+      # @param [Boolean] init_context whether dot shorthand refers to an initializer parameter
+      # @return [String]
       def size_expr_c(from: parent_typemap.parent_struct.short_name, init_context: false)
         struct = parent_typemap.parent_struct
         e = Expression.new(use_size_expr(init_context), struct.attributes, struct.init_params)
@@ -122,9 +151,11 @@ module Crow
 
     # This class describes initialisation properties for narray data elements within a
     # struct container. An instance of this class describes specific initialisation options that
-    # can then be rendered into C code for validationa or setting values in project files.
+    # can then be rendered into C code for validation or setting values in project files.
     #
     class NArray < TypeInit
+      # Creates NArray initialization rules and derives missing element and shape defaults.
+      # @param [Hash] opts keyword options accepted by {TypeInit#initialize}
       def initialize(opts = {})
         super(**opts)
         @expr ||= parent_typemap.class.item_default
@@ -137,6 +168,9 @@ module Crow
         end
       end
 
+      # Renders the NArray shape expression as C code.
+      # @param [String] container_name C struct variable used for attribute references
+      # @return [String]
       def shape_expr_c(container_name = parent_typemap.parent_struct.short_name)
         struct = parent_typemap.parent_struct
 

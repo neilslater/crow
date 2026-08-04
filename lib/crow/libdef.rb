@@ -48,15 +48,20 @@ module Crow
   # NB Some functions are incomplete and manual editing may be required in order to create a working
   # Ruby project.
   #
-  # @example Create a new Kaggle project based on template file
-  #  libdef = Crow::LibDef.new('the_module', structs: [{name: 'hello',
-  #                                          attributes: [{name: 'hi', ctype: NARRAY_DOUBLE}]}])
+  # @example Create a new Kaggle project based on template files
+  #  libdef = Crow::LibDef.new('the_module', structs: [{ name: 'hello',
+  #    attributes: [{ name: 'hi', ctype: :NARRAY_DOUBLE }] }])
   #  libdef.create_project('/path/to/target_project')
   #
   class LibDef
     include LibTemplateRules
 
+    # Directory containing the supported project skeletons.
+    # @return [String]
     TEMPLATE_DIR = File.realdirpath(File.join(__dir__, '../../lib/templates/project_types'))
+
+    # Identifiers accepted by {#create_project}.
+    # @return [Array<String>]
     TEMPLATES = ['kaggle'].freeze
 
     # The label used for file names relating to the whole project.
@@ -88,9 +93,9 @@ module Crow
     end
 
     # Writes project files from a standard Crow template.
-    # @param [String] project_type identifier for template. Supported value 'kaggle'.
     # @param [String] target_dir folder where files will be copied to. New files will be written,
     #                 existing files are skipped.
+    # @param [String] project_type identifier for template. Supported value is `kaggle`.
     # @return [void]
     #
     def create_project(target_dir, project_type = 'kaggle')
@@ -155,9 +160,10 @@ module Crow
     # @param [String] source_dir template folder that files are recursively copied from.
     # @param [String] target_dir folder where files will be copied to. New files will be written, existing files
     #                 are skipped.
-    # @option source_names [String] :source_short_name, name used in template project file names and content,
+    # @param [Hash] source_names names to replace while copying the template
+    # @option source_names [String] :source_short_name name used in template project file names and content,
     #                                will be globally replaced
-    # @option source_names [String] :source_module_name, namespace used in template project content,
+    # @option source_names [String] :source_module_name namespace used in template project content,
     #                                will be globally replaced
     # @return [void]
     #
@@ -183,7 +189,7 @@ module Crow
 
       target_file = File.join(target_dir, rel_target_file)
 
-      return if File.exist?(target_file) && contains_user_code?(target_file)
+      return if File.exist?(target_file) && contains_user_code?(rel_target_file)
 
       finish_copy_project_file(source_file, target_file, rel_target_file, source_names)
     end

@@ -9,7 +9,8 @@
 #define BASE_RUBY_MODULE_H
 
 #include <ruby.h>
-#include "narray.h"
+#include <numo/narray.h>
+#include <numo/intern.h>
 #include "util/narray_helper.h"
 #include "util/ruby_helpers.h"
 #include "util/mt.h"
