@@ -45,9 +45,40 @@ describe Crow::Expression do
     end
 
     it 'evaluates an expression using safe test values for attributes and parameters' do
-      expr = described_class.new '%num + $x', libdef.structs.first.attributes, libdef.structs.first.init_params
+      expr = described_class.new '(%num + $x) * 3', libdef.structs.first.attributes, libdef.structs.first.init_params
 
-      expect(expr.as_ruby_test_value).to eq 2
+      expect(expr.as_ruby_test_value).to eq 6
+    end
+
+    it 'evaluates floating-point and unary arithmetic' do
+      expressions = ['1.5 + %num', '+ %num', '- %num', '~ %num']
+      results = expressions.map { |text| described_class.new(text, libdef.structs.first.attributes).as_ruby_test_value }
+
+      expect(results).to eq [2.5, 1, -1, -2]
+    end
+
+    it 'rejects test expressions that are not arithmetic' do
+      expr = described_class.new 'Kernel.system("false")', libdef.structs.first.attributes
+
+      expect { expr.as_ruby_test_value }.to raise_error ArgumentError, /Unsupported test expression/
+    end
+
+    it 'rejects unsupported binary operators' do
+      expr = described_class.new '%num && 1', libdef.structs.first.attributes
+
+      expect { expr.as_ruby_test_value }.to raise_error ArgumentError, /Unsupported test expression/
+    end
+
+    it 'rejects unsupported unary operators' do
+      expr = described_class.new '! %num', libdef.structs.first.attributes
+
+      expect { expr.as_ruby_test_value }.to raise_error ArgumentError, /Unsupported test expression/
+    end
+
+    it 'rejects invalid syntax' do
+      expr = described_class.new '1 +', libdef.structs.first.attributes
+
+      expect { expr.as_ruby_test_value }.to raise_error ArgumentError, /Unsupported test expression/
     end
 
     it 'rejects unknown attributes when producing a Ruby test value' do

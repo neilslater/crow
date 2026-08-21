@@ -14,7 +14,7 @@ Gem::Specification.new do |spec|
   spec.homepage      = 'http://github.com/neilslater/crow'
   spec.license       = 'MIT'
 
-  spec.required_ruby_version = '>= 2.7.1'
+  spec.required_ruby_version = '>= 3.3'
 
   spec.add_dependency 'numo-narray-alt', '>= 0.9.9', '< 0.12'
   spec.add_dependency 'rake-compiler', '>= 0.8.3'

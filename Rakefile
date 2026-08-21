@@ -5,6 +5,8 @@ require 'rspec/core/rake_task'
 require 'fileutils'
 
 require 'bundler/audit/task'
+require 'ncs_rubocop_conf'
+require 'rubocop'
 require 'rubocop/rake_task'
 require 'yard'
 
@@ -18,6 +20,13 @@ desc 'Crow unit tests'
 RSpec::Core::RakeTask.new(:spec) do |t|
   t.pattern = 'spec/**/*_spec.rb'
   t.verbose = false
+end
+
+desc 'Audit local RuboCop exceptions'
+task :rubocop_audit do
+  audit = NcsRuboCopConf::ExceptionAudit.new(root: __dir__)
+  audit.report
+  abort 'RuboCop exception audit failed' unless audit.success?
 end
 
 def demo_structs
@@ -96,12 +105,24 @@ task :demo, :out_path do |_t, args|
   puts "Wrote demo project to #{out_path}"
 end
 
+desc 'Lint Ruby rendered from maintained templates'
+task :rubocop_templates do
+  require 'tmpdir'
+  require_relative 'lib/crow'
+
+  Dir.mktmpdir('crow-rubocop-templates-', __dir__) do |target_dir|
+    Crow::LibDef.new('crow_lint_fixture', structs: demo_structs).create_project(target_dir)
+    config_path = File.expand_path('.rubocop.yml', __dir__)
+    abort 'Rendered-template RuboCop failed' unless RuboCop::CLI.new.run(['--config', config_path, target_dir]).zero?
+  end
+end
+
 desc 'Generate YARD documentation'
 YARD::Rake::YardocTask.new do |doc_task|
   doc_task.files = ['lib/crow.rb', 'lib/crow/*.rb']
 end
 
 desc 'Run full set of QC tools'
-task qc: %i[bundle:audit rubocop spec]
+task qc: %i[bundle:audit rubocop rubocop_templates rubocop_audit spec]
 
 task default: :qc

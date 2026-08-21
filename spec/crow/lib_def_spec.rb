@@ -111,6 +111,46 @@ describe Crow::LibDef do
     )
   end
 
+  def base_struct_files(c_path, struct_names)
+    struct_names.flat_map do |name|
+      %W[
+        #{c_path}/base/struct_#{name}.h
+        #{c_path}/base/struct_#{name}.c
+        #{c_path}/base/ruby_class_#{name}.h
+        #{c_path}/base/ruby_class_#{name}.c
+      ]
+    end
+  end
+
+  def ruby_struct_files(c_path, struct_names)
+    struct_names.flat_map do |name|
+      %W[#{c_path}/ruby/class_#{name}.h #{c_path}/ruby/class_#{name}.c]
+    end
+  end
+
+  def generated_spec_files(dir, struct_names)
+    struct_names.map { |name| File.join(dir, 'spec', "#{name}_spec.rb") }
+  end
+
+  def run_user_ruby_extension(dir)
+    write_project_files(dir, %w[ext foo ruby class_bar.c] => user_sources.fetch(:extension))
+    compile_project('foo', dir)
+    run_ruby_in_project('foo', dir, %(f = Foo::Bar.new; f.hi = -17; p f.hi_doubled))
+  end
+
+  def run_user_c_library(dir)
+    add_user_library_sources(dir)
+    compile_project('foo', dir)
+    run_ruby_in_project('foo', dir, %(f = Foo::Bar.new; f.hi = -3; p f.hi_user))
+  end
+
+  def regenerate_user_source(dir)
+    target = File.join(dir, 'ext', 'foo', 'ruby', 'class_bar.c')
+    File.write(target, "Leave me alone!\n")
+    lib_definition.create_project(dir)
+    File.read(target)
+  end
+
   shared_examples 'a source code generator' do |lib_name, struct_names|
     describe '#create_project' do
       it 'creates C source files for the Ruby module' do
@@ -127,36 +167,19 @@ describe Crow::LibDef do
 
       it 'creates four base C files for each struct' do
         in_project(lib_definition) do |_dir, c_path|
-          expected_files = struct_names.flat_map do |expected_name|
-            [
-              File.join(c_path, 'base', "struct_#{expected_name}.h"),
-              File.join(c_path, 'base', "struct_#{expected_name}.c"),
-              File.join(c_path, 'base', "ruby_class_#{expected_name}.h"),
-              File.join(c_path, 'base', "ruby_class_#{expected_name}.c")
-            ]
-          end
-          expect(expected_files).to all_exist
+          expect(base_struct_files(c_path, struct_names)).to all_exist
         end
       end
 
       it 'creates two "ruby" C files for each struct' do
         in_project(lib_definition) do |_dir, c_path|
-          expected_files = struct_names.flat_map do |expected_name|
-            [
-              File.join(c_path, 'ruby', "class_#{expected_name}.h"),
-              File.join(c_path, 'ruby', "class_#{expected_name}.c")
-            ]
-          end
-          expect(expected_files).to all_exist
+          expect(ruby_struct_files(c_path, struct_names)).to all_exist
         end
       end
 
       it 'creates a spec file for each struct' do
         in_project(lib_definition) do |dir|
-          spec_path = File.join(dir, 'spec')
-          struct_names.each do |expected_name|
-            expect(File.exist?(File.join(spec_path, "#{expected_name}_spec.rb"))).to be true
-          end
+          expect(generated_spec_files(dir, struct_names)).to all_exist
         end
       end
 
@@ -309,31 +332,19 @@ describe Crow::LibDef do
 
     it 'allows user source code to be added in "ruby" dir' do
       in_project(lib_definition) do |dir|
-        write_project_files(dir, %w[ext foo ruby class_bar.c] => user_sources.fetch(:extension))
-        compile_project('foo', dir)
-
-        result = run_ruby_in_project('foo', dir, %(f = Foo::Bar.new; f.hi = -17; p f.hi_doubled))
-        expect(result.chomp).to end_with '-34'
+        expect(run_user_ruby_extension(dir).chomp).to end_with '-34'
       end
     end
 
     it 'allows user source code to be added in "lib" dir' do
       in_project(lib_definition) do |dir|
-        add_user_library_sources(dir)
-        compile_project('foo', dir)
-        result = run_ruby_in_project('foo', dir, %(f = Foo::Bar.new; f.hi = -3; p f.hi_user))
-        expect(result.chomp).to end_with '-5.25'
+        expect(run_user_c_library(dir).chomp).to end_with '-5.25'
       end
     end
 
     it 'preserves user source code when regenerating a project' do
       in_project(lib_definition) do |dir|
-        target = File.join(dir, 'ext', 'foo', 'ruby', 'class_bar.c')
-        File.write(target, "Leave me alone!\n")
-
-        lib_definition.create_project(dir)
-
-        expect(File.read(target)).to eq "Leave me alone!\n"
+        expect(regenerate_user_source(dir)).to eq "Leave me alone!\n"
       end
     end
   end

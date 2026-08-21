@@ -20,19 +20,21 @@ describe Crow::StructClass do
     paths
   end
 
+  def expected_base_files(dir, expected_name)
+    %W[
+      #{dir}/base/struct_#{expected_name}.h
+      #{dir}/base/struct_#{expected_name}.c
+      #{dir}/base/ruby_class_#{expected_name}.h
+      #{dir}/base/ruby_class_#{expected_name}.c
+    ]
+  end
+
   shared_examples 'a C source creator' do |expected_name|
     describe '#write' do
       it 'creates four suitably-named "base" files' do
         Dir.mktmpdir do |dir|
           struct_class.write(dir)
-          expect(
-            %W[
-              #{dir}/base/struct_#{expected_name}.h
-              #{dir}/base/struct_#{expected_name}.c
-              #{dir}/base/ruby_class_#{expected_name}.h
-              #{dir}/base/ruby_class_#{expected_name}.c
-            ]
-          ).to all_exist
+          expect(expected_base_files(dir, expected_name)).to all_exist
         end
       end
     end

@@ -1,4 +1,6 @@
 # kaggle_skeleton/spec/helpers.rb
+# frozen_string_literal: true
+
 require 'kaggle_skeleton'
 
 # Matcher compares Numo arrays numerically

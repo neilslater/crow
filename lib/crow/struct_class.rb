@@ -45,7 +45,7 @@ module Crow
 
     # RSpec templates rendered for every struct.
     # @return [Array<String>]
-    SPEC_TEMPLATES = ['dataset_spec.rb'].freeze
+    SPEC_TEMPLATES = ['dataset_spec.rb.erb'].freeze
 
     # Creates a renderer for one struct definition.
     # @param [String] short_name base name substituted into generated file names
@@ -86,7 +86,8 @@ module Crow
     # @return [void]
     def write_specs(path)
       SPEC_TEMPLATES.each do |template|
-        File.open(File.join(path, template.sub('dataset', short_name)), 'w') do |file|
+        target_name = template.sub('dataset', short_name).delete_suffix('.erb')
+        File.open(File.join(path, target_name), 'w') do |file|
           file.puts render(File.join(SPEC_TEMPLATE_DIR, template))
         end
       end

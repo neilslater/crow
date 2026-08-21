@@ -1,21 +1,24 @@
-class KaggleSkeleton::Solver
-  def initialize(opts = {})
-    set_opts(opts)
-  end
+# frozen_string_literal: true
 
-  def run
-    raise NotImplementedError
-  end
+module KaggleSkeleton
+  # Base solver for generated optimization projects.
+  class Solver
+    def initialize(opts = {})
+      assign_options(opts)
+    end
 
-  def self.default_opts
-    Hash[
-      example: 0
-    ]
-  end
+    def run
+      raise NotImplementedError
+    end
 
-  private
+    def self.default_opts
+      { example: 0 }
+    end
 
-  def set_opts(opts)
-    @opts = self.class.default_opts.merge(opts)
+    private
+
+    def assign_options(opts)
+      @opts = self.class.default_opts.merge(opts)
+    end
   end
 end

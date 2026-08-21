@@ -1,0 +1,50 @@
+# frozen_string_literal: true
+
+require 'helpers'
+
+describe '<%= full_class_name_ruby %>' do
+  subject(:instance) do
+    class_under_test.new(<%= init_params.map { |param| param.min_valid.to_s }.join(', ') %>)
+  end
+
+  let(:class_under_test) { <%= full_class_name_ruby %> }
+
+  it 'is a valid Class' do
+    expect(class_under_test).to be_a Class
+  end
+
+  describe '.new' do
+    it 'instantiates a <%= full_class_name_ruby %>' do
+      expect(instance).to be_a class_under_test
+    end
+<% validated_params = init_params.select(&:validate?) -%>
+<% if validated_params.any? -%>
+<% invalid_cases = validated_params.flat_map do |iparam| -%>
+<% cases = [] -%>
+<% cases << [iparam, iparam.init.validate_min - 1] if iparam.init.validate_min -%>
+<% cases << [iparam, iparam.init.validate_max + 1] if iparam.init.validate_max -%>
+<% cases -%>
+<% end -%>
+
+    [
+<% invalid_cases.each_with_index do |(iparam, invalid_value), index| -%>
+      ['<%= iparam.name %>', <%= invalid_value %>, [<%= init_params.map { |param| iparam.name == param.name ? invalid_value : param.min_valid.to_s }.join(', ') %>]]<%= ',' unless index == invalid_cases.length - 1 %>
+<% end -%>
+    ].each do |param_name, invalid_value, arguments|
+      it "raises when #{param_name} = #{invalid_value}" do
+        expect { class_under_test.new(*arguments) }.to raise_error(ArgumentError, Regexp.new(param_name))
+      end
+    end
+<% end -%>
+<% if testable_attributes.any? -%>
+
+    context 'with default attribute values' do
+<% testable_attributes.each do |attribute| -%>
+      it '<%= attribute.name %> has value of <%= attribute.test_value %>' do
+        expect(instance.<%= attribute.name %>).to eq <%= attribute.test_value %>
+      end
+<% end -%>
+    end
+<% end -%>
+  end
+end

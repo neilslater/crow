@@ -16,7 +16,7 @@ Kaggle competition:
 
 ## Installation
 
- * You need a Ruby interpreter, recommended version 2.1.4 or higher, with support for compiling native extensions.
+ * You need Ruby 3.3 or newer, with support for compiling native extensions.
 
  * Copy this repo locally, and make the directory with the README.md your current directory
 

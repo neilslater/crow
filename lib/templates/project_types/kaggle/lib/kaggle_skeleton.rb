@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'numo/narray/alt'
 require 'csv'
 require 'kaggle_skeleton/kaggle_skeleton'
