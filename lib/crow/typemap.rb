@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'set'
-
 module Crow
   # Defines the base conversions to C or Ruby code snippets for {TypeMap} classes.
   #

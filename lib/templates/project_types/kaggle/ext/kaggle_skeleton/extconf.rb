@@ -1,4 +1,6 @@
 # ext/kaggle_skeleton/extconf.rb
+# frozen_string_literal: true
+
 require 'mkmf'
 require 'numo/narray/alt'
 

@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'set'
-
 module Crow
   # This class describes initialisation properties for simple data elements within a
   # struct container. An instance of this class describes specific initialisation options that

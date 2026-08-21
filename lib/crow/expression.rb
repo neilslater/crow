@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'ripper'
+
 module Crow
   # This class represents template segments that can be assessed in context of attributes or arguments
   # available within a structure.
@@ -39,9 +41,7 @@ module Crow
     def as_ruby_test_value
       code = ruby_testval_named_params(text)
       code = ruby_testval_attributes(code)
-
-      # Given the purpose of Crow, this is not a security issue
-      eval code # rubocop: disable Security/Eval
+      evaluate_arithmetic(code)
     end
 
     private
@@ -88,6 +88,48 @@ module Crow
 
         [attr.default.to_i, attr.min_valid].max.to_s
       end
+    end
+
+    def evaluate_arithmetic(code)
+      body = Ripper.sexp(code)&.fetch(1, nil)
+      raise ArgumentError, "Unsupported test expression: #{text}" unless body&.one?
+
+      evaluate_node(body.first)
+    end
+
+    def evaluate_node(node)
+      return evaluate_number(node) if %i[@int @float].include?(node.first)
+      return evaluate_binary(node) if node.first == :binary
+      return evaluate_unary(node) if node.first == :unary
+      return evaluate_node(node.fetch(1).fetch(0)) if node.first == :paren
+
+      raise ArgumentError, "Unsupported test expression: #{text}"
+    end
+
+    def evaluate_number(node)
+      return Integer(node[1], 0) if node.first == :@int
+
+      Float(node[1])
+    end
+
+    def evaluate_binary(node)
+      left = evaluate_node(node[1])
+      right = evaluate_node(node[3])
+      operator = node[2]
+      unless %i[+ - * / % ** << >> & | ^ < <= > >= == !=].include?(operator)
+        raise ArgumentError, "Unsupported test expression: #{text}"
+      end
+
+      left.public_send(operator, right)
+    end
+
+    def evaluate_unary(node)
+      value = evaluate_node(node[2])
+      return +value if node[1] == :+@
+      return -value if node[1] == :-@
+      return ~value if node[1] == :~
+
+      raise ArgumentError, "Unsupported test expression: #{text}"
     end
 
     def allowed_attr_names

@@ -1,30 +1,9 @@
+inherit_gem:
+  ncs_rubocop_conf:
+    - config/base.yml
+    - config/rake.yml
+    - config/rspec.yml
+    - config/native_extension.yml
+
 plugins:
   - rubocop-performance
-  - rubocop-rake
-  - rubocop-rspec
-
-AllCops:
-  TargetRubyVersion: 2.7.1
-  NewCops: enable
-  Exclude:
-    - 'lib/templates/**/*'
-    - 'vendor/bundle/**/*'
-
-Layout/LineLength:
-  Max: 120
-
-Metrics/BlockLength:
-  AllowedMethods:
-    - context
-    - describe
-    - shared_examples
-
-Metrics/ParameterLists:
-  Max: 4
-  CountKeywordArgs: false
-
-RSpec/ExampleLength:
-  Max: 6
-  CountAsOne:
-    - array
-    - hash

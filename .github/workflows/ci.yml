@@ -12,9 +12,10 @@ permissions:
   contents: read
 
 jobs:
-  test:
-    name: Ruby ${{ matrix.ruby }}
+  specs:
+    name: RSpec (Ruby ${{ matrix.ruby }})
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     strategy:
       fail-fast: false
@@ -34,8 +35,38 @@ jobs:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
 
+      - name: Run specs
+        run: bundle exec rspec
+
+  quality:
+    name: Quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '4.0'
+          bundler-cache: true
+
       - name: Run RuboCop
         run: bundle exec rubocop
 
-      - name: Run specs
-        run: bundle exec rspec
+      - name: Lint rendered templates
+        run: bundle exec rake rubocop_templates
+
+      - name: Audit RuboCop exceptions
+        run: bundle exec ncs-rubocop-conf-audit
+
+      - name: Audit dependencies
+        run: bundle exec bundle-audit check --update
+
+      - name: Generate API documentation
+        run: bundle exec rake yard
+
+      - name: Build gem package
+        run: gem build crow.gemspec
