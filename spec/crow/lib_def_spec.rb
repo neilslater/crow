@@ -37,6 +37,20 @@ describe Crow::LibDef do
       .to raise_error RuntimeError, /Unknown project type/
   end
 
+  context 'with a missing project skeleton', :aggregate_failures do
+    let(:template_dir) { Dir.mktmpdir }
+
+    before { stub_const('Crow::LibDef::TEMPLATE_DIR', template_dir) }
+    after { FileUtils.remove_entry(template_dir) }
+
+    it 'rejects generation before writing output' do
+      target = File.join(described_class::TEMPLATE_DIR, 'output')
+      expect { described_class.new('foo').create_project(target) }
+        .to raise_error(RuntimeError, /No source project/)
+      expect(File.exist?(target)).to be false
+    end
+  end
+
   def run_command(command)
     # Prevent the generated project's Bundler commands inheriting Crow's active bundle.
     stdout, stderr, status = Bundler.with_unbundled_env do

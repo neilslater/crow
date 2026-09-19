@@ -13,6 +13,17 @@ describe Crow::TypeInit do
     end
   end
 
+  describe 'explicit defaults' do
+    [nil, '42'].each do |default|
+      it "preserves an explicit #{default.inspect} default" do
+        rules = described_class.new(parent_typemap: type_map, default: default)
+        expect(rules.default).to eq default
+      end
+    end
+
+    let(:init) { {} }
+  end
+
   describe 'validation expressions' do
     where = {
       {} => ['( 1 )', '( 0 )'],

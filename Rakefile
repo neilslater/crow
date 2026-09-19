@@ -9,6 +9,7 @@ require 'ncs_rubocop_conf'
 require 'rubocop'
 require 'rubocop/rake_task'
 require 'yard'
+require_relative 'tasks/documentation_stats'
 
 desc 'Run Rubocop'
 RuboCop::RakeTask.new
@@ -122,7 +123,13 @@ YARD::Rake::YardocTask.new do |doc_task|
   doc_task.files = ['lib/crow.rb', 'lib/crow/*.rb']
 end
 
+desc 'Check public API documentation completeness and warnings'
+task :documentation do
+  DocumentationStats.new.run('--list-undoc', '--fail-on-warning', '--no-cache', '--no-save',
+                             'lib/crow.rb', 'lib/crow/*.rb')
+end
+
 desc 'Run full set of QC tools'
-task qc: %i[bundle:audit rubocop rubocop_templates rubocop_audit spec]
+task qc: %i[bundle:audit rubocop rubocop_templates rubocop_audit documentation spec]
 
 task default: :qc
