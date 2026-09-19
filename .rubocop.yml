@@ -8,6 +8,10 @@ inherit_gem:
 plugins:
   - rubocop-performance
 
+inherit_mode:
+  merge:
+    - Exclude
+
 # RuboCop rationale: Local agent guidance and ad-hoc probes are not repository source.
 AllCops:
   Exclude:
