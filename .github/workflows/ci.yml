@@ -65,6 +65,9 @@ jobs:
       - name: Audit dependencies
         run: bundle exec bundle-audit check --update
 
+      - name: Check API documentation
+        run: bundle exec rake documentation
+
       - name: Generate API documentation
         run: bundle exec rake yard
 
