@@ -10,7 +10,7 @@ group :development, :test do
   gem 'bundler', '>= 1.8'
   gem 'ncs_rubocop_conf',
       github: 'neilslater/ncs_rubocop_conf',
-      tag: 'v0.2.0',
+      tag: 'v0.2.1',
       require: false
   gem 'rake', '>= 12.3.3'
   gem 'rspec', '>= 2.13.0'
