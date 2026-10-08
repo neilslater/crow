@@ -100,13 +100,11 @@ module Crow
     #
     def create_project(target_dir, project_type = 'kaggle')
       source_dir = check_pre_create_project(project_type)
-      source_names = { source_short_name: 'kaggle_skeleton', source_module_name: 'KaggleSkeleton' }
-      copy_project(source_dir, target_dir, source_names)
-
-      spec_dir = ensure_target_spec_dir(target_dir)
-      ext_dir = ensure_target_ext_dir(target_dir)
-
-      write_all_struct_files(ext_dir, spec_dir)
+      ModelValidation.library(self)
+      plan = OutputPlan.new
+      plan_project(plan, source_dir, target_dir)
+      structs.each { |struct| struct.plan_project(plan, target_dir) }
+      plan.write
     end
 
     private
@@ -135,88 +133,28 @@ module Crow
       source_dir
     end
 
-    def ensure_target_spec_dir(target_dir)
-      spec_dir = File.join(target_dir, 'spec')
-      FileUtils.mkdir_p spec_dir unless File.directory?(spec_dir)
-      spec_dir
-    end
+    def plan_project(plan, source_dir, target_dir)
+      Dir.glob(File.join(source_dir, '**', '*')).each do |source|
+        relative = source.delete_prefix("#{source_dir}/")
+        next if File.directory?(source) || skip_project_file?(relative)
 
-    def ensure_target_ext_dir(target_dir)
-      ext_dir = File.join(target_dir, 'ext', short_name)
-      FileUtils.mkdir_p ext_dir unless File.directory?(ext_dir)
-      ext_dir
-    end
-
-    def write_all_struct_files(ext_dir, spec_dir)
-      structs.each do |struct_class|
-        # NB the _class refers to class inside target project, not in current process
-        struct_class.write ext_dir
-        struct_class.write_user ext_dir
-        struct_class.write_specs spec_dir
+        plan_project_file(plan, source, relative, target_dir)
       end
     end
 
-    # Writes project files copied from a template directory.
-    # @param [String] source_dir template folder that files are recursively copied from.
-    # @param [String] target_dir folder where files will be copied to. New files will be written, existing files
-    #                 are skipped.
-    # @param [Hash] source_names names to replace while copying the template
-    # @option source_names [String] :source_short_name name used in template project file names and content,
-    #                                will be globally replaced
-    # @option source_names [String] :source_module_name namespace used in template project content,
-    #                                will be globally replaced
-    # @return [void]
-    #
-    def copy_project(source_dir, target_dir,
-                     source_names = { source_short_name: 'kaggle_skeleton', source_module_name: 'KaggleSkeleton' })
-      unless File.directory?(source_dir) && File.exist?(File.join(source_dir, 'Gemfile'))
-        raise "No source project in #{source_dir}"
+    def plan_project_file(plan, source, relative, target_dir)
+      contents = File.binread(source)
+      if change_names?(relative)
+        relative = relative.gsub('kaggle_skeleton', short_name)
+        contents = contents.gsub('kaggle_skeleton', short_name).gsub('KaggleSkeleton', module_name)
       end
-
-      FileUtils.mkdir_p target_dir
-      Dir.glob(File.join(source_dir, '**', '*')) do |source_file|
-        copy_project_file source_file, source_dir, target_dir, source_names
-      end
-    end
-
-    def copy_project_file(source_file, source_dir, target_dir, source_names)
-      rel_source_file = source_file.sub(File.join(source_dir, '/'), '')
-      return if skip_project_file?(rel_source_file) || File.directory?(source_file)
-
-      rel_target_file = rel_source_file
-
-      rel_target_file.gsub!(source_names[:source_short_name], short_name) if change_names?(rel_target_file)
-
-      target_file = File.join(target_dir, rel_target_file)
-
-      return if File.exist?(target_file) && contains_user_code?(rel_target_file)
-
-      finish_copy_project_file(source_file, target_file, rel_target_file, source_names)
-    end
-
-    def finish_copy_project_file(source_file, target_file, rel_target_file, source_names)
-      FileUtils.mkdir_p File.dirname(target_file) unless File.directory?(File.dirname(target_file))
-      FileUtils.cp(source_file, target_file)
-      change_names_in_file(target_file, source_names) if change_names?(rel_target_file)
-      render_and_overwrite_template(target_file) if run_template?(rel_target_file)
-    end
-
-    def change_names_in_file(target_file, source_names)
-      contents = File.read(target_file)
-      contents.gsub!(source_names[:source_short_name], short_name)
-      contents.gsub!(source_names[:source_module_name], module_name)
-      File.open(target_file, 'w') { |file| file.puts contents }
+      contents = OutputPlan.render(source, binding, contents) if run_template?(relative)
+      plan.add(File.join(target_dir, relative), contents, preserve: contains_user_code?(relative))
     end
 
     def module_name_from_short_name(sname)
       parts = sname.split('_')
       parts.map { |part| part[0].upcase + part[1, 30] }.join
-    end
-
-    def render_and_overwrite_template(target_file)
-      erb = ERB.new(File.read(target_file), trim_mode: '-')
-      rendering = erb.result(binding)
-      File.open(target_file, 'w') { |file| file.puts rendering }
     end
   end
 end
