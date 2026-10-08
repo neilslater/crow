@@ -37,7 +37,7 @@ describe Crow::LibDef do
   end
 
   def expect_generated_project(dir)
-    execute(dir, 'bundle', 'install', '--local')
+    execute(dir, 'bundle', 'install')
     execute(dir, 'bundle', 'exec', 'rake', 'compile')
     output = execute(dir, 'bundle', 'exec', 'rspec')
     expect(output).to include('0 failures')
