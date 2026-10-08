@@ -60,74 +60,48 @@ module Crow
     # @param [String] path directory to write files to.
     # @return [void]
     def write(path)
-      ext_base_dir = File.join(path, 'base')
-      FileUtils.mkdir_p ext_base_dir unless File.directory?(ext_base_dir)
-
-      TEMPLATES.each do |template|
-        File.open(File.join(path, 'base', template.sub('dataset', short_name)), 'w') do |file|
-          file.puts render(File.join(TEMPLATE_DIR, template))
-        end
-      end
+      write_group(path, :base)
     end
 
-    # Writes user C files that go in ext/lib/ruby and ext/lib/lib for developer to extend with the
-    # main C-based functionality of the library.
-    # @param [String] path directory to write files to.
-    # @return [void]
+    # Writes absent user extension scaffolds after rendering the whole request.
+    # @param path [String] extension directory
     def write_user(path)
-      ensure_user_subdirs(path)
-      write_user_ruby_classes(path)
-      write_user_struct_files(path)
+      write_group(path, :user)
     end
 
-    # Writes a Ruby source file containing basic spec examples that exercise standard functions of
-    # the structure as defined.
-    # @param [String] path directory to write spec files to.
-    # @return [void]
+    # Writes generated specs after rendering the whole request.
+    # @param path [String] spec directory
     def write_specs(path)
-      SPEC_TEMPLATES.each do |template|
-        target_name = template.sub('dataset', short_name).delete_suffix('.erb')
-        File.open(File.join(path, target_name), 'w') do |file|
-          file.puts render(File.join(SPEC_TEMPLATE_DIR, template))
+      write_group(path, :spec)
+    end
+
+    # Adds one file group to a larger rendered request.
+    # @param plan [OutputPlan] destination plan
+    # @param path [String] output directory
+    # @param group [Symbol] base, user or spec files
+    def plan_group(plan, path, group)
+      groups.fetch(group).each do |subdir, templates|
+        templates.each do |template|
+          directory = group == :spec ? SPEC_TEMPLATE_DIR : TEMPLATE_DIR
+          source = File.join(directory, template)
+          target = template.sub('dataset', short_name).delete_suffix('.erb')
+          plan.add(File.join(path, subdir, target), OutputPlan.render(source, struct_binding), preserve: group == :user)
         end
       end
     end
 
     private
 
-    def ensure_user_subdirs(path)
-      ext_ruby_dir = File.join(path, 'ruby')
-      FileUtils.mkdir_p ext_ruby_dir unless File.directory?(ext_ruby_dir)
-
-      ext_lib_dir = File.join(path, 'lib')
-      FileUtils.mkdir_p ext_lib_dir unless File.directory?(ext_lib_dir)
+    def groups
+      { base: { 'base' => TEMPLATES },
+        user: { 'ruby' => USER_CLASS_TEMPLATES, 'lib' => USER_STRUCT_TEMPLATES },
+        spec: { '' => SPEC_TEMPLATES } }
     end
 
-    def write_user_ruby_classes(path)
-      USER_CLASS_TEMPLATES.each do |template|
-        target = File.join(path, 'ruby', template.sub('dataset', short_name))
-        next if File.exist?(target)
-
-        File.open(target, 'w') do |file|
-          file.puts render(File.join(USER_CLASS_TEMPLATE_DIR, template))
-        end
-      end
-    end
-
-    def write_user_struct_files(path)
-      USER_STRUCT_TEMPLATES.each do |template|
-        target = File.join(path, 'lib', template.sub('dataset', short_name))
-        next if File.exist?(target)
-
-        File.open(target, 'w') do |file|
-          file.puts render(File.join(USER_STRUCT_TEMPLATE_DIR, template))
-        end
-      end
-    end
-
-    def render(template_file)
-      erb = ERB.new(File.read(template_file), trim_mode: '-')
-      erb.result(struct_binding)
+    def write_group(path, group)
+      plan = OutputPlan.new
+      plan_group(plan, path, group)
+      plan.write
     end
   end
 
@@ -142,6 +116,10 @@ module Crow
   #  structdef.write('/path/to/target_project/ext/the_module')
   #
   class StructClass
+    include StructAttributes
+    include StructContract
+    include SpecValues
+
     # The label used for file names and struct pointers relating to this struct
     # @return [String]
     attr_accessor :short_name
@@ -189,7 +167,6 @@ module Crow
       @init_params = create_init_params(opts)
 
       @parent_lib = opts[:parent_lib] || Crow::LibDef.new('module')
-      @templates = StructTemplates.new(short_name, binding)
     end
 
     # Writes four C source files that implement a basic Ruby native extension for the class. The files
@@ -197,7 +174,8 @@ module Crow
     # @param [String] path directory to write files to.
     # @return [void]
     def write(path)
-      @templates.write(path)
+      ModelValidation.structure(self)
+      templates.write(path)
     end
 
     # Writes user C files that go in ext/lib/ruby and ext/lib/lib for developer to extend with the
@@ -205,7 +183,8 @@ module Crow
     # @param [String] path directory to write files to.
     # @return [void]
     def write_user(path)
-      @templates.write_user(path)
+      ModelValidation.structure(self)
+      templates.write_user(path)
     end
 
     # Writes a Ruby source file containing basic spec examples that exercise standard functions of
@@ -213,7 +192,18 @@ module Crow
     # @param [String] path directory to write spec files to.
     # @return [void]
     def write_specs(path)
-      @templates.write_specs(path)
+      ModelValidation.structure(self)
+      templates.write_specs(path)
+    end
+
+    # Adds all struct output to a validated project plan.
+    # @param plan [OutputPlan] project plan
+    # @param target [String] project root
+    def plan_project(plan, target)
+      ext = File.join(target, 'ext', lib_short_name)
+      templates.plan_group(plan, ext, :base)
+      templates.plan_group(plan, ext, :user)
+      templates.plan_group(plan, File.join(target, 'spec'), :spec)
     end
 
     # Adds an attribute definition to the struct/class description.
@@ -221,72 +211,6 @@ module Crow
     # @return [Crow::TypeMap] the new attribute definition
     def add_attribute(opts = {})
       @attributes << Crow::TypeMapFactory.create_typemap(opts.merge(parent_struct: self))
-    end
-
-    # Whether any of the attributes are NArray objects.
-    # @return [Boolean]
-    def any_narray?
-      @attributes.any?(&:narray?)
-    end
-
-    # List of attributes which contain NArray objects.
-    # @return [Array<Crow::TypeMap>]
-    def narray_attributes
-      @attributes.select(&:narray?)
-    end
-
-    # List of attributes which should be handled by to_h and from_h.
-    # @return [Array<Crow::TypeMap>]
-    def stored_attributes
-      @attributes.select(&:store)
-    end
-
-    # Attributes excluded from generated persistence helpers.
-    # @return [Array<Crow::TypeMap>]
-    def non_stored_attributes
-      @attributes.reject(&:store)
-    end
-
-    # Whether any attribute requires separately allocated storage.
-    # @return [Boolean]
-    def any_alloc?
-      @attributes.any?(&:needs_alloc?)
-    end
-
-    # Whether generated initialization code is required.
-    # @return [Boolean]
-    def needs_init?
-      !!(any_narray? || any_alloc? || init_params.any?)
-    end
-
-    # Whether initialization must iterate over allocated or NArray data.
-    # @return [Boolean]
-    def needs_init_iterators?
-      !!(any_narray? || any_alloc?)
-    end
-
-    # Attributes whose generated C representation requires allocation.
-    # @return [Array<Crow::TypeMap>]
-    def alloc_attributes
-      @attributes.select(&:needs_alloc?)
-    end
-
-    # Scalar attributes that require neither allocation nor NArray handling.
-    # @return [Array<Crow::TypeMap>]
-    def simple_attributes
-      @attributes.reject { |a| a.needs_alloc? || a.narray? }
-    end
-
-    # Scalar attributes that have an initialization expression.
-    # @return [Array<Crow::TypeMap>]
-    def simple_attributes_with_init
-      @attributes.reject { |a| a.needs_alloc? || a.narray? }.select(&:needs_init?)
-    end
-
-    # Attributes for which generated specs can construct simple test values.
-    # @return [Array<Crow::TypeMap>]
-    def testable_attributes
-      simple_attributes
     end
 
     # Short file-name identifier of the containing library.
@@ -314,6 +238,10 @@ module Crow
     end
 
     private
+
+    def templates
+      StructTemplates.new(short_name, binding)
+    end
 
     def create_attributes(opts)
       if opts[:attributes]

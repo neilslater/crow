@@ -1,213 +1,131 @@
 // ext/<%= lib_short_name %>/base/ruby_class_<%= short_name %>.c
-
 #include "base/ruby_class_<%= short_name %>.h"
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-//
-//  Ruby bindings for training data arrays - the deeper implementation is in
-//  struct_<%= short_name %>.c
-//
-
-VALUE <%= short_name %>_as_ruby_class( <%= struct_name %> *<%= short_name %> , VALUE klass ) {
-  return Data_Wrap_Struct( klass, <%= short_name %>__gc_mark, <%= short_name %>__destroy, <%= short_name %> );
+typedef struct { VALUE klass; <%= struct_name %> *item; } <%= short_name %>__wrap_args;
+static VALUE <%= short_name %>__wrap(VALUE opaque) {
+  <%= short_name %>__wrap_args *args = (<%= short_name %>__wrap_args *)opaque;
+  return Data_Wrap_Struct(args->klass, <%= short_name %>__gc_mark, <%= short_name %>__destroy, args->item);
+}
+VALUE <%= short_name %>_as_ruby_class(<%= struct_name %> *item, VALUE klass) {
+  int state;
+  VALUE roots[] = {<%= (attributes.select(&:needs_gc_mark?).map { |a| "item ? item->#{a.name} : Qnil" } + ['Qnil']).join(', ') %>};
+  <%= short_name %>__wrap_args args = {klass, item};
+  VALUE result = rb_protect(<%= short_name %>__wrap, (VALUE)&args, &state);
+  for (size_t i = 0; i < sizeof(roots) / sizeof(VALUE); ++i) RB_GC_GUARD(roots[i]);
+  if (state) { <%= short_name %>__destroy(item); rb_jump_tag(state); }
+  return result;
+}
+VALUE <%= short_name %>_alloc(VALUE klass) {
+  VALUE result = Data_Wrap_Struct(klass, <%= short_name %>__gc_mark, <%= short_name %>__destroy, NULL);
+  DATA_PTR(result) = <%= short_name %>__create();
+  return result;
+}
+void assert_value_wraps_<%= short_name %>(VALUE obj) {
+  if (TYPE(obj) != T_DATA || RTYPEDDATA_P(obj) ||
+      !rb_obj_is_kind_of(obj, <%= full_class_name %>) ||
+      RDATA(obj)->dfree != (RUBY_DATA_FUNC)<%= short_name %>__destroy || !DATA_PTR(obj))
+    rb_raise(rb_eTypeError, "Expected a compatible <%= struct_name %> object");
+}
+<%= struct_name %> *get_<%= short_name %>_struct(VALUE obj) {
+  assert_value_wraps_<%= short_name %>(obj);
+  return DATA_PTR(obj);
 }
 
-VALUE <%= short_name %>_alloc( VALUE klass ) {
-  return <%= short_name %>_as_ruby_class( <%= short_name %>__create(), klass );
-}
-
-<%= struct_name %> *get_<%= short_name %>_struct( VALUE obj ) {
-  <%= struct_name %> *<%= short_name %>;
-  Data_Get_Struct( obj, <%= struct_name %>, <%= short_name %> );
-  return <%= short_name %>;
-}
-
-void assert_value_wraps_<%= short_name %>( VALUE obj ) {
-  if ( TYPE(obj) != T_DATA ||
-      RDATA(obj)->dfree != (RUBY_DATA_FUNC)<%= short_name %>__destroy) {
-    rb_raise( rb_eTypeError, "Expected a <%= struct_name %> object, but got something else" );
-  }
-}
-
-/* Document-class: <%= full_class_name_ruby %>
- *
- */
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-//
-//  Network method definitions
-//
-
-/* @overload initialize( <%= init_params.map(&:name).join(', ') %> )
- * Creates a new ...
-<% init_params.each do |ip| -%>
- * @param [<%= ip.rdoc_type %>] <%= ip.name %> ...
-<% end -%>
- * @return [<%= full_class_name_ruby %>] new ...
- */
-VALUE <%= short_name %>_rbobject__initialize( VALUE self<% unless init_params.empty? %>, <%= init_params.map(&:as_rv_param).join(', ') %><% end %> ) {
-<% if needs_init? -%>
-<% init_params.each do |init_param| -%>
-  <%= init_param.declare %>
-<% end -%>
-  <%= struct_name %> *<%= short_name %> = get_<%= short_name %>_struct( self );
-<% init_params.each do |init_param| -%>
-  <%= init_param.name %> = <%= init_param.param_item_to_c %>;
-<% if init_param.validate? -%>
-  if <%= init_param.validate_fail_condition_c(init_param.name) %> {
-    rb_raise( rb_eArgError, "Bad value for <%= init_param.name %>" );
-  }
-<% end -%>
-<% end -%>
-
-  <%= short_name %>__init( <%= short_name %><% unless init_params.empty? %>, <%= init_params.map(&:name).join(', ') %><% end %> );
-
-<% end -%>
+/* Document-class: <%= full_class_name_ruby %> */
+VALUE <%= short_name %>_rbobject__initialize(VALUE self<% init_params.each do |p| %>, <%= p.as_rv_param %><% end %>) {
+  rb_check_frozen(self);
+  VALUE args[] = {<%= (init_params.map(&:rv_name) + ['Qnil']).join(', ') %>};
+  <%= short_name %>__initialize_ruby(get_<%= short_name %>_struct(self), self, args);
   return self;
 }
-
-/* @overload clone
- * When cloned, the returned <%= struct_name %> has deep copies of C data.
- * @return [<%= full_class_name_ruby %>] new
- */
-VALUE <%= short_name %>_rbobject__initialize_copy( VALUE copy, VALUE orig ) {
-  <%= struct_name %> *<%= short_name %>_copy;
-  <%= struct_name %> *<%= short_name %>_orig;
-
+VALUE <%= short_name %>_rbobject__initialize_copy(VALUE copy, VALUE orig) {
   if (copy == orig) return copy;
-  <%= short_name %>_orig = get_<%= short_name %>_struct( orig );
-  <%= short_name %>_copy = get_<%= short_name %>_struct( copy );
-
-  <%= short_name %>__deep_copy( <%= short_name %>_copy, <%= short_name %>_orig );
-
+  rb_obj_init_copy(copy, orig);
+  <%= struct_name %> *source = get_<%= short_name %>_struct(orig);
+  <%= short_name %>__copy_ruby(get_<%= short_name %>_struct(copy), source, copy);
+  RB_GC_GUARD(orig);
   return copy;
 }
-
-/* @overload to_h
- * Copies object to hash
- * @return [Hash] hash representation of <%= full_class_name_ruby %>
- */
-VALUE <%= short_name %>_rbobject__to_h( VALUE self ) {
-  VALUE hash;
-  <%= struct_name %> *<%= short_name %> = get_<%= short_name %>_struct( self );
-  hash = rb_hash_new();
-<% stored_attributes.each do |attribute| -%>
-  rb_hash_aset(hash, ID2SYM(rb_intern("<%= attribute.name %>")), <%= attribute.struct_item_to_ruby %>);
+VALUE <%= short_name %>_rbobject__to_h(VALUE self) {
+  <%= struct_name %> *<%= short_name %> = get_<%= short_name %>_struct(self);
+  <%= short_name %>__require_ready(<%= short_name %>);
+  VALUE hash = rb_hash_new();
+<% stored_attributes.each do |a| -%>
+<% if a.narray? -%>
+  <%= a.narray_fn_name %>(<%= short_name %>);
 <% end -%>
+  rb_hash_aset(hash, ID2SYM(rb_intern("<%= a.name %>")), <%= a.struct_item_to_ruby %>);
+<% end -%>
+  RB_GC_GUARD(self);
   return hash;
 }
-
-/* @overload from_h
- * Creates a new object from supplied hash
- * @return [<%= full_class_name_ruby %>] new object
- */
-VALUE <%= short_name %>_rbclass__from_h( int argc, VALUE* argv, VALUE self ) {
-  <%= struct_name %> *<%= short_name %>;
-  VALUE named_args;
-  VALUE v;
-
-  rb_scan_args(argc, argv, ":", &named_args);
-  if (NIL_P(named_args)) {
-    rb_raise( rb_eArgError, "No arguments provided to from_h" );
-  }
-<% stored_attributes.each do |attribute| -%>
-  v = rb_hash_aref( named_args, ID2SYM( rb_intern( "<%= attribute.name %>" ) ) );
-  if (NIL_P(v)) { rb_raise( rb_eArgError, "Missing key :<%= attribute.name %> in hash" ); }
+/* Stored-field snapshot restoration. <%= restoration_error ? "Unavailable: #{restoration_error}" : 'Residual buffers reset; NArrays materialize independent logical copies.' %> */
+VALUE <%= short_name %>_rbclass__from_h(int argc, VALUE *argv, VALUE self) {
+  VALUE hash;
+  rb_scan_args(argc, argv, ":", &hash);
+<% if restoration_error -%>
+  rb_raise(rb_eArgError, "Restoration unsupported: %s", <%= restoration_error.inspect %>);
+<% else -%>
+  if (NIL_P(hash)) hash = rb_hash_new();
+  VALUE result = <%= short_name %>_alloc(self);
+  <%= short_name %>__restore(get_<%= short_name %>_struct(result), result, hash);
+  RB_GC_GUARD(hash);
+  return result;
 <% end -%>
-
-  <%= short_name %> = <%= short_name %>__create();
-<% stored_attributes.each do |attribute| -%>
-  v = rb_hash_aref( named_args, ID2SYM( rb_intern( "<%= attribute.name %>" ) ) );
-  <%= short_name %>-><%= attribute.name %> = <%= attribute.class.ruby_to_c( 'v' ) %>;
-<% end -%>
-
-  // TODO: This leaves any pointers as NULL and non-store items as default from create . . .
-
-  // TODO: This is not validated and could be very broken
-
-  return <%= short_name %>_as_ruby_class( <%= short_name %>, <%= full_class_name %> );
 }
 
-
-<% simple_attributes.each do |attribute| -%>
-<% if attribute.ruby_read -%>
-/* @!attribute <% if attribute.read_only? %>[r] <% end %><%= attribute.ruby_name %>
- * Description goes here
- * @return [<%= attribute.rdoc_type %>]
- */
-VALUE <%= short_name %>_rbobject__get_<%= attribute.name %>( VALUE self ) {
-  <%= struct_name %> *<%= short_name %> = get_<%= short_name %>_struct( self );
-  return <%= attribute.struct_item_to_ruby %>;
+<% simple_attributes.each do |a| -%>
+<% if a.ruby_read -%>
+VALUE <%= short_name %>_rbobject__get_<%= a.name %>(VALUE self) {
+  <%= struct_name %> *<%= short_name %> = get_<%= short_name %>_struct(self);
+  <%= short_name %>__require_ready(<%= short_name %>);
+  return <%= a.struct_item_to_ruby %>;
 }
-
 <% end -%>
-<% if attribute.ruby_write -%>
-VALUE <%= short_name %>_rbobject__set_<%= attribute.name %>( VALUE self, VALUE <%= attribute.rv_name %> ) {
-  <%= struct_name %> *<%= short_name %> = get_<%= short_name %>_struct( self );
-  <%= short_name %>-><%= attribute.name %> = <%= attribute.param_item_to_c %>;
-  return <%= attribute.rv_name %>;
+<% if a.ruby_write -%>
+VALUE <%= short_name %>_rbobject__set_<%= a.name %>(VALUE self, VALUE <%= a.rv_name %>) {
+  rb_check_frozen(self);
+  <%= struct_name %> *<%= short_name %> = get_<%= short_name %>_struct(self);
+  <%= short_name %>__require_ready(<%= short_name %>);
+  <%= a.cbase %> value = <%= a.param_item_to_c %>;
+  if <%= a.validate_fail_condition_c('value') %> rb_raise(rb_eArgError, "Bad value for <%= a.name %>");
+  rb_check_frozen(self);
+  <%= short_name %>__require_ready(<%= short_name %>);
+  <%= short_name %>-><%= a.name %> = value;
+  return <%= a.rv_name %>;
 }
-
 <% end -%>
 <% end -%>
-<% narray_attributes.each do |attribute| -%>
-/* @!attribute <% if attribute.read_only? %>[r] <% end %><%= attribute.ruby_name %>
- * Description goes here
- * @return [<%= attribute.rdoc_type %>]
- */
-VALUE <%= short_name %>_rbobject__get_<%= attribute.name %>( VALUE self ) {
-  <%= struct_name %> *<%= short_name %> = get_<%= short_name %>_struct( self );
-  return <%= attribute.struct_item_to_ruby %>;
+<% narray_attributes.select(&:ruby_read).each do |a| -%>
+VALUE <%= short_name %>_rbobject__get_<%= a.name %>(VALUE self) {
+  <%= struct_name %> *item = get_<%= short_name %>_struct(self);
+  <%= a.narray_fn_name %>(item);
+  return item-><%= a.name %>;
 }
-
 <% end -%>
-<% alloc_attributes.each do |attribute| -%>
-<% if attribute.ruby_read -%>
-/* @!attribute <% if attribute.read_only? %>[r] <% end %><%= attribute.ruby_name %>
- * Description goes here
- * @return [<%= attribute.rdoc_type %>]
- */
-VALUE <%= short_name %>_rbobject__get_<%= attribute.name %>( VALUE self ) {
-  int i, s;
-  volatile VALUE rv_ary_<%= attribute.name %>;
-  <%= struct_name %> *<%= short_name %> = get_<%= short_name %>_struct( self );
-
-  s = <%= attribute.init.size_expr_c %>;
-  rv_ary_<%= attribute.name %> = rb_ary_new2( s );
-  for( i = 0; i < s; i++ ) {
-    rb_ary_store( rv_ary_<%= attribute.name %>, i,  <%= attribute.array_item_to_ruby_converter %>( <%= short_name %>-><%= attribute.name %>[i] ) );
-  }
-
-  return rv_ary_<%= attribute.name %>;
+<% alloc_attributes.select(&:ruby_read).each do |a| -%>
+VALUE <%= short_name %>_rbobject__get_<%= a.name %>(VALUE self) {
+  <%= struct_name %> *item = get_<%= short_name %>_struct(self);
+  <%= short_name %>__require_ready(item);
+  size_t count = item->crow_extent_<%= a.name %>;
+  VALUE result = rb_ary_new_capa((long)count);
+  for (size_t i = 0; i < count; ++i) rb_ary_push(result, <%= a.array_item_to_ruby_converter %>(item-><%= a.name %>[i]));
+  RB_GC_GUARD(self);
+  return result;
 }
-
 <% end -%>
-<% if attribute.ruby_write -%>
-VALUE <%= short_name %>_rbobject__set_<%= attribute.name %>( VALUE self, VALUE <%= attribute.rv_name %> ) {
-  int i;
-  <%= struct_name %> *<%= short_name %> = get_<%= short_name %>_struct( self );
-  // TODO: Implement array writing routine
-}
-
+void init_<%= short_name %>_class(void) {
+  rb_define_alloc_func(<%= full_class_name %>, <%= short_name %>_alloc);
+  rb_define_method(<%= full_class_name %>, "initialize", <%= short_name %>_rbobject__initialize, <%= init_params.length %>);
+  rb_define_method(<%= full_class_name %>, "initialize_copy", <%= short_name %>_rbobject__initialize_copy, 1);
+  rb_define_method(<%= full_class_name %>, "to_h", <%= short_name %>_rbobject__to_h, 0);
+  rb_define_singleton_method(<%= full_class_name %>, "from_h", <%= short_name %>_rbclass__from_h, -1);
+<% attributes.each do |a| -%>
+<% if a.ruby_read -%>
+  rb_define_method(<%= full_class_name %>, "<%= a.ruby_name %>", <%= short_name %>_rbobject__get_<%= a.name %>, 0);
 <% end -%>
-<% end -%>
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void init_<%= short_name %>_class( ) {
-  // <%= struct_name %> instantiation and class methods
-  rb_define_alloc_func( <%= full_class_name %>, <%= short_name %>_alloc );
-  rb_define_method( <%= full_class_name %>, "initialize", <%= short_name %>_rbobject__initialize, <%= init_params.count %> );
-  rb_define_method( <%= full_class_name %>, "initialize_copy", <%= short_name %>_rbobject__initialize_copy, 1 );
-  rb_define_method( <%= full_class_name %>, "to_h", <%= short_name %>_rbobject__to_h, 0 );
-  rb_define_singleton_method( <%= full_class_name %>, "from_h", <%= short_name %>_rbclass__from_h, -1 );
-
-  // <%= struct_name %> attributes
-<% attributes.each do |attribute| -%>
-<% if attribute.ruby_read -%>
-  rb_define_method( <%= full_class_name %>, "<%= attribute.ruby_name %>", <%= short_name %>_rbobject__get_<%= attribute.name %>, 0 );
-<% end -%>
-<% if attribute.ruby_write -%>
-  rb_define_method( <%= full_class_name %>, "<%= attribute.ruby_name %>=", <%= short_name %>_rbobject__set_<%= attribute.name %>, 1 );
+<% if a.ruby_write -%>
+  rb_define_method(<%= full_class_name %>, "<%= a.ruby_name %>=", <%= short_name %>_rbobject__set_<%= a.name %>, 1);
 <% end -%>
 <% end -%>
 }

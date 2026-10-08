@@ -155,6 +155,7 @@ module Crow
       # Creates NArray initialization rules and derives missing element and shape defaults.
       # @param [Hash] opts keyword options accepted by {TypeInit#initialize}
       def initialize(opts = {})
+        @explicit_shape = opts[:shape_expr]
         super(**opts)
         @expr ||= parent_typemap.class.item_default
         if @shape_expr
@@ -162,8 +163,33 @@ module Crow
         elsif @shape_exprs
           @shape_expr = parent_typemap.shape_tmp_var
         else
-          @shape_expr = "{ #{([1] * rank_expr.to_i).join(', ')} }"
+          @shape_expr = "{ #{([1] * rank_expr.to_i.clamp(0, 62)).join(', ')} }"
         end
+      end
+
+      # Normalized explicit dimension expressions used by generated allocation.
+      # @return [Array<String>] dimension expressions
+      def normalized_shapes
+        raise ArgumentError, "#{parent_typemap.name}: use shape_exprs instead of shape_expr" if @explicit_shape
+
+        rank = normalized_rank
+        shapes = shape_exprs || Array.new(rank, '1')
+        unless valid_shapes?(shapes, rank)
+          raise ArgumentError, "#{parent_typemap.name}: shape_exprs length must match rank_expr"
+        end
+
+        shapes
+      end
+
+      # Validates the fixed rank accepted by generated shape arrays.
+      # @return [Integer] positive rank
+      def normalized_rank
+        rank = rank_expr || (shape_exprs ? shape_exprs.length.to_s : '1')
+        unless /\A[1-9][0-9]*\z/.match?(rank.to_s) && rank.to_i <= 62
+          raise ArgumentError, "#{parent_typemap.name}: rank_expr must be a positive literal at most 62"
+        end
+
+        rank.to_i
       end
 
       # Renders the NArray shape expression as C code.
@@ -175,6 +201,14 @@ module Crow
         allowed_attributes = struct.attributes.clone
 
         Expression.new(shape_expr, allowed_attributes, struct.init_params).as_c_code(container_name)
+      end
+
+      private
+
+      def valid_shapes?(shapes, rank)
+        shapes.is_a?(Array) && shapes.length == rank && shapes.all? do |item|
+          item.is_a?(String) && !item.empty?
+        end
       end
     end
 
